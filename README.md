@@ -147,9 +147,9 @@ True
 ```
 
 ```
-rabbitmqctl add_user gonzo gonzo
-rabbitmqctl set_user_tags gonzo administrator
-rabbitmqctl set_permissions -p / gonzo ".*" ".*" ".*"
+rabbitmqctl add_user news_ml news_ml
+rabbitmqctl set_user_tags news_ml administrator
+rabbitmqctl set_permissions -p / news_ml ".*" ".*" ".*"
 ```
 
 ## Celery
