@@ -8,7 +8,6 @@ Defines API endpoints.
 import logging
 import flask_restful
 
-
 from conf import logger
 from conf import settings
 
@@ -38,21 +37,21 @@ api_app = Flask(__name__)
 # Flask configuration.
 api_app.config.from_pyfile("../../../conf/settings.py")
 # Define API.
-gonzo_api = flask_restful.Api(api_app)
+news_api = flask_restful.Api(api_app)
 # Initialize database.
 db = Model.db.init_app(api_app)
 
 # API Endpoint definition.
-gonzo_api.add_resource(ApiBase, settings.api_base_url)
-gonzo_api.add_resource(ApiUser, '/api/1.0/users/<int:id>')
-gonzo_api.add_resource(ApiUserList, '/api/1.0/users')
-gonzo_api.add_resource(Campaign, '/api/1.0/campaign/<string:ref>')
-gonzo_api.add_resource(CampaignList, '/api/1.0/campaign')
-gonzo_api.add_resource(GetToken, '/api/1.0/token')
-gonzo_api.add_resource(Person, '/api/1.0/person/<int:id>')
-gonzo_api.add_resource(PersonList, '/api/1.0/person')
-gonzo_api.add_resource(NewsList, '/api/1.0/news')
-gonzo_api.add_resource(Status, '/api/1.0/status')
+news_api.add_resource(ApiBase, settings.api_base_url)
+news_api.add_resource(ApiUser, '/api/1.0/users/<int:id>')
+news_api.add_resource(ApiUserList, '/api/1.0/users')
+news_api.add_resource(Campaign, '/api/1.0/campaign/<string:ref>')
+news_api.add_resource(CampaignList, '/api/1.0/campaign')
+news_api.add_resource(GetToken, '/api/1.0/token')
+news_api.add_resource(Person, '/api/1.0/person/<int:id>')
+news_api.add_resource(PersonList, '/api/1.0/person')
+news_api.add_resource(NewsList, '/api/1.0/news')
+news_api.add_resource(Status, '/api/1.0/status')
 
 # API Proxy WSGi for gunicorn.
 api_app.wsgi_app = ProxyFix(api_app.wsgi_app)

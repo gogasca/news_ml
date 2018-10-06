@@ -373,7 +373,7 @@ class NewsList(Resource):
                 # ['title', 'content', 'url', 'published_at', 'provider']
                 response = [{field: getattr(news, field) for field in
                              settings.NEWS_FIELDS} for news in news_list]
-                return jsonify(news=response, status='ok', source='gonzo')
+                return jsonify(news=response, status='ok', source='news_ml')
             log.warn('api() | No News found')
             return Response(json.dumps(errors.NO_NEWS), status=404,
                             mimetype=settings.api_mime_type)
