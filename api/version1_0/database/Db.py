@@ -211,9 +211,6 @@ class Db(object):
         :return:
         """
         query = "select pg_terminate_backend(pid) from pg_stat_activity where " \
-                "" \
-                "" \
-                "" \
                 "usename = '" + settings.dbusername + \
                 "' and state = 'idle' and query_start < current_timestamp - " \
                 "interval '5 minutes';"

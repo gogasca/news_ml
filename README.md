@@ -164,15 +164,15 @@ celery worker -n 1 -P processes -c 15 --loglevel=DEBUG -Ofair
 export C_FORCE_ROOT="true"
 export DBHOST=35.202.73.207
 export DBPORT=5432
-export DBUSERNAME=postgres
-export DBPASSWORD=postgres
-export DBNAME=news
+export DBUSERNAME="postgres"
+export DBPASSWORD="postgres"
+export DBNAME="news"
 
 # NEWS API
-export NEWS_API_KEY=1369bd55461b40e0987191f4ebe094d4
+export NEWS_API_KEY="1369bd55461b40e0987191f4ebe094d4"
 
 # EMAIL
-export MAILGUN_API_KEY=key-81261b57db24a12f91980e8195a07920
+export MAILGUN_API_KEY="key-81261b57db24a12f91980e8195a07920"
 # API
 export API_USERNAME="AC64861838b417b555d1c8868705e4453f"
 export API_PASSWORD="YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o"
@@ -205,6 +205,39 @@ CREATE TABLE api_users
 );
 ```
 
+## Start services
+
+```
+    vim ~/.bashrc
+    vim ~/.profile
+
+    export C_FORCE_ROOT="true"
+
+    mkdir -p /etc/supervisor/conf.d
+    mkdir /var/log/supervisor/
+
+    cp /usr/local/bin/supervisorctl /usr/bin/
+    cp /usr/local/bin/supervisord /usr/bin/
+    
+```
+
+Start supervisor after reboot:
+
+```
+    supervisord -c supervisord.conf
+```
+
+Use supervisorctl to check services status
+
+### Upgrades
+
+```
+    cd /usr/local/src/news_ml
+    git pull
+
+    supervisorctl restart all
+    supervisorctl status
+```
 
 ## Database information
 
