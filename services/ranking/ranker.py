@@ -192,7 +192,6 @@ def process_articles(campaign, limit=100):
     sorted_articles = sort_articles(ranked_articles)
     if not isinstance(limit, int) and limit > 1:
         raise ValueError('Invalid limit')
-
     for order, article in enumerate(sorted_articles[:limit], 1):
         logging.info(article)
         DbHelper.update_ranked_post(news_id=article.news_id,
