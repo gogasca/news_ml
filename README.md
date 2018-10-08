@@ -248,6 +248,24 @@ https://pydigger.com/pypi/sqlacodegen
 postgresql://username:password@hostname/database
 ```
 
+
+## Troubleshooting
+
+Problem: Supervisor not starting services.
+Solution: Validate permissions for .sh scripts (Executable)
+
+Problem: Supervisor not starting API service.
+Solution: Check gunicorn ```gunicorn --log-file=- news_ml:api_app```
+
+Problem: Supervisor not starting Celery service.
+Solution: Validate RabbitMQ is started
+
+Problem: Can't start services.
+Solution: Install nltk dependencies from root.
+
+Problem: Can't start services.
+Solution: ```sudo -i```, verify ```.bashrc``` and ```.profile```. 
+
 ## Questions?
 
 Bugs and issues can be reported at noreply@google.com
