@@ -4,7 +4,7 @@
 # Program: Celery start script for Supervisor
 # Use celeryd.conf to launch this script.
 
-source ~/.profile
+source ~root/.profile
 DEBUG_MODE="INFO"
 CELERY_LOGFILE=/usr/local/src/news_ml/log/%n.log
 # If you change CELERY_PROCESSES verify you change CELERYD_PREFETCH_MULTIPLIER in conf/celeryconfig.py.

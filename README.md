@@ -135,7 +135,7 @@ python
 [nltk_data] Downloading package stopwords to /root/nltk_data...
 [nltk_data]   Unzipping corpora/stopwords.zip.
 True
->>> nltk.download('punkt')
+>>>nltk.download('punkt')
 [nltk_data] Downloading package punkt to /root/nltk_data...
 [nltk_data]   Unzipping tokenizers/punkt.zip.
 ```
