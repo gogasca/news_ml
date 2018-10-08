@@ -171,14 +171,12 @@ def update_articles(articles):
     """
     if not articles:
         raise ValueError('Invalid number of articles')
-    order = 0
-    for article in articles:
+    for order, article in enumerate(articles, 1):
         logging.info(article)
-        order += 1
         DbHelper.update_ranked_post(news_id=article.news_id,
                                     rank_score=article.score,
                                     rank_order=order)
-    logging.info('Process %d articles', order)
+    logging.info('Process %d articles', len(articles))
 
 
 def process_articles(campaign, limit=100):
