@@ -30,6 +30,14 @@ class RankerD(object):
         self._articles = articles
 
     @property
+    def sorted_articles(self):
+        return self._sorted_articles
+
+    @sorted_articles.setter
+    def sorted_articles(self, sorted_articles):
+        self._sorted_articles = sorted_articles
+
+    @property
     def num_of_articles(self):
         return self._num_of_articles
 
@@ -53,7 +61,7 @@ class RankerD(object):
     def reference(self, reference):
         self._reference = reference
 
-    def _get_articles(self):
+    def get_articles(self):
         """Gets latest news already inserted in database.
 
         :return:
@@ -68,13 +76,15 @@ class RankerD(object):
     def rank_articles(self):
         """Reads posts from DB. Filters unwanted providers. Then rank them.
 
-        :param filtered_providers:
         :return:
         """
-        self.articles = self._get_articles()
+        self.articles = self.get_articles()
         logging.info('Sorting %d articles by score.', len(self.articles))
         if self.articles:
-            self._sorted_articles = ranker.sort_articles(self.articles)
+            self.sorted_articles = ranker.sort_articles(self.articles)
         logging.info('Completed Ranking of %d articles(s).',
                      len(self._sorted_articles))
-        return self._sorted_articles
+        if settings.update_rank_articles_db:
+            logging.info('Updating database')
+            ranker.update_articles(self.sorted_articles)
+        return self.sorted_articles

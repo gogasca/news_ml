@@ -92,18 +92,22 @@ alexa_port = 8082
 # Ranking
 # =========================================================
 rank_articles = True
-ranking_sources = ['techcrunch',
+update_rank_articles_db = True
+ranking_sources = ['amazon.com',
+                   'fb.com',
+                   'facebook.com',
+                   'ibm.com',
+                   'microsoft.com',
+                   'googleblog.com',
+                   'anaconda.com',
+                   'databricks.com',
+                   'fastcompany.com',
+                   'techcrunch',
                    'towardsdatascience.com',
                    'the next web',
-                   'hackernoon.com',
-                   'databricks.com',
-                   'anaconda.com',
-                   'googleblog.com',
-                   'ibm.com',
-                   'fb.com',
-                   'amazon.com']
+                   'hackernoon.com']
 
-unknown_source_score = 10
+unknown_source_score = 5
 ranking_limit = 1000
 ranking_query_date = """SELECT to_char(published_at,'YYYY-MM-DD') AS date
     FROM news GROUP BY 1 ORDER BY date DESC LIMIT 1;"""

@@ -31,6 +31,22 @@ class RankedArticle(object):
         return self._content.split
 
     @property
+    def source(self):
+        return self._source
+
+    @source.setter
+    def source(self, source):
+        self._source = source
+
+    @property
+    def ranking_source(self):
+        return self._ranking_source
+
+    @ranking_source.setter
+    def ranking_source(self, ranking_source):
+        self._ranking_source = ranking_source
+
+    @property
     def order(self):
         return self._order
 
@@ -49,18 +65,18 @@ class RankedArticle(object):
     def rank(self):
         """Assigns score based on News source. Sources defined in settings file.
 
+        First sources in settings.ranking_sources list get higher score.
+        Articles which are generated first are prioritized.
         :return:
         """
         try:
-            self._ranking_source = 1.001 ** settings.ranking_sources.index(
-                self._source)
+            self.ranking_source = 1 + settings.ranking_sources.index(
+                self.source)
         except ValueError:
-            self._ranking_source = settings.unknown_source_score
+            self.ranking_source = settings.unknown_source_score
 
         try:
-            # Divide score by ranking source, higher sources get higher score.
-            self.score += 20 // self._ranking_source
-            # Articles which are displayed first are prioritized.
+            self.score += 200 // self.ranking_source
             self.score += self.order + random.randrange(0, 10)
         except ZeroDivisionError as e:
             logging.exception(e)
@@ -69,12 +85,10 @@ class RankedArticle(object):
         return "RankedArticle: (%d) Source: [%r] Ranking: %d Score: (%f) %r,  " \
                "" \
                "" \
-               "" \
-               "" \
                "<%r>." % (
                    self.order,
-                   self._source,
-                   self._ranking_source,
+                   self.source,
+                   self.ranking_source,
                    self.score,
                    self._title.encode('utf-8'),
                    self._url)
@@ -83,12 +97,10 @@ class RankedArticle(object):
         return "RankedArticle: (%d) Source: [%r] Ranking: %d Score: (%f) %r,  " \
                "" \
                "" \
-               "" \
-               "" \
                "<%r>." % (
                    self.order,
-                   self._source,
-                   self._ranking_source,
+                   self.source,
+                   self.ranking_source,
                    self.score,
                    self._title.encode('utf-8'),
                    self._url)
@@ -123,9 +135,8 @@ def rank_articles(news_articles):
     :return:
     """
     ranked_articles = []
-    order = 1
     logging.info('Ranking %d posts and assign score.' % len(news_articles))
-    for news_article in news_articles:
+    for order, news_article in enumerate(news_articles, 1):
         ranked_article = RankedArticle(news_id=news_article[0],
                                        title=news_article[1],
                                        content=news_article[2],
@@ -135,9 +146,8 @@ def rank_articles(news_articles):
         ranked_article.order = order
         # Rank article based on the source.
         ranked_article.rank()
-        ranked_articles.append(ranked_article)
         logging.info('Added Ranked Article %r', ranked_article)
-        order += 1
+        ranked_articles.append(ranked_article)
     return ranked_articles
 
 
@@ -153,20 +163,16 @@ def sort_articles(articles):
     return sorted_articles
 
 
-def process_articles(campaign, limit=10):
+def update_articles(articles):
     """
 
-    :param campaign:
-    :param limit:
+    :param articles:
     :return:
     """
-    ranked_articles = get_and_rank_news_articles(campaign=campaign)
-    sorted_articles = sort_articles(ranked_articles)
+    if not articles:
+        raise ValueError('Invalid number of articles')
     order = 0
-    if not isinstance(limit, int) and limit > 1:
-        raise ValueError('Invalid limit')
-
-    for article in sorted_articles[:limit]:
+    for article in articles:
         logging.info(article)
         order += 1
         DbHelper.update_ranked_post(news_id=article.news_id,
@@ -175,8 +181,28 @@ def process_articles(campaign, limit=10):
     logging.info('Process %d articles', order)
 
 
-def print_articles(campaign):
+def process_articles(campaign, limit=100):
+    """Test processing and DB insertion.
+
+    :param campaign:
+    :param limit:
+    :return:
     """
+    ranked_articles = get_and_rank_news_articles(campaign=campaign)
+    sorted_articles = sort_articles(ranked_articles)
+    if not isinstance(limit, int) and limit > 1:
+        raise ValueError('Invalid limit')
+
+    for order, article in enumerate(sorted_articles[:limit], 1):
+        logging.info(article)
+        DbHelper.update_ranked_post(news_id=article.news_id,
+                                    rank_score=article.score,
+                                    rank_order=order)
+    logging.info('Process %d articles', order)
+
+
+def print_articles(campaign):
+    """Test processing
 
     :param campaign:
     :return:
@@ -188,4 +214,3 @@ def print_articles(campaign):
         print article
 
 
-process_articles('E1GPL5QY6Q')

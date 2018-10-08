@@ -36,6 +36,7 @@ def process_campaign(self, campaign_instance):
         log.info(
             'process_campaign() Provider not found: %s' %
             campaign_instance.provider)
+        campaign_instance.terminate(status='-1')
 
     elapsed_time = time.time() - start_time
     log.info(
@@ -44,7 +45,6 @@ def process_campaign(self, campaign_instance):
         log.info('rank_news() Reading posts then ranking...')
         ranker_instance = RankerD.RankerD(campaign_instance.reference)
         ranker_instance.rank_articles()
-        ranker_instance.insert_articles()
         log.info('rank_news() Process took %f seconds processed ' % elapsed_time)
     # Terminate campaign. Update database with end_date.
     campaign_instance.terminate()

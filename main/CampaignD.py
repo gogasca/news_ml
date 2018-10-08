@@ -146,7 +146,6 @@ class CampaignD(object):
                        'WHERE campaign.reference=\'%s\'' % (
                            settings.dbnow, status, self.reference)
             DbHelper.update_database(sqlquery)
-
         # Notify via SMS.
         send_sms.send_sms_alert(
             body='Campaign: %s for [%s] %d articles completed' % (
