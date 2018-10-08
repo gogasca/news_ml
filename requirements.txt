@@ -12,6 +12,7 @@ cachetools==2.0.0
 celery==3.1.23
 certifi==2017.4.17
 click==6.7
+cryptography
 cycler==0.10.0
 Flask==0.12.*
 Flask-HTTPAuth==3.1.2

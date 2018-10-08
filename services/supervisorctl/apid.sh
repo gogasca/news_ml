@@ -1,4 +1,5 @@
 #!/bin/bash
+source ~/.profile
 cd /usr/local/src/news_ml/api/version1_0/
 GUNICORN_LOGFILE=/usr/local/src/news_ml/log/gunicorn.log
 API_PORT=8081
