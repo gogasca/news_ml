@@ -177,6 +177,25 @@ def associate_tag_news(news_id, tag_id):
         log.exception(exception)
 
 
+def update_ranked_post(news_id, rank_score, rank_order):
+    """
+
+    :param news_id:
+    :param rank_score:
+    :param rank_order:
+    :return:
+    """
+
+    sql_query = 'UPDATE news SET rank_score = %s, rank_order = %s WHERE ' \
+                'news_id = %d' % (rank_score, rank_order, news_id)
+    try:
+        db = Db.Db()
+        db.initialize(dsn=settings.SQLALCHEMY_DSN)
+        return db.update(sql_query)
+    except psycopg2.ProgrammingError as exception:
+        log.exception(exception)
+
+
 def get_multiple_records(sqlquery):
     """
 
@@ -192,7 +211,7 @@ def get_multiple_records(sqlquery):
 
 
 def get_record(sqlquery):
-    """
+    """Gets a single Record (LIMIT 1)
 
     :param sqlquery:
     :return:

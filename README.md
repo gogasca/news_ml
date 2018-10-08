@@ -248,6 +248,39 @@ https://pydigger.com/pypi/sqlacodegen
 postgresql://username:password@hostname/database
 ```
 
+## Ranking algorithm
+
+```
+    def rank(self):
+        """Assign score based on source.
+        Sources defined in settings file.
+
+        :return:
+        """
+    
+        try:
+            self._ranking_source = settings.ranking_sources.index(self._source)
+        except ValueError:
+            self._ranking_source = settings.unknown_source_score
+
+        try:
+            self._ranking_provider = settings.ranking_providers.index(self._provider)
+        except ValueError:
+            self._ranking_provider = settings.unknown_provider_score
+
+        # Articles which are read first are prioritized. Divide 100 by weight to prioritize higher values
+        self.score += 20 // self._ranking_source
+        self.score += 30 // self._ranking_provider
+        self.score += self.order + random.randrange(0, 10)
+        
+```
+
+## Cronjob
+
+```
+crontab -e
+0 */6 * * * /usr/local/src/news_ml/utils/scripts/get_news.sh 
+```
 
 ## Troubleshooting
 

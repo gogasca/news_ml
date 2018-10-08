@@ -4,6 +4,8 @@ from conf import settings
 from utils.reporting import Generator
 from api.version1_0.database import DbHelper
 
+from services.sms import send_sms
+
 
 class CampaignD(object):
     """Crawler object in charge of launching Web requests."""
@@ -18,6 +20,7 @@ class CampaignD(object):
         self._query = ''
         self._send_report = False
         self._email_recipients = []
+        self._sms_enabled = False
         self._sms_recipients = []
         self._translation_enable = False
         self._translation_lang = None
@@ -40,6 +43,14 @@ class CampaignD(object):
     @provider.setter
     def provider(self, provider):
         self._provider = provider
+
+    @property
+    def sms_enabled(self):
+        return self._sms_enabled
+
+    @sms_enabled.setter
+    def sms_enabled(self, sms_enabled):
+        self._sms_enabled = sms_enabled
 
     @property
     def query(self):
@@ -120,7 +131,7 @@ class CampaignD(object):
         if self.reference and num_of_articles > -1:
             sqlquery = 'UPDATE campaign SET articles=%s WHERE ' \
                        'campaign.reference=\'%s\'' % (
-                num_of_articles, self.reference)
+                           num_of_articles, self.reference)
             DbHelper.update_database(sqlquery)
 
     def terminate(self, status='1'):
@@ -133,8 +144,14 @@ class CampaignD(object):
         if self.reference:
             sqlquery = 'UPDATE campaign SET campaign_end=\'%s\', status=%s ' \
                        'WHERE campaign.reference=\'%s\'' % (
-                settings.dbnow, status, self.reference)
+                           settings.dbnow, status, self.reference)
             DbHelper.update_database(sqlquery)
+
+        # Notify via SMS.
+        send_sms.send_sms_alert(
+            body='Campaign: %s for [%s] %d articles completed' % (
+                self.reference, self.provider,
+                self.num_of_articles))
 
     def __repr__(self):
         return self.reference

@@ -6,8 +6,8 @@ from conf import logger
 from conf import settings
 
 from main.lib.usa.news_api import top_news as news_ml
-from services.sms import send_sms
 from services.nlp import utils as nlp_utils
+from services.ranking import RankerD
 
 log = logger.LoggerManager().getLogger("__app__",
                                        logging_file=settings.app_logfile)
@@ -28,11 +28,6 @@ def process_campaign(self, campaign_instance):
 
     log.info('process_campaign() Initializing...')
     start_time = time.time()
-
-    send_sms.send_sms_alert(
-        body='Campaign: %s for [%s] started' % (
-        campaign_instance.reference, campaign_instance.provider))
-
     # Select campaign instance based on Provider
     if campaign_instance.provider == settings.news_api:
         log.info('process_campaign() News API')
@@ -45,14 +40,14 @@ def process_campaign(self, campaign_instance):
     elapsed_time = time.time() - start_time
     log.info(
         'process_campaign() Process took %f seconds processed ' % elapsed_time)
-    # Terminate campaign. Update database with end_date
+    if settings.rank_articles:
+        log.info('rank_news() Reading posts then ranking...')
+        ranker_instance = RankerD.RankerD(campaign_instance.reference)
+        ranker_instance.rank_articles()
+        ranker_instance.insert_articles()
+        log.info('rank_news() Process took %f seconds processed ' % elapsed_time)
+    # Terminate campaign. Update database with end_date.
     campaign_instance.terminate()
-
-    # Notify via SMS.
-    send_sms.send_sms_alert(
-        body='Campaign: %s for [%s] %d articles completed' % (
-            campaign_instance.reference, campaign_instance.provider,
-            campaign_instance.num_of_articles))
 
 
 @task(name='process_text', queue='gold', bind=True, default_retry_delay=30,

@@ -51,6 +51,6 @@ function rank_news () {
 
 
 # Generate Daily report.
-collect_news "$NEWS_API"
+collect_news "$QUERY_NEWS"
 # Rank news.
 # rank_news "$RANKER"

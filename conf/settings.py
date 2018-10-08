@@ -91,41 +91,28 @@ alexa_port = 8082
 # =========================================================
 # Ranking
 # =========================================================
+rank_articles = True
+ranking_sources = ['techcrunch',
+                   'towardsdatascience.com',
+                   'the next web',
+                   'hackernoon.com',
+                   'databricks.com',
+                   'anaconda.com',
+                   'googleblog.com',
+                   'ibm.com',
+                   'fb.com',
+                   'amazon.com']
 
-ranking_providers = ['launchticker',
-                     'recode',
-                     'cnet',
-                     'techcrunch',
-                     'mashable',
-                     'theverge',
-                     'engadget',
-                     'zdnet',
-                     'businessinsider',
-                     'arstechnica',
-                     'venturebeat',
-                     'techradar',
-                     'hackernews',
-                     'thenextweb',
-                     'zdnet']
-
-ranking_sources = ['launch-ticker',
-                   'recode',
-                   'cnet',
-                   'techcrunch',
-                   'mashable',
-                   'the-verge',
-                   'engadget',
-                   'ars-technica',
-                   'techmeme',
-                   'zdnet',
-                   'businessinsider',
-                   'hacker-news',
-                   'techradar',
-                   'the-next-web']
-
-unknown_provider_score = 20
-unknown_source_score = 100
+unknown_source_score = 10
 ranking_limit = 1000
+ranking_query_date = """SELECT to_char(published_at,'YYYY-MM-DD') AS date
+    FROM news GROUP BY 1 ORDER BY date DESC LIMIT 1;"""
+ranking_query_get_news = """SELECT news_id, title, content, lower(source), url
+    FROM news WHERE campaign = '%s' GROUP BY 1,2,3,4,5;"""
+ranking_query_get_news_filtered = """SELECT post_id, title, text,
+lower(source), url, lower(tld)
+    FROM news WHERE to_char(published_at,'YYYY-MM-DD') = '%s'
+    AND LOWER(source) != ANY('{%s}'::text[]) GROUP BY 1,2,3,4,5,6;"""
 
 # =========================================================
 # Twilio configuration parameters
