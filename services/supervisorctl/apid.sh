@@ -1,4 +1,9 @@
 #!/bin/bash
+# Google 2018
+# Gonzalo Gasca Meza gogasca@google.com
+# Program: Gunicorn start script for Supervisor
+# Use apid.conf to launch this script.
+
 cd /usr/local/src/news_ml/api/version1_0/
 GUNICORN_LOGFILE=/usr/local/src/news_ml/log/gunicorn.log
 API_PORT=8081

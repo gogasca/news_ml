@@ -29,13 +29,13 @@ curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H
 Request News from NEWS API using a Report:
 
 ```
-curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" -X POST -d '{ "provider": "news_api", "report": {"email": "noreply@google.com"}}' http://0.0.0.0:8080/api/1.0/campaign
+curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" -X POST -d '{ "provider": "news_api", "report": {"email": "noreply@google.com"}}' http://0.0.0.0:8081/api/1.0/campaign
 ``` 
 
 Search for news including 'tensorflow' from NEWS API:
 
 ```
-curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" -X POST -d '{ "provider": "news_api", "query": "tensorflow, sagemaker, keras, petastorm"}' http://0.0.0.0:8080/api/1.0/campaign
+curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" -X POST -d '{ "provider": "news_api", "query": "tensorflow, sagemaker, keras, petastorm"}' http://0.0.0.0:8081/api/1.0/campaign
 ``` 
 
 ## Starting API manually

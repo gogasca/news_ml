@@ -58,4 +58,5 @@ api_app.wsgi_app = ProxyFix(api_app.wsgi_app)
 
 # API Logs.
 log.info('Initializing News API >>>')
-banner.horizontal('News ML v0.1 ')
+banner.horizontal('News ML v0.1')
+log.info('News API Started... >>>')

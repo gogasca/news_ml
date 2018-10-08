@@ -28,7 +28,7 @@ log_salience = False
 # NLP settings
 # =========================================================
 
-credentials = filepath + 'conf/credentials/dpe-cloud-news-e2dd0ad267ab.json'
+credentials = filepath + 'conf/credentials/key.json'
 salience_score = 0.01
 content_size = 16384
 invalid_words = filepath + 'conf/dictionary/es_blacklist'
