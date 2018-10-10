@@ -177,9 +177,8 @@ max_api_client_requests = 1000
 # =========================================================
 # News processor
 # =========================================================
-
-max_crawler_processing = 1800  # Max time processing news task.
-max_task_processing = 1800  # Max time processing news task.
+max_crawler_processing = 3600  # Max time processing news task.
+max_task_processing = 3600  # Max time processing news task.
 max_rank_processing = 1800  # Max time ranking posts.
 max_api_processing = 600
 
