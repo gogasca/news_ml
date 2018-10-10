@@ -16,12 +16,14 @@ EMAIL_NOTIFICATIONS='gogasca@google.com'
 # API Requests.
 SOURCES='techcrunch'
 NEWS_API='{ "provider": "news_api", "report": {"email": "'${EMAIL_NOTIFICATIONS}'"}}'
-QUERY_NEWS='{ "provider": "news_api", "query": "tensorflow, sagemaker, keras, petastorm, kubeflow"}'
+QUERY_NEWS='{ "provider": "news_api", "query": "tensorflow, sagemaker, keras, petastorm, kubeflow"} "report": {"email": "'${EMAIL_NOTIFICATIONS}'"}'
 RANKER='{ "report": {"email": "'${EMAIL_NOTIFICATIONS}'"} }'
+CLUSTER='{ "clusters": 8, "report": {"email": "'${EMAIL_NOTIFICATIONS}'"} }'
 
 # API URL.
 CAMPAIGN_URL="http://0.0.0.0:8081/api/1.0/campaign"
 RANK_URL="http://0.0.0.0:8081/api/1.0/rank"
+CLUSTER_URL="http://0.0.0.0:8081/api/1.0/clustering"
 
 function echo_log {
     echo $DATE" $1" >> $LOG
@@ -49,8 +51,22 @@ function rank_news () {
     echo_log "($REQUEST_IDENTIFIER) Request completed"
 }
 
+function cluster_news () {
+    # Ranks existing news.
+    local REQUEST_IDENTIFIER=`head -200 /dev/urandom | cksum | awk '{print $1}'`
+    local JSON_REQUEST=$1
+    echo_log "($REQUEST_IDENTIFIER) Clustering news information...${JSON_REQUEST}"
+    curl -k -u ${API_USERNAME}:${API_PASSWORD} -H "Content-Type: application/json" --data "${JSON_REQUEST}" ${CLUSTER_URL} -v >> $LOG
+    check;
+    echo_log "($REQUEST_IDENTIFIER) CURL Request sent"
+    echo_log "($REQUEST_IDENTIFIER) Sleeping..."
+    sleep 60;
+}
+
 
 # Generate Daily report.
 collect_news "$QUERY_NEWS"
 # Rank news.
-# rank_news "$RANKER"
+rank_news "$RANKER"
+# Cluster news.
+cluster_news "$CLUSTER"
