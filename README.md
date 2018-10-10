@@ -168,21 +168,21 @@ celery worker -n 1 -P processes -c 15 --loglevel=DEBUG -Ofair
 
 ```
 export C_FORCE_ROOT="true"
-export DBHOST=35.202.73.207
+export DBHOST=127.0.0.1
 export DBPORT=5432
 export DBUSERNAME="postgres"
 export DBPASSWORD="postgres"
 export DBNAME="news"
 
 # NEWS API
-export NEWS_API_KEY="1369bd55461b40e0987191f4ebe094d4"
+export NEWS_API_KEY=""
 
 # EMAIL
-export MAILGUN_API_KEY="key-81261b57db24a12f91980e8195a07920"
+export MAILGUN_API_KEY="key-"
 # API
-export API_USERNAME="AC64861838b417b555d1c8868705e4453f"
-export API_PASSWORD="YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o"
-export SECRET_FERNET_KEY="nIPstt3yGcdo16JiA-tPzdXZJZ-zPpB6eQk9rw-EP6Q="
+export API_USERNAME=""
+export API_PASSWORD=""
+export SECRET_FERNET_KEY=""
 ```
 
 ## Create API Users
