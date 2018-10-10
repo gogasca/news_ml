@@ -59,6 +59,7 @@ class ApiBase(Resource):
 
 class ApiUser(Resource):
     """Finds a specific username by id."""
+
     def get(self, id):
         """Get User information from database.
 
@@ -122,7 +123,7 @@ class ApiUserList(Resource):
                 return Response(response, status=400,
                                 mimetype=settings.api_mime_type)
             if Model.ApiUsers.query.filter_by(
-                    username=username).first() is not None:
+                username=username).first() is not None:
                 log.error('api() | Username already exists.')
                 response = json.dumps('Username already exists')
                 return Response(response, status=400,
@@ -236,6 +237,70 @@ class CampaignList(Resource):
                                                                        campaign_instance.send_report,
                                                                        campaign_instance.num_of_articles,
                                                                        False)
+
+
+class ClusteringList(Resource):
+    """Requests clustering over existing posts."""
+
+    @api_controller.validate_json
+    @authenticator.local_authentication
+    def post(self):
+        """
+
+        :return:
+        """
+        try:
+            log.info('%s %r' % (request.remote_addr, request))
+            log.info('api() | POST | Received request for Clustering')
+            # Assign API request information.
+            clustering_instance = api_controller.get_clustering(
+                request.json) or None
+            # Returns valid ClusterD object.
+            if not clustering_instance:
+                log.error('api() | Unable to process Clustering request %r',
+                          request.data)
+                response = json.dumps(errors.INVALID_CAMPAIGN)
+                resp = Response(response, status=422,
+                                mimetype=settings.api_mime_type)
+                return resp
+            celery = Celery()
+            celery.config_from_object("conf.celeryconfig")
+            celery.send_task('process_clustering',
+                             exchange='news_ml',
+                             queue='gold',
+                             routing_key='news_ml.gold',
+                             kwargs={
+                                 'clustering_instance': clustering_instance},
+                             retries=3)
+            response = jsonify(
+                {'campaign_id': clustering_instance.campaign_reference})
+            response.headers['Location'] = api.url_for(api(current_app),
+                                                       Campaign,
+                                                       ref=clustering_instance.campaign_reference,
+                                                       _external=True,
+                                                       _scheme=settings.api_scheme)
+            response.status_code = 202
+            return response
+
+        except UnboundLocalError as exception:
+            log.exception(exception)
+            response = json.dumps(errors.INVALID_REQUEST)
+            resp = Response(response, status=500,
+                            mimetype=settings.api_mime_type)
+            return resp
+
+        finally:
+            # Insert campaign details into database.
+            if clustering_instance:
+                clustering_instance.id = ModelOperations.insert_campaign(0,
+                                                                         'Cluster %s' % clustering_instance.campaign_reference,
+                                                                         clustering_instance.campaign_reference,
+                                                                         settings.dbnow,
+                                                                         request.data,
+                                                                         clustering_instance.provider,
+                                                                         clustering_instance.send_report,
+                                                                         clustering_instance.num_of_articles,
+                                                                         False)
 
 
 class GetToken(Resource):
@@ -383,6 +448,67 @@ class NewsList(Resource):
             response = json.dumps(errors.INVALID_REQUEST)
             return Response(response, status=400,
                             mimetype=settings.api_mime_type)
+
+
+class RankList(Resource):
+    @api_controller.validate_json
+    @authenticator.local_authentication
+    def post(self):
+        """Inserts a Ranked article.
+
+        :return:
+        """
+
+        try:
+            log.info('%s %r' % (request.remote_addr, request))
+            log.info('api() | POST | Received request for Ranking')
+            ranker_instance = api_controller.get_ranker(request.json) or None
+            # Returns a RankerD object used to rank existing articles in DB.
+            if not ranker_instance:
+                log.error('api() | Unable to process Ranker request %r',
+                          request.data)
+                response = json.dumps(errors.INVALID_RANKER)
+                resp = Response(response, status=422,
+                                mimetype=settings.api_mime_type)
+                return resp
+            celery = Celery()
+            celery.config_from_object("conf.celeryconfig")
+            celery.send_task('rank_news',
+                             exchange='news_ml',
+                             queue='gold',
+                             routing_key='news_ml.gold',
+                             kwargs={'ranker_instance': ranker_instance},
+                             retries=3)
+            response = jsonify(
+                {'campaign_id': ranker_instance.campaign_reference})
+            response.headers['Location'] = api.url_for(api(current_app),
+                                                       Campaign,
+                                                       ref=ranker_instance.campaign_reference,
+                                                       _external=True,
+                                                       _scheme=settings.api_scheme)
+            response.status_code = 202
+            return response
+
+        except UnboundLocalError as e:
+            log.exception(e)
+            response = json.dumps(errors.INVALID_REQUEST)
+            resp = Response(response, status=500,
+                            mimetype=settings.api_mime_type)
+            return resp
+        finally:
+            # Insert Ranker campaign details into database.
+            if ranker_instance:
+                ranker_instance.id = ModelOperations.insert_campaign(0,
+                                                                     'Ranker '
+                                                                     '%s' %
+                                                                     ranker_instance.campaign_reference,
+                                                                     ranker_instance.campaign_reference,
+                                                                     settings.dbnow,
+                                                                     request.data,
+                                                                     'RANKER',
+                                                                     ranker_instance.send_report,
+                                                                     ranker_instance.num_of_articles,
+                                                                     False)
 
 
 class Status(Resource):

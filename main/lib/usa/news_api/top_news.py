@@ -31,4 +31,4 @@ def launch(campaign_instance):
     crawler = TornadoBacklog.TornadoBacklog(campaign_instance)
     ioloop.IOLoop.current().run_sync(lambda: crawler.crawl())
     elapsed_time = time.time() - start_time
-    gen_log.info('Process took %f seconds processed ' % elapsed_time)
+    gen_log.info('launch() Process took %f seconds.' % elapsed_time)

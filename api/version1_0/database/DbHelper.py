@@ -1,3 +1,5 @@
+"""Helper function for DB operations."""
+
 import logging
 import psycopg2
 import psycopg2.extensions
@@ -17,7 +19,7 @@ log = logger.LoggerManager().getLogger("__app__",
                                        logging_file=settings.app_logfile)
 log.setLevel(level=logging.DEBUG)
 
-_NOW = 'now()'
+DB_NOW = 'now()'
 SEPARATOR = "','"
 
 
@@ -30,8 +32,8 @@ def item_exists(url, table='news'):
     """
     try:
         if url:
-            sql_query = "SELECT url FROM " + table + " WHERE url='" + \
-                        url.strip() + "'"
+            sql_query = """SELECT url FROM %s WHERE url='%s'""" % (
+                table, url.strip())
             db = Db.Db()
             db.initialize(dsn=settings.SQLALCHEMY_DSN)
             result = db.query(sql_query)
@@ -63,24 +65,29 @@ def insert_news(title=None, author='', description='', content='', url='',
     """
     try:
         if title and url:
-            sql_query = "INSERT INTO news (title, author, description, " \
-                        "content, url, url_to_image, source_id, source, " \
-                        "campaign, published_at, score, magnitude, sentiment " \
-                        ") VALUES ('%s','%s','%s','%s'," \
-                        "'%s','%s','%s','%s','%s','%s', %s, %s, '%s') " % (
-                            title.replace("'", "''"),
-                            author.replace("'", "''"),
-                            description.replace("'", "''"),
-                            content[:settings.content_size].replace("'", "''"),
-                            url,
-                            url_to_image,
-                            source_id,
-                            source,
-                            campaign,
-                            published_at,
-                            score,
-                            magnitude,
-                            sentiment)
+            sql_query = """
+            INSERT INTO news (
+            title, author, description, content, url, url_to_image, source_id,
+            source, campaign, published_at, score, magnitude, sentiment, inserted_at
+             ) VALUES (
+             '{title}','{author}','{description}','{content}','{url}',
+             '{url_to_image}','{source_id}','{source}','{campaign}',
+             '{published_at}',{score},{magnitude},'{sentiment}','{inserted_at}')
+            """.format(
+                title=title.replace("'", "''"),
+                author=author.replace("'", "''"),
+                description=description.replace("'", "''"),
+                content=content[: settings.content_size].replace("'", "''"),
+                url=url,
+                url_to_image=url_to_image,
+                source_id=source_id,
+                source=source,
+                campaign=campaign,
+                published_at=published_at,
+                score=score,
+                magnitude=magnitude,
+                sentiment=sentiment,
+                inserted_at=DB_NOW)
             db = Db.Db()
             db.initialize(dsn=settings.SQLALCHEMY_DSN)
             return db.insert_content(sql_query, 'news_id')
@@ -132,7 +139,7 @@ def insert_person(person_name=''):
     try:
         if person_name:
             sql_query = 'INSERT INTO persons (name, mention_date)'
-            content = "'" + person_name.replace("'", "''") + "'," + _NOW
+            content = "'" + person_name.replace("'", "''") + "'," + DB_NOW
             db = Db.Db()
             db.initialize(dsn=settings.SQLALCHEMY_DSN)
             return db.insert(sql_query, content, None)
@@ -150,7 +157,7 @@ def insert_company(company_name=''):
     try:
         if company_name:
             sql_query = 'INSERT INTO companies (name, mention_date)'
-            content = "'" + company_name.replace("'", "''") + "'," + _NOW
+            content = "'" + company_name.replace("'", "''") + "'," + DB_NOW
             db = Db.Db()
             db.initialize(dsn=settings.SQLALCHEMY_DSN)
             return db.insert(sql_query, content, None)
@@ -196,6 +203,41 @@ def update_ranked_post(news_id, rank_score, rank_order):
         log.exception(exception)
 
 
+def insert_cluster_article(news_id=-1, title=None, content='', source='',
+                           url='',
+                           cluster=-1, campaign_reference='', **kwargs):
+    """
+    :param news_id:
+    :param title:
+    :param content:
+    :param source:
+    :param url:
+    :param cluster:
+    :param campaign_reference:
+    :param kwargs:
+    :return:
+    """
+    try:
+        if title and url:
+            sql_query = "INSERT INTO clustering_news (news_id, inserted_at, " \
+                        "title, content, url, source, cluster, " \
+                        "campaign_reference) " \
+                        "VALUES (%d,'%s','%s','%s','%s','%s', %d,'%s') " \
+                        % (news_id,
+                           DB_NOW,
+                           title.replace("'", "''"),
+                           content[:settings.content_size].replace("'", "''"),
+                           url,
+                           source,
+                           cluster,
+                           campaign_reference)
+            db = Db.Db()
+            db.initialize(dsn=settings.SQLALCHEMY_DSN)
+            return db.insert_content(sql_query, 'id')
+    except psycopg2.ProgrammingError as exception:
+        log.exception(exception)
+
+
 def get_multiple_records(sqlquery):
     """
 
@@ -227,7 +269,6 @@ def get_record(sqlquery):
 def update_database(sqlquery):
     """
 
-    :rtype : object
     :param sqlquery:
     :return:
     """

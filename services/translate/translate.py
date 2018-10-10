@@ -9,10 +9,14 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = settings.credentials
 
 
 def detect_language(text):
-    """Detects the text's language."""
+    """Detects the text's language.
+
+     Text can also be a sequence of strings, in which case this method
+     will return a sequence of results for each text.
+    :param text:
+    :return:
+    """
     translate_client = translate.Client()
-    # Text can also be a sequence of strings, in which case this method
-    # will return a sequence of results for each text.
     result = translate_client.detect_language(text)
     print('Confidence: {}'.format(result['confidence']))
     print('Language: {}'.format(result['language']))
@@ -41,8 +45,7 @@ def list_languages_with_target(target):
 
 
 def translate_text_with_model(target, text, model=translate.NMT):
-    """
-    Translates text into the target language.
+    """Translates text into the target language.
 
     Make sure your project is whitelisted.
 

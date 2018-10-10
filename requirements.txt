@@ -56,6 +56,7 @@ requests-oauthlib==0.8.0
 rsa==3.4.2
 singledispatch==3.4.0.3
 six==1.10.0
+sklearn
 SQLAlchemy==1.1.5
 sqlacodegen
 subprocess32==3.2.7

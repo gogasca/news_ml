@@ -263,7 +263,6 @@ class News(db.Model, AutoSerialize, Serializer):
     url_to_image = Column(String(512))
     published_at = Column(DateTime(True))
     content = Column(String(65536))
-    tld = Column(String(256))
     campaign = Column(String(16))
     score = Column(Float(53))
     magnitude = Column(Float(53))

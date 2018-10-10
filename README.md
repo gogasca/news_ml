@@ -20,6 +20,12 @@ The API is composed of many modules:
 
 ## Example:
 
+Check API status
+
+```
+curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o http://0.0.0.0:8081/api/1.0/status
+```
+
 Request News from NEWS API:
 
 ```

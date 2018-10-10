@@ -37,6 +37,7 @@ entity_filter = filepath + 'conf/entity_blacklist'
 # =========================================================
 # NLP
 # =========================================================
+process_entities = False
 remove_stop_words = True
 default_language = 'en'
 translation_service = True
@@ -110,13 +111,35 @@ ranking_sources = ['amazon.com',
 unknown_source_score = 5
 ranking_limit = 1000
 ranking_query_date = """SELECT to_char(published_at,'YYYY-MM-DD') AS date
-    FROM news GROUP BY 1 ORDER BY date DESC LIMIT 1;"""
-ranking_query_get_news = """SELECT news_id, title, content, lower(source), url
-    FROM news WHERE campaign = '%s' GROUP BY 1,2,3,4,5;"""
+    FROM news WHERE inserted_at IS NOT NULL GROUP BY 1 ORDER BY date DESC LIMIT 1;"""
+ranking_query_get_news = """SELECT news_id, title, content, LOWER(source) AS
+    source, url FROM news WHERE campaign = '%s' GROUP BY 1,2,3,4,5;"""
+ranking_query_get_news_by_date = """SELECT news_id, title, content,
+    LOWER(source) AS source, url FROM news WHERE TO_CHAR(inserted_at,
+    'YYYY-MM-DD') = '%s' AND inserted_at IS NOT NULL GROUP BY 1,2,3,4,5;"""
 ranking_query_get_news_filtered = """SELECT post_id, title, text,
-lower(source), url, lower(tld)
-    FROM news WHERE to_char(published_at,'YYYY-MM-DD') = '%s'
-    AND LOWER(source) != ANY('{%s}'::text[]) GROUP BY 1,2,3,4,5,6;"""
+    LOWER(source), url FROM news WHERE to_char(published_at,'YYYY-MM-DD') = '%s'
+    AND LOWER(source) != ANY('{%s}'::text[]) GROUP BY 1,2,3,4,5;"""
+
+# =========================================================
+# Clustering configuration parameters. Queries Ranked posts
+# =========================================================
+
+num_of_clusters = 8
+process_cosine_similarity = False
+update_clustering_articles_db = True
+api_num_of_clusters = 'clusters'
+clustering_provider = 'CLUSTERING'
+clustering_limit = 1000
+clustering_query_date = """SELECT to_char(inserted_at,'YYYY-MM-DD') AS date
+    FROM news WHERE inserted_at IS NOT NULL GROUP BY 1 ORDER BY date DESC LIMIT 1;"""
+clustering_query_get_news = """SELECT news_id, title, content, LOWER(source) AS
+    source, url FROM news WHERE TO_CHAR(inserted_at,'YYYY-MM-DD') = '%s' AND inserted_at IS NOT NULL GROUP
+    BY 1,2,3,4,5;"""
+clustering_query_get_news_filtered = """SELECT news_id, title, content,
+    LOWER(source) AS source, url FROM news WHERE TO_CHAR(inserted_at,
+    'YYYY-MM-DD') = '%s' AND LOWER(source) != ALL('{%s}'::text[]) GROUP BY 1,
+    2,3,4,5;"""
 
 # =========================================================
 # Twilio configuration parameters
@@ -136,7 +159,7 @@ api_account = os.environ['API_USERNAME']
 api_password = os.environ['API_PASSWORD']
 api_logfile = filepath + '/log/apid.log'
 api_base_url = '/api/1.0/'
-api_scheme = 'https'
+api_scheme = 'http'
 api_frontend = 'api.googlecloud.io'
 api_ip_address = '0.0.0.0'
 api_external_port = 8080
@@ -165,21 +188,23 @@ max_api_processing = 600
 # Email SMTP
 # =========================================================
 
-# =========================================================
-# Email Mailgun
-# =========================================================
-mailgun_sender = '8bits@techie8.com'
-mailgun_api_key = os.environ.get('MAILGUN_API_KEY')
+EMAIL_SEPARATOR = ';'
 email_server = 'smtp.gmail.com'
 email_port = 587
 email_address = os.environ.get('EMAIL_USERNAME')
 email_password = os.environ.get('EMAIL_PASSWORD')
 email_name = 'News ML Reporter'
-email_subject = 'News ML Resumen diario'
+email_subject = 'News ML Daily summary'
 email_report = True
 email_to = ['gogasca@google.com']
 email_check_mx = False
 email_verify = False
+
+# =========================================================
+# Email Mailgun
+# =========================================================
+mailgun_sender = 'newsml@googleai.com'
+mailgun_api_key = os.environ.get('MAILGUN_API_KEY')
 
 # =========================================================
 # Database

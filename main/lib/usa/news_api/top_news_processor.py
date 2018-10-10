@@ -15,6 +15,43 @@ log = logger.LoggerManager().getLogger("__app__",
 log.setLevel(level=logging.DEBUG)
 
 
+def process_entities(article, news_id):
+    """
+
+    :param article:
+    :return:
+    """
+    log.info('Processing content for : %s', article.url)
+    entities = nlp.analyze_entities(
+        '%r %r' % (article.title, article.description))
+    num_of_entities = len(entities)
+    log.info('Processing %d entities: %s', num_of_entities, article.url)
+    if num_of_entities > 1:
+        # Extract tags and associate them with original article.
+        log.info('Processing article tags: %s', article.url)
+        tags = nlp_utils.extract_tags(entities)
+        for tag in tags:
+            if tag != '':
+                tag_id = DbHelper.insert_tag(tag_name=tag,
+                                             source=url_extract.get_domain(
+                                                 article.url))
+                if news_id and tag_id:
+                    DbHelper.associate_tag_news(news_id, tag_id)
+                    log.info('Processing persons: %s', article.url)
+                    persons = nlp_utils.extract_entity(entities)
+                    log.info('Found %d persons', len(persons))
+                    for person in persons:
+                        DbHelper.insert_person(person)
+                    log.info('Processing organizations: %s', article.url)
+                    organizations = nlp_utils.extract_entity(entities,
+                                                             'ORGANIZATION')
+                    log.info('Found %d organizations', len(organizations))
+                    for organization in organizations:
+                        DbHelper.insert_company(organization)
+    else:
+        log.error('No entities found')
+
+
 def process_articles(articles, news_provider, campaign_instance):
     """
 
@@ -23,7 +60,6 @@ def process_articles(articles, news_provider, campaign_instance):
     :param campaign_instance:
     :return:
     """
-
     num_of_articles = len(articles)
     log.info('Analyzing %d articles...', len(articles))
     if num_of_articles > 1:
@@ -32,17 +68,12 @@ def process_articles(articles, news_provider, campaign_instance):
         if campaign_instance.send_report:
             subject = 'Silicon Valley | Daily Automatic Summary Report | News ' \
                       '' \
-                      '' \
-                      '' \
-                      '' \
-                      '' \
                       'API | %s' % news_provider
             report = Report.Report(subject=subject)
             report.email_recipients = campaign_instance.email_recipients
         for _, article in articles.items():
             if article.description:
-                log.info(
-                    'Analyzing article %r, %r' % (article.title, article.url))
+                log.info('Article %r, %r' % (article.title, article.url))
                 new_article = False
                 if not DbHelper.item_exists(article.url):
                     log.info('Inserting into database')
@@ -62,44 +93,15 @@ def process_articles(articles, news_provider, campaign_instance):
                                                        published_at=article.published_at,
                                                        score=score,
                                                        magnitude=magnitude,
-                                                       sentiment=nlp_utils.get_sentiment(
-                                                           score))
+                                                       sentiment=nlp_utils.get_sentiment(score))
                         if not news_id:
                             log.error('Unable to Insert record %s', article.url)
                             continue
                     except (ValueError, UnicodeDecodeError) as exception:
                         log.exception(exception)
                     new_article = True
-                    log.info('Processing content for : %s', article.url)
-                    entities = nlp.analyze_entities(
-                        '%r %r' % (article.title, article.description))
-                    num_of_entities = len(entities)
-                    log.info('Processing %d entities: %s', num_of_entities,
-                             article.url)
-                    if num_of_entities > 1:
-                        # Extract tags and associate them with original article.
-                        log.info('Processing article tags: %s', article.url)
-                        tags = nlp_utils.extract_tags(entities)
-                        for tag in tags:
-                            if tag != '':
-                                tag_id = DbHelper.insert_tag(tag_name=tag,
-                                                             source=url_extract.get_domain(
-                                                                 article.url))
-                                if news_id and tag_id:
-                                    DbHelper.associate_tag_news(news_id, tag_id)
-                        log.info('Processing persons: %s', article.url)
-                        persons = nlp_utils.extract_entity(entities)
-                        log.info('Found %d persons', len(persons))
-                        for person in persons:
-                            DbHelper.insert_person(person)
-                        log.info('Processing organizations: %s', article.url)
-                        organizations = nlp_utils.extract_entity(entities,
-                                                                 'ORGANIZATION')
-                        log.info('Found %d organizations', len(organizations))
-                        for organization in organizations:
-                            DbHelper.insert_company(organization)
-                    else:
-                        log.error('No entities found')
+                    if settings.process_entities:
+                        process_entities(article, news_id)
                 else:
                     log.warning('Article %r already exists ', article.url)
 
@@ -111,8 +113,7 @@ def process_articles(articles, news_provider, campaign_instance):
                             article.title + ' ' + article.description,
                             campaign_instance.translation_lang)
                         sql_query = translate_utils.create_sql_query(
-                            translated_text, settings.default_language,
-                            news_id)
+                            translated_text, settings.default_language, news_id)
                         if sql_query:
                             DbHelper.update_database(sql_query)
                     else:
@@ -120,7 +121,7 @@ def process_articles(articles, news_provider, campaign_instance):
                             article.title + ' ' + article.description,
                             campaign_instance.translation_lang)
                     if campaign_instance.send_report and len(
-                            translated_text) > 1:
+                        translated_text) > 1:
                         log.info('Adding translated information to report')
                         report.add_content(article.url, translated_text)
                 elif campaign_instance.send_report:

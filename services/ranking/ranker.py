@@ -1,6 +1,7 @@
 """Ranks articles from Database."""
 import logging
 import random
+import re
 
 from api.version1_0.database import DbHelper
 from conf import settings
@@ -85,6 +86,7 @@ class RankedArticle(object):
         return "RankedArticle: (%d) Source: [%r] Ranking: %d Score: (%f) %r,  " \
                "" \
                "" \
+               "" \
                "<%r>." % (
                    self.order,
                    self.source,
@@ -97,6 +99,7 @@ class RankedArticle(object):
         return "RankedArticle: (%d) Source: [%r] Ranking: %d Score: (%f) %r,  " \
                "" \
                "" \
+               "" \
                "<%r>." % (
                    self.order,
                    self.source,
@@ -106,24 +109,46 @@ class RankedArticle(object):
                    self._url)
 
 
-def get_and_rank_news_articles(campaign):
+def get_and_rank_news_articles(date='latest'):
     """Get Articles in DB and assigns them a score.
 
     Args:
         campaign: (str)
-        date: (str) Date format could be: 2017-07-27
-                    date = time.strftime('%Y-%m-%d')
+
     Returns:
         News information from Database.
     """
-    if not campaign:
-        raise ValueError('Invalid campaign')
+    if not date:
+        raise ValueError('Invalid date')
 
+    if date == 'latest':
+        date = DbHelper.get_record(settings.ranking_query_date)
+        logging.info('Using latest date. The latest date found was: %s', date)
+
+    logging.info('Using date: %s', date)
+    if re.match('\d{4}-\d{1,2}-\d{2}', date):
+        news = get_articles_by_date(date)
+        if news:
+            logging.info('Ranking started.')
+            return rank_articles(news)
+        else:
+            raise ValueError('No news found')
+    else:
+        raise ValueError('Invalid date format')
+
+
+def get_articles_by_date(date):
+    """
+
+    :param date:
+    :return: list(List of RankedArticle)
+    """
+    logging.info('Looking news for %s', date)
     news = DbHelper.get_multiple_records(
-        settings.ranking_query_get_news % campaign)
+        settings.ranking_query_get_news_by_date % date)
     if news:
-        logging.info('Ranking started.')
-        return rank_articles(news)
+        logging.info('Total news found: %s', len(news))
+        return news
     else:
         raise ValueError('No news found')
 
@@ -186,7 +211,7 @@ def process_articles(campaign, limit=100):
     :param limit:
     :return:
     """
-    ranked_articles = get_and_rank_news_articles(campaign=campaign)
+    ranked_articles = get_and_rank_news_articles()
     sorted_articles = sort_articles(ranked_articles)
     if not isinstance(limit, int) and limit > 1:
         raise ValueError('Invalid limit')
@@ -204,10 +229,8 @@ def print_articles(campaign):
     :param campaign:
     :return:
     """
-    articles = get_and_rank_news_articles(campaign=campaign)
+    articles = get_and_rank_news_articles()
     sorted_articles = sort_articles(articles)
     logging.info('Found %d articles. Printing results:', len(sorted_articles))
     for article in sorted_articles:
         print article
-
-

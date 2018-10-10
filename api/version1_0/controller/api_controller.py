@@ -4,6 +4,8 @@ from main import CampaignD
 from main import TextD
 from main import PersonD
 from functools import wraps
+from services.clustering.k_means import ClusterD
+from services.ranking import RankerD
 from conf import settings
 from conf import constants
 from flask import (
@@ -27,8 +29,7 @@ def validate_json(f):
         try:
             request.json
         except Exception:
-            msg = 'Request must be a valid JSON. Use Content-Type: ' \
-                  'application/json'
+            msg = 'Invalid JSON Request. Use Content-Type: application/json'
             abort(400, description=msg)
         return f(*args, **kw)
 
@@ -50,11 +51,10 @@ def validate_schema(schema_name):
                 if schema_name == 'campaign':
                     # Validate POST for new campaign
                     validator.check_campaign(json_request=request.json)
-
                 if schema_name == 'person':
                     # Validate POST for new person
                     validator.check_person(json_request=request.json)
-            except Exception, exception:
+            except Exception as exception:
                 print exception
                 msg = 'Request must be a valid JSON for %s' % schema_name
                 abort(400, description=msg)
@@ -77,7 +77,6 @@ def get_campaign(json_request):
         raise ValueError(errors.INVALID_CAMPAIGN)
 
     campaign_instance = CampaignD.CampaignD()
-
     provider = json_request.get('provider')
     query = json_request.get('query')
     report = json_request.get('report')
@@ -99,6 +98,62 @@ def get_campaign(json_request):
     else:
         campaign_instance.translation_enable = False
     return campaign_instance
+
+
+def get_clustering(json_request):
+    """
+
+    :param json_request:
+    :return:
+    :raise: ValueError
+    """
+
+    if not json_request:
+        raise ValueError(errors.INVALID_CAMPAIGN)
+
+    clustering_instance = ClusterD.Clustering(settings.num_of_clusters)
+    clustering_instance.provider = settings.clustering_provider.upper()
+
+    if settings.api_num_of_clusters in json_request:
+        num_of_clusters = json_request[settings.api_num_of_clusters]
+        if isinstance(num_of_clusters, int) and (num_of_clusters > 1):
+            clustering_instance.num_of_clusters = num_of_clusters
+        else:
+            raise ValueError(errors.INVALID_NUM_CLUSTERS)
+
+    if constants.REPORT in json_request:
+        clustering_instance.send_report = True
+        if constants.EMAIL in json_request[constants.REPORT]:
+            clustering_instance.email_recipients = \
+            json_request[constants.REPORT][constants.EMAIL].split(
+                settings.EMAIL_SEPARATOR)
+    return clustering_instance
+
+
+def get_ranker(json_request):
+    """
+    Gets Rank information from JSON Request.
+        -provider
+        -report
+
+    :param json_request:
+    :return:
+    :raise: ValueError
+    """
+
+    if not json_request:
+        raise ValueError(errors.INVALID_CAMPAIGN)
+
+    # Create a Ranker instance which will process news.
+    ranker_instance = RankerD.RankerD()
+    if constants.PROVIDER in json_request:
+        ranker_instance.provider = json_request[constants.PROVIDER].upper()
+    if constants.REPORT in json_request:
+        ranker_instance.send_report = True
+        if constants.EMAIL in json_request[constants.REPORT]:
+            ranker_instance.email_recipients = json_request[constants.REPORT][constants.EMAIL].split(
+                settings.EMAIL_SEPARATOR)
+    return ranker_instance
 
 
 def get_text(json_request):
@@ -123,7 +178,7 @@ def get_text(json_request):
     # Verify text parameter exist.
     text_in_request = json_request.get(constants.TEXT)
     if text_in_request:
-        text_instance.run_sentiment_analysis = True  # TODO(gogasca) Add flag
+        text_instance.run_sentiment_analysis = True  # TODO(gogasca) Add FLAG
         #  in API: sentiment_analysis=True
         text_instance.content = text_in_request
 

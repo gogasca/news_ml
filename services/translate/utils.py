@@ -17,8 +17,6 @@ def create_sql_query(translation, detected_language, news_id):
     """
     if translation and detected_language and news_id:
         return u"UPDATE news SET translated_text='%s', detected_language='%s' " \
-               u"" \
-               u"" \
                u"WHERE news_id=%s;" % (
                    translation, detected_language, str(news_id))
     return settings.EMPTY_TEXT
@@ -41,7 +39,7 @@ def translate_content(text, language=settings.translation_default_language):
     # Limited text (Limit requests to settings.translation_limit)
     limited_text = text[:settings.translation_limit]
     detected_language = translate.detect_language(limited_text)
-    # Submit translation request
+    # Submit translation request.
     if detected_language != language:
         translated_text = translate.translate_text(language, limited_text)
     else:
@@ -49,8 +47,8 @@ def translate_content(text, language=settings.translation_default_language):
               '(%s)' % (
                   detected_language, language)
         return settings.EMPTY_TEXT
-    # Verify language is detected and text is translated
+    # Verify language is detected and text is translated.
     if _LANGUAGE in detected_language and _TRANSLATED_TEXT in translated_text:
-        # Clean text for SQL insertion
+        # Clean text for SQL insertion.
         translation = translated_text[_TRANSLATED_TEXT].replace("'", "''")
     return translation
