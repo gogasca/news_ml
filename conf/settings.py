@@ -37,7 +37,7 @@ entity_filter = filepath + 'conf/entity_blacklist'
 # =========================================================
 # NLP
 # =========================================================
-process_entities = False
+process_entities = True
 remove_stop_words = True
 default_language = 'en'
 translation_service = True
@@ -79,7 +79,6 @@ hacker_news = 'HACKER_NEWS'
 recode = 'RECODE'
 techradar = 'TECHRADAR'
 the_next_web = 'THE_NEXT_WEB'
-
 campaign_limit = 120
 
 # =========================================================
@@ -147,9 +146,9 @@ clustering_query_get_news_filtered = """SELECT news_id, title, content,
 
 sms_alerts = False
 twilio_from = '+14088053951'
-twilio_accountId = 'ACed0b00c221c2e58a3f6dd33308c84321'
-twilio_tokenId = '68314e5765c801ba4e38bdb4c730f90e'
-phone_numbers = ['+14082186575']
+twilio_accountId = ''
+twilio_tokenId = ''
+phone_numbers = ['+1408XXXXXXX']
 
 # =========================================================
 # API configuration parameters
@@ -179,9 +178,9 @@ max_api_client_requests = 1000
 # News processor
 # =========================================================
 
-max_crawler_processing = 1800  # Max time processing news task
-max_task_processing = 1800  # Max time processing news task
-max_rank_processing = 1800  # Max time ranking posts
+max_crawler_processing = 1800  # Max time processing news task.
+max_task_processing = 1800  # Max time processing news task.
+max_rank_processing = 1800  # Max time ranking posts.
 max_api_processing = 600
 
 # =========================================================
@@ -203,7 +202,7 @@ email_verify = False
 # =========================================================
 # Email Mailgun
 # =========================================================
-mailgun_sender = 'newsml@googleai.com'
+mailgun_sender = 'news-ml@googleai.com'
 mailgun_api_key = os.environ.get('MAILGUN_API_KEY')
 
 # =========================================================

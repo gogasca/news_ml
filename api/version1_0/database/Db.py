@@ -78,8 +78,7 @@ class Db(object):
                     return_id = ";"
                 cur = self.conn.cursor()
                 final_query = sql_query + return_id
-                log.info(
-                    'insert_content() Executing SQL query: %s ' % final_query)
+                log.info('SQL query: %s ' % final_query)
                 cur.execute(final_query)
                 self.conn.commit()
                 if id:

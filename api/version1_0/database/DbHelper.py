@@ -64,33 +64,32 @@ def insert_news(title=None, author='', description='', content='', url='',
     :return:
     """
     try:
-        if title and url:
-            sql_query = """
-            INSERT INTO news (
-            title, author, description, content, url, url_to_image, source_id,
-            source, campaign, published_at, score, magnitude, sentiment, inserted_at
-             ) VALUES (
-             '{title}','{author}','{description}','{content}','{url}',
-             '{url_to_image}','{source_id}','{source}','{campaign}',
-             '{published_at}',{score},{magnitude},'{sentiment}','{inserted_at}')
-            """.format(
-                title=title.replace("'", "''"),
-                author=author.replace("'", "''"),
-                description=description.replace("'", "''"),
-                content=content[: settings.content_size].replace("'", "''"),
-                url=url,
-                url_to_image=url_to_image,
-                source_id=source_id,
-                source=source,
-                campaign=campaign,
-                published_at=published_at,
-                score=score,
-                magnitude=magnitude,
-                sentiment=sentiment,
-                inserted_at=DB_NOW)
-            db = Db.Db()
-            db.initialize(dsn=settings.SQLALCHEMY_DSN)
-            return db.insert_content(sql_query, 'news_id')
+        if not (title and url):
+            raise ValueError('Title or url missing')
+        sql_query = \
+            "INSERT INTO news (" \
+            "title, author, description, content, url, url_to_image, " \
+            "source_id, source, campaign, published_at, score, magnitude, " \
+            "sentiment, inserted_at ) " \
+            "VALUES ('%s','%s','%s','%s', '%s','%s','%s','%s','%s','%s', " \
+            "%s, %s, '%s', '%s')" \
+            % (title.replace("'", "''"),
+               author.replace("'", "''"),
+               description.replace("'", "''"),
+               content[:settings.content_size].replace("'", "''"),
+               url,
+               url_to_image,
+               source_id,
+               source,
+               campaign,
+               published_at,
+               score,
+               magnitude,
+               sentiment,
+               DB_NOW)
+        db = Db.Db()
+        db.initialize(dsn=settings.SQLALCHEMY_DSN)
+        return db.insert_content(sql_query, 'news_id')
     except psycopg2.ProgrammingError as exception:
         log.exception(exception)
 

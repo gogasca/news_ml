@@ -76,11 +76,12 @@ def process_articles(articles, news_provider, campaign_instance):
                 log.info('Article %r, %r' % (article.title, article.url))
                 new_article = False
                 if not DbHelper.item_exists(article.url):
-                    log.info('Inserting into database')
                     news_id = None
                     try:
+                        logging.info('Process sentiment analysis')
                         score, magnitude = nlp_utils.get_sentiment_scores(
                             article.content or article.description)
+                        logging.info('Insert article into Database')
                         news_id = DbHelper.insert_news(title=article.title,
                                                        author=article.author,
                                                        description=article.description,
