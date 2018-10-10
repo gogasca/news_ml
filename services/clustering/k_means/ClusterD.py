@@ -331,13 +331,3 @@ class Clustering(object):
                        'WHERE campaign.reference=\'%s\'' % (
                            settings.dbnow, status, self.campaign_reference)
             DbHelper.update_database(sqlquery)
-
-
-"""
-clustering_instance = Clustering(8)
-clustering_instance.send_report = True
-clustering_instance.email_recipients.append('gogasca@google.com')
-articles = clustering_instance.get_articles()
-clustering_instance.process_articles()
-clustering_instance.terminate(1)
-"""

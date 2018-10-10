@@ -33,4 +33,8 @@ CELERY_TRACK_STARTED = True
 CELERY_ROUTES = {
     'process_campaign': {'queue': 'gold', 'routing_key': 'news_ml.gold',
                          'exchange': 'news_ml',},
+    'process_clustering': {'queue': 'gold', 'routing_key': 'news_ml.gold',
+                         'exchange': 'news_ml',},
+    'rank_news': {'queue': 'gold', 'routing_key': 'news_ml.gold',
+                         'exchange': 'news_ml',},
 }
