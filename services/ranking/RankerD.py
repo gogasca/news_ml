@@ -114,7 +114,7 @@ class RankerD(object):
                                         '<b>Provider</b>: %s' % (
                                         article._title,
                                         article.score,
-                                        article._provider.upper()))
+                                        article.source.upper()))
         return self.sorted_articles
 
     def terminate(self, status=1):
