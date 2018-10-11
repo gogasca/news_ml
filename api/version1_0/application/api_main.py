@@ -434,8 +434,7 @@ class NewsList(Resource):
                     settings.max_news).all()
             if news_list:
                 log.info('api() | %d News found ' % len(news_list))
-                # Extract fields:
-                # ['title', 'content', 'url', 'published_at', 'provider']
+                # Extract fields: ['title', 'content', 'url', 'published_at', 'provider']
                 response = [{field: getattr(news, field) for field in
                              settings.NEWS_FIELDS} for news in news_list]
                 return jsonify(news=response, status='ok', source='news_ml')

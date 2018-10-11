@@ -15,33 +15,54 @@ DATE_FILTER_PATTERN = re.compile(
     r'\d{4}-((1[0-2]|[1-9])|0[1-9])-((3[01]|[12][0-9]|[1-9])|0[1-9])')
 
 
-def news_filter(request):
+def validate_date(date_value):
     """
+
+    :param date_value:
+    :return:
+    """
+    if not (DATE_FILTER_PATTERN.match(date_value) or date_value == settings.DATE_LATEST):
+        log.error('Invalid date value parameter: %r', date_value)
+        return False
+    return True
+
+
+def news_filter(request):
+    """Source parameters.
+
+    -date
+    -source
+
+    # By date parameters: (YYYY-MM-DD), otherwise use latest. (settings.DATE_LATEST (u'latest'))
+        http://0.0.0.0:8081/api/1.0/news?date=2018-10-09
+
+    # By source:
+        http://0.0.0.0:8081/api/1.0/news?source=AMAZON.COM
 
     :param request:
-    :return:(Model.Posts) List of posts.
+    :return:(Model.News) List of news.
     """
-    log.info('/news request: %s', request)
-    # Date parameters (YYYY-MM-DD) or settings.DATE_LATEST (u'latest')
+    log.info('/news Request: %s', request)
     date_value = request.args.get('date')
-    # Get news provider.
-    provider_value = request.args.get('provider')
-    provider_value = provider_value or settings.DEFAULT_PROVIDER
+    source_value = request.args.get('source')
+    # Check Date value and source value.
+    queryset = Model.News.query.order_by(Model.News.published_at.desc(), Model.News.source)
+    if date_value:
+        logging.info('News date: %s', date_value)
+        date_value = date_value.lower()
+        if not validate_date(date_value):
+            return None
+        if settings.DATE_LATEST != date_value:
+            queryset = queryset.filter(Model.News.published_at == date_value)
+    if source_value:
+        logging.info('News source: %s', source_value)
+        source_value = source_value.upper()
 
-    # Process invalid date format.
-    if date_value and not (DATE_FILTER_PATTERN.match(
-            date_value) or date_value.lower() == settings.DATE_LATEST):
-        log.error('Invalid date value parameter: %r', date_value)
-        return None
-
-    queryset = Model.News.query.filter(Model.News.provider == provider_value)
-
-    if not date_value or date_value.lower() == settings.DATE_LATEST:
-        queryset = queryset.order_by(Model.News.published_at.desc())
-    else:
-        queryset = queryset.filter(Model.News.published_at == date_value)
-
-    return queryset.limit(settings.max_news).all()
+    # Process arguments.
+    if source_value:
+        return queryset.filter(Model.News.source == source_value).limit(settings.max_news).all()
+    if date_value:
+        return queryset.limit(settings.max_news).all()
 
 
 def insert_user(username, password, created):
@@ -59,28 +80,6 @@ def insert_user(username, password, created):
             db.session.add(user)
             db.session.commit()
             return user.id
-    except Exception as exception:
-        log.error(exception)
-        db.session.rollback()
-    finally:
-        db.session.close()
-
-
-def insert_post(title, text, short_url, source):
-    """
-
-    :param title:
-    :param text:
-    :param short_url:
-    :param source:
-    :return:
-    """
-    try:
-        if title and text:
-            news = Model.News(title, text, short_url, source)
-            db.session.add(news)
-            db.session.commit()
-            return news.news_id
     except Exception as exception:
         log.error(exception)
         db.session.rollback()

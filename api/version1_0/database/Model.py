@@ -9,7 +9,7 @@ from collections import OrderedDict
 from itsdangerous import (TimedJSONWebSignatureSerializer as SecSerializer,
                           BadSignature, SignatureExpired)
 
-from sqlalchemy import BigInteger, Boolean, Column, DateTime, Float, Integer, \
+from sqlalchemy import BigInteger, Boolean, Column, Date, DateTime, Float, Integer, \
     String, Table, Time, text
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 from sqlalchemy.inspection import inspect
@@ -261,12 +261,17 @@ class News(db.Model, AutoSerialize, Serializer):
     description = Column(String(65536))
     url = Column(String(512))
     url_to_image = Column(String(512))
-    published_at = Column(DateTime(True))
+    published_at = Column(Date())
     content = Column(String(65536))
     campaign = Column(String(16))
     score = Column(Float(53))
     magnitude = Column(Float(53))
     sentiment = Column(String(16))
+    rank_score = Column(Float(53))
+    rank_order = Column(Integer)
+    translated_content = Column(String(65536))
+    detected_language = Column(String(128))
+    inserted_at = Column(DateTime(True))
 
     def serialize(self):
         """
@@ -299,7 +304,7 @@ class Person(db.Model, AutoSerialize, Serializer):
     id = Column(Integer, primary_key=True,
                 server_default=text("nextval('persons_id_seq'::regclass)"))
     name = Column(String(64), nullable=False)
-    Column('mention_date', TIMESTAMP(True, 6))
+    mention_date = Column(TIMESTAMP(True, 6))
     valid = Column(Boolean, server_default=text("true"))
 
     def serialize(self):
@@ -313,8 +318,9 @@ class Person(db.Model, AutoSerialize, Serializer):
         del d['valid']
         return d
 
-    def __init__(self, name):
+    def __init__(self, name, mention_date):
         self.name = name
+        self.mention_date = mention_date
 
 
 t_tags = Table(

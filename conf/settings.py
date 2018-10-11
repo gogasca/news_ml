@@ -12,8 +12,8 @@ else:
 sys.path.append(filepath)
 
 DATE_LATEST = u'latest'
-DEFAULT_PROVIDER = 'NEWS_API'
-NEWS_FIELDS = ['title', 'content', 'url', 'published_at', 'provider']
+DEFAULT_PROVIDER = u'GOOGLEBLOG.COM'
+NEWS_FIELDS = ['title', 'content', 'url', 'published_at', 'source']
 EMPTY_TEXT = ''
 _EMAIL_SEPARATOR = ';'
 

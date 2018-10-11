@@ -16,7 +16,7 @@ def create_sql_query(translation, detected_language, news_id):
     :return:
     """
     if translation and detected_language and news_id:
-        return u"UPDATE news SET translated_text='%s', detected_language='%s' " \
+        return u"UPDATE news SET translated_content='%s', detected_language='%s' " \
                u"WHERE news_id=%s;" % (
                    translation, detected_language, str(news_id))
     return settings.EMPTY_TEXT
