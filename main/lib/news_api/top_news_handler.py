@@ -43,7 +43,7 @@ def handle_http_response(response):
             for article in articles:
                 # Create a News Article instance.
                 source_name = article[SOURCE][SOURCE_NAME]
-                log.info('New Article: %s %s' % (source_name, article[TITLE]))
+                log.info('Article: [%s] %s' % (source_name, article[TITLE]))
                 article_instance = NewsArticle.Article(settings.news_api)
                 article_instance.source_id = article[SOURCE][ID]
                 article_instance.source = source_name.upper()

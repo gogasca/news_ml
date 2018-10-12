@@ -1,6 +1,8 @@
 """Read News from Google API."""
 
+from datetime import datetime
 import logging
+
 from api.version1_0.database import DbHelper
 from conf import settings
 from conf import logger
@@ -66,9 +68,7 @@ def process_articles(articles, news_provider, campaign_instance):
         campaign_instance.set_articles(num_of_articles)
         # Create Report instance and attach recipients.
         if campaign_instance.send_report:
-            subject = 'Silicon Valley | Daily Automatic Summary Report | News ' \
-                      '' \
-                      'API | %s' % news_provider
+            subject = 'News ML | %s' % news_provider
             report = Report.Report(subject=subject)
             report.email_recipients = campaign_instance.email_recipients
         for _, article in articles.items():
@@ -77,6 +77,7 @@ def process_articles(articles, news_provider, campaign_instance):
                 new_article = False
                 if not DbHelper.item_exists(article.url):
                     news_id = None
+                    log.info('New Article retrieved %r, %r' % (article.title, article.url))
                     try:
                         logging.info('Process sentiment analysis')
                         score, magnitude = nlp_utils.get_sentiment_scores(
@@ -126,9 +127,12 @@ def process_articles(articles, news_provider, campaign_instance):
                         log.info('Adding translated information to report')
                         report.add_content(article.url, translated_text)
                 elif campaign_instance.send_report:
-                    log.info('Adding article information to report: %s %s' % (
-                        article.title, article.url))
-                    report.add_content(article.url, article.title)
+                    # Only send today articles in report.
+                    today = datetime.now().date()
+                    published = datetime.strptime(article.published_at[:10], '%Y-%m-%d')
+                    if today == published:
+                        log.info('Adding article information to report: %s %s' % (article.title, article.url))
+                        report.add_content(article.url, article.title)
             else:
                 log.error('Not content found: %s', article.url)
     else:

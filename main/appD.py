@@ -5,7 +5,7 @@ from celery.task import task
 from conf import logger
 from conf import settings
 
-from main.lib.usa.news_api import top_news as news_ml
+from main.lib.news_api import top_news as news_ml
 from services.nlp import utils as nlp_utils
 
 log = logger.LoggerManager().getLogger("__app__",

@@ -16,7 +16,7 @@ class Report(object):
             self._id = Generator.Generator().get_uuid()
         self._content = ''
         self._email_recipients = []
-        self.valid_content = False
+        self.content_added = False
         self.subject = subject
         self.add_title('News ML')
         self.add_subtitle('Daily Summary Report')
@@ -49,7 +49,7 @@ class Report(object):
         :param body:
         :return:
         """
-        self.valid_content = True
+        self.content_added = True
         if not self.content:
             self.content = ''
         self.content += '<h4><span style="color: #339966;">%s%s &nbsp;</h4>' % (
@@ -62,7 +62,7 @@ class Report(object):
         :param content:
         :return:
         """
-        self.valid_content = True
+        self.content_added = True
         if not self.content:
             self.content = ''
         self.content += '<li> %s%s &nbsp;<a href=%s>Link</a></li><br/>' % (
@@ -73,13 +73,13 @@ class Report(object):
 
         :return:
         """
-        if self.valid_content:
+        if self.content_added:
             email_client.send_email_mailgun(
                 email_recipients=self.email_recipients,
                 subject=self.subject,
                 body=self.content)
         else:
-            print('Invalid content')
+            print('No content found')
 
     @property
     def id(self):

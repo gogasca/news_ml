@@ -18,6 +18,10 @@ The API is composed of many modules:
  - RabbitMQ (Message Queue)
  - PostgreSQL (Relational Database)
 
+## Mini version
+
+You can use sample script which collects News to a CSV file.
+
 ## Example:
 
 Check API status

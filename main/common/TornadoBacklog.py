@@ -26,8 +26,8 @@ from tornado.log import gen_log
 
 from conf import logger
 from conf import settings
-from main.lib.usa.news_api import top_news_handler as news_handler
-from main.lib.usa.news_api import top_news_processor as news_processor
+from main.lib.news_api import top_news_handler as news_handler
+from main.lib.news_api import top_news_processor as news_processor
 
 log = logger.LoggerManager().getLogger('__app__')
 log.setLevel(level=logging.DEBUG)
