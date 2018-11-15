@@ -2,25 +2,211 @@
 
 ## Introduction
 
-This Python script collects article and news information from News API.
-Script collects information from fixed sources and if search is enabled
+This Python application collects article and news information from News 
+API. App collects information from fixed sources and if search is enabled
 it will look into all news available in API for a specific time period.
 We will also extract entities from News content via Google Cloud NLP.
 
-## API
+## Quick start
 
-We created an API which is able to handle requests to collect News.
-The API is composed of many modules:
+You can use sample Python script (mini/app.py) 
+which collects News and stores them into a CSV file using News API Key 
+which can be obtained [here](www.newsapi.org).
 
- - Ngnix (Web server and main load balancer, terminates HTTPS)
- - Gunicorn (WSGI)
- - Flask (Python Web App)
- - RabbitMQ (Message Queue)
- - PostgreSQL (Relational Database)
+## API Server
 
-## Mini version
+We created an [API](https://medium.com/ymedialabs-innovation/deploy-flask-app-with-nginx-using-gunicorn-and-supervisor-d7a93aa07c18) which is able to handle requests to collect News.
+The API [stack](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-14-04)
+is composed of the following modules:
+  
+ - [Ngnix](https://www.nginx.com/) (Web server and main load balancer, terminates HTTPS) (Optional)
+ - [Gunicorn](http://flask.pocoo.org/docs/1.0/deploying/wsgi-standalone/) (WSGI)
+ - [Flask](http://flask.pocoo.org/) (Python Web App)
+ - [RabbitMQ](https://www.rabbitmq.com/) (Message Queue)
+ - [PostgreSQL](https://www.postgresql.org/) (Relational Database)
 
-You can use sample script which collects News to a CSV file.
+## Architecture
+
+```
+
+REST API Server -> News collector -> PostgresSQL
+                           RabbitMQ
+                           Celery
+```    
+
+## Software 
+
+Python based API:
+
+ - Flask
+ - Gunicorn
+ - Celery 
+ - RabbitMQ
+ - PostgreSQL
+ - Ngnix
+ - Google Cloud NLP
+ - Ngnix -> Gunicorn -> Flask -> RabbitMQ/Celery/PostgreSQL.
+  
+## Installation
+
+
+### Requirements
+
+Recomended OS: Ubuntu 16:
+
+```
+apt-get install python build-essential  -y
+apt-get install python-pip python-dev -y
+apt-get install libpq-dev python-dev     # Required for psycopg2
+apt-get install git -y
+apt-get install python-pip
+apt-get install libpq-dev
+apt-get install rabbitmq-server
+```
+
+Clone repo
+
+```
+apt
+cd /usr/local/src
+git clone https://github.com/gogasca/news_ml.git
+```
+
+Install dependencies
+
+```
+pip install -r requirements.txt
+```
+
+Install NLTK dependencies
+
+```
+python
+>>> import nltk
+>>> nltk.download("stopwords")
+[nltk_data] Downloading package stopwords to /root/nltk_data...
+[nltk_data]   Unzipping corpora/stopwords.zip.
+True
+>>>nltk.download('punkt')
+[nltk_data] Downloading package punkt to /root/nltk_data...
+[nltk_data]   Unzipping tokenizers/punkt.zip.
+```
+
+## Database information
+
+You need to create a new Database based on PostgreSQL:
+Check the database example:
+
+```
+Check news_ml/conf/database for extracted schema.
+```
+
+## RabbitMQ
+
+```
+/usr/local/sbin/rabbitmq-server
+```
+
+```
+rabbitmqctl add_user news_ml news_ml
+rabbitmqctl set_user_tags news_ml administrator
+rabbitmqctl set_permissions -p / news_ml ".*" ".*" ".*"
+```
+
+## Celery
+
+```
+celery worker -n 1 -P processes -c 15 --loglevel=DEBUG -Ofair
+```
+
+## Authentication
+
+Update these parameters accordingly in the following files:
+
+```
+vim ~/.bashrc
+vim ~/.profile
+```
+
+Change based on your settings:
+
+```
+export DBHOST=127.0.0.1
+export DBPORT=5432
+export DBUSERNAME="postgres"
+export DBPASSWORD="postgres"
+export DBNAME="news"
+
+# NEWS API
+export NEWS_API_KEY=""
+
+# Key for Email support from mailgun.com
+export MAILGUN_API_KEY="key-"
+
+# System API information
+export API_USERNAME=""
+export API_PASSWORD=""
+
+# Key used for encrypting user information.
+export SECRET_FERNET_KEY=""
+```
+
+
+## RabbitMQ
+
+```
+Edit /etc/hosts or your DNS server with rabbitmq hostname.
+This needs to match the /conf/celeryconfig.py File
+
+BROKER_URL = 'amqp://news_ml:news_ml@rabbitmq:5672'
+```
+
+Start RabbitMQ
+
+```
+/usr/local/sbin/rabbitmq-server
+```
+
+```
+rabbitmqctl add_user news_ml news_ml
+rabbitmqctl set_user_tags news_ml administrator
+rabbitmqctl set_permissions -p / news_ml ".*" ".*" ".*"
+```
+
+## Celery (manually)
+
+```
+celery worker -n %h -P processes -c 15 --loglevel=DEBUG -Ofair
+```
+
+## Start API (manually)
+
+Depending on the path where you clone the repo you may need to edit the file.
+
+```
+GUNICORN_LOGFILE=/usr/local/src/news_ml/log/gunicorn.log
+API_PORT=8081
+NUM_WORKERS=1
+TIMEOUT=60
+WORKER_CONNECTIONS=1000
+BACKLOG=500
+LOG_LEVEL=DEBUG
+
+cd news_ml/api/version1_0
+gunicorn news_ml:api_app --bind 0.0.0.0:$API_PORT --log-level=$LOG_LEVEL --log-file=$GUNICORN_LOGFILE --workers $NUM_WORKERS --worker-connections=$WORKER_CONNECTIONS --backlog=$BACKLOG --timeout $TIMEOUT &
+```
+
+
+## Supported API endpoints
+
+```
+/api/1.0/status
+/api/1.0/campaign
+/api/1.0/clustering
+/api/1.0/person
+/api/1.0/news
+/api/1.0/rank
+```
 
 ## Example:
 
@@ -48,31 +234,61 @@ Search for news including 'tensorflow' from NEWS API:
 curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" -X POST -d '{ "provider": "news_api", "query": "tensorflow, sagemaker, keras, petastorm"}' http://0.0.0.0:8081/api/1.0/campaign
 ``` 
 
-## Starting API manually
+Read for existing news:
 
 ```
-gunicorn news_ml:api_app --bind 0.0.0.0:8080 --log-level=DEBUG -w 1
-```
+curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" http://0.0.0.0:8081/api/1.0/news
+``` 
 
-## RabbitMQ
-
-```
-/usr/local/sbin/rabbitmq-server
-```
+Read for news from amazon.com:
 
 ```
-rabbitmqctl add_user news_ml news_ml
-rabbitmqctl set_user_tags news_ml administrator
-rabbitmqctl set_permissions -p / news_ml ".*" ".*" ".*"
+curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" http://0.0.0.0:8081/api/1.0/news?source=amazon.com
 ```
 
-## Celery
+
+## Manage services via supervisor (optional)
+
+Add the following ENV ```export C_FORCE_ROOT="true"``` to the following files:
+
 
 ```
-celery worker -n %h -P processes -c 15 --loglevel=DEBUG -Ofair
+vim ~/.bashrc
+vim ~/.profile
 ```
 
-## Loadbalancer
+
+```
+mkdir -p /etc/supervisor/conf.d
+mkdir /var/log/supervisor/
+
+cp /usr/local/bin/supervisorctl /usr/bin/
+cp /usr/local/bin/supervisord /usr/bin/
+cp /usr/local/src/news_ml/conf/supervisor/celeryd.conf /etc/supervisor/conf.d
+cp /usr/local/src/news_ml/conf/supervisor/supervisord.conf /etc/supervisor/
+    
+```
+
+Start supervisor after reboot:
+
+```
+cd /etc/supervisor/
+supervisord -c supervisord.conf
+```
+
+Use supervisorctl to check services status
+
+### Upgrades
+
+```
+cd /usr/local/src/news_ml
+git pull
+
+supervisorctl restart all
+supervisorctl status
+```
+
+## Loadbalancer (Optional)
 
 Ngnix acts as our API loadbalancer.
 
@@ -93,101 +309,6 @@ Use Apache ab tool to measure API performance.
 ab -n 10 -A username:password https://<API_HOSTNAME>/api/1.0/status
 ```
 
-## Architecture
-
-
-```
-
-REST API Server -> News collector -> PostgresSQL
-                           RabbitMQ
-                           Celery
-```    
-
-## Software 
-
-Python based API:
-
- - Flask
- - Gunicorn
- - Celery 
- - RabbitMQ
- - PostgreSQL
- - Ngnix
- - Google Cloud NLP
- - Ngnix -> Gunicorn -> Flask -> RabbitMQ/Celery/PostgreSQL.
-  
-## Installation
-
-
-```
-apt-get install python build-essential  -y
-apt-get install python-pip python-dev -y
-apt-get install libpq-dev python-dev     # Required for psycopg2
-apt-get install git -y
-apt-get install python-pip
-apt-get install libpq-dev
-apt-get install rabbitmq-server
-pip install --upgrade pip
-```
-
-
-
-```
-pip install nltk
-pip install coverage
-pip install flower
-```
-
-```
-python
->>> import nltk
->>> nltk.download("stopwords")
-[nltk_data] Downloading package stopwords to /root/nltk_data...
-[nltk_data]   Unzipping corpora/stopwords.zip.
-True
->>>nltk.download('punkt')
-[nltk_data] Downloading package punkt to /root/nltk_data...
-[nltk_data]   Unzipping tokenizers/punkt.zip.
-```
- 
-## RabbitMQ
-
-```
-/usr/local/sbin/rabbitmq-server
-```
-
-```
-rabbitmqctl add_user news_ml news_ml
-rabbitmqctl set_user_tags news_ml administrator
-rabbitmqctl set_permissions -p / news_ml ".*" ".*" ".*"
-```
-
-## Celery
-
-```
-celery worker -n 1 -P processes -c 15 --loglevel=DEBUG -Ofair
-```
-
-## Authentication
-
-```
-export C_FORCE_ROOT="true"
-export DBHOST=127.0.0.1
-export DBPORT=5432
-export DBUSERNAME="postgres"
-export DBPASSWORD="postgres"
-export DBNAME="news"
-
-# NEWS API
-export NEWS_API_KEY=""
-
-# EMAIL
-export MAILGUN_API_KEY="key-"
-# API
-export API_USERNAME=""
-export API_PASSWORD=""
-export SECRET_FERNET_KEY=""
-```
 
 ## Create API Users
 
@@ -205,6 +326,16 @@ So we use token based authentication, users request for a token and in the subse
 token to access data. This token lives for a short span of time, even if the attacker manages to get hold of the token, 
 its only valid for short span of time. This way we can add one more layer of security to the REST API.
 
+
+## Database information
+
+How to generate schema? Please read here:
+https://pydigger.com/pypi/sqlacodegen
+
+```
+postgresql://username:password@hostname/database
+```
+
 ```
 CREATE TABLE api_users
 (
@@ -215,48 +346,7 @@ CREATE TABLE api_users
 );
 ```
 
-## Start services
 
-```
-    vim ~/.bashrc
-    vim ~/.profile
-
-    export C_FORCE_ROOT="true"
-
-    mkdir -p /etc/supervisor/conf.d
-    mkdir /var/log/supervisor/
-
-    cp /usr/local/bin/supervisorctl /usr/bin/
-    cp /usr/local/bin/supervisord /usr/bin/
-    
-```
-
-Start supervisor after reboot:
-
-```
-    supervisord -c supervisord.conf
-```
-
-Use supervisorctl to check services status
-
-### Upgrades
-
-```
-    cd /usr/local/src/news_ml
-    git pull
-
-    supervisorctl restart all
-    supervisorctl status
-```
-
-## Database information
-
-How to generate schema? Please read here:
-https://pydigger.com/pypi/sqlacodegen
-
-```
-postgresql://username:password@hostname/database
-```
 
 ## Ranking algorithm
 
@@ -287,6 +377,8 @@ postgresql://username:password@hostname/database
 
 ## Cronjob
 
+You can use a cronjob to generate a report every 6 hours. Example:
+
 ```
 crontab -e
 0 */6 * * * /usr/local/src/news_ml/utils/scripts/get_news.sh 
@@ -295,21 +387,35 @@ crontab -e
 ## Troubleshooting
 
 Problem: Supervisor not starting services.
+
 Solution: Validate permissions for .sh scripts (Executable)
 
+--
+
 Problem: Supervisor not starting API service.
+
 Solution: Check gunicorn ```gunicorn --log-file=- news_ml:api_app```
 
+--
+
 Problem: Supervisor not starting Celery service.
+
 Solution: Validate RabbitMQ is started
 
-Problem: Can't start services.
-Solution: Install nltk dependencies from root.
+--
 
 Problem: Can't start services.
+
+Solution: Install nltk dependencies from root.
+
+--
+
+Problem: Can't start services.
+
 Solution: ```sudo -i```, verify ```.bashrc``` and ```.profile```. 
+
 
 ## Questions?
 
-Bugs and issues can be reported at noreply@google.com
+Bugs and issues can be reported at gogasca [at] google [dot] com
 
