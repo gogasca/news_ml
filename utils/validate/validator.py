@@ -87,7 +87,7 @@ def check_email_addresses(recipients, check_mx=settings.email_check_mx,
     valid_addresses = []
     if recipients:
         email_addresses = filter(None,
-                                 recipients.split(settings._EMAIL_SEPARATOR))
+                                 recipients.split(settings.EMAIL_SEPARATOR))
         for email in email_addresses:
             if validate_email(email, check_mx=check_mx, verify=verify):
                 valid_addresses.append(email)

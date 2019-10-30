@@ -5,12 +5,13 @@ import datetime
 
 from api.version1_0.authentication.security import common
 from conf import settings
+
 from collections import OrderedDict
 from itsdangerous import (TimedJSONWebSignatureSerializer as SecSerializer,
                           BadSignature, SignatureExpired)
 
-from sqlalchemy import BigInteger, Boolean, Column, Date, DateTime, Float, Integer, \
-    String, Table, Time, text
+from sqlalchemy import BigInteger, Boolean, Column, Date, DateTime, Float, \
+    Integer, String, Table, Time, text
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 from sqlalchemy.inspection import inspect
 from sqlalchemy.ext.declarative import declarative_base
@@ -24,9 +25,7 @@ db = SQLAlchemy()
 
 
 class Serializer(object):
-    """
-        Serialize information from database to a JSON Dictionary
-    """
+    """Serialize information from database to a JSON Dictionary."""
 
     def serialize(self):
         return {c: getattr(self, c) for c in inspect(self).attrs.keys()}
@@ -159,10 +158,10 @@ class ApiUsers(db.Model, AutoSerialize, Serializer):
         try:
             data = s.loads(token)
         except SignatureExpired:
-            return None  # Valid token, but expired. #TODO(gogasca) Add
+            return None  # Valid token, but expired. # TODO(gogasca) Add
             # logging.warning
         except BadSignature:
-            return None  # Invalid token. #TODO(gogasca) Add logging.error
+            return None  # Invalid token. # TODO(gogasca) Add logging.error
         user = ApiUsers.query.get(data['id'])
         return user
 

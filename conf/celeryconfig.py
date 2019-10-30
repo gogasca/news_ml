@@ -1,11 +1,16 @@
-"""Configuration for Celery."""
+"""Celery configuration settings."""
 
 from kombu import Exchange
 from kombu import Queue
 
-import settings
+import os
+import sys
 
-CELERYD_CHDIR = settings.filepath
+
+filepath = os.environ.get('NEWSML_ENV')
+sys.path.append(filepath)
+
+CELERYD_CHDIR = filepath
 CELERY_ENABLE_UTC = True
 CELERY_TIMEZONE = 'US/Pacific'
 CELERY_ACCEPT_CONTENT = ['json', 'pickle']

@@ -16,12 +16,13 @@ class Article(object):
     """
     def __init__(self, provider):
         self._provider = provider
-        self._source_id = ''
-        self._source = ''
         self._author = ''
         self._content = ''
         self._description = ''
         self._published_at = ''
+        self._source_id = ''
+        self._source = ''
+        self._title = ''
         self._url_to_image = ''
         self._url = ''
 

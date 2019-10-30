@@ -1,22 +1,16 @@
 """System configuration settings."""
 
 import os
-import platform
-import sys
-
-if platform.system() == 'Linux':
-    filepath = '/usr/local/src/news_ml/'
-else:
-    filepath = '/Users/gogasca/Documents/Development/dpe/news/'
-sys.path.append(filepath)
 
 # Parameters
+filepath = os.environ.get('NEWSML_ENV')
+
 
 DATE_LATEST = u'latest'
 DEFAULT_PROVIDER = u'GOOGLEBLOG.COM'
 NEWS_FIELDS = ['title', 'content', 'url', 'published_at', 'source']
 EMPTY_TEXT = ''
-_EMAIL_SEPARATOR = ';'
+EMAIL_SEPARATOR = ';'
 
 # =========================================================
 # Logging
@@ -171,7 +165,7 @@ api_global_limits = '1000/second'
 max_news = 8
 items_per_page = 10
 api_error_limit = 50
-api_ok = 'News API is active'
+api_ok = 'News API version %s is active' % api_version
 api_mime_type = 'application/json'
 max_api_client_requests = 1000
 
@@ -187,7 +181,6 @@ max_api_processing = 600
 # Email SMTP
 # =========================================================
 
-EMAIL_SEPARATOR = ';'
 email_server = 'smtp.gmail.com'
 email_port = 587
 email_address = os.environ.get('EMAIL_USERNAME')
@@ -203,6 +196,7 @@ email_verify = False
 # Email Mailgun
 # =========================================================
 mailgun_sender = 'news-ml@newsml.io'
+maingun_domain = os.environ.get('MAILGUN_DOMAIN')
 mailgun_api_key = os.environ.get('MAILGUN_API_KEY')
 
 # =========================================================

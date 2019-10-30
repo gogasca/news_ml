@@ -15,7 +15,7 @@ which can be obtained [here](https://www.newsapi.org).
 
 ## API Server
 
-We created an [API](https://medium.com/ymedialabs-innovation/deploy-flask-app-with-nginx-using-gunicorn-and-supervisor-d7a93aa07c18) which is able to handle requests to collect News.
+I created an [API](https://medium.com/ymedialabs-innovation/deploy-flask-app-with-nginx-using-gunicorn-and-supervisor-d7a93aa07c18) which is able to handle requests to collect News.
 The API [stack](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-14-04)
 is composed of the following modules:
   
@@ -140,12 +140,12 @@ export DBNAME="newsml"
 # NEWS API
 export NEWS_API_KEY=""
 
-# Key for Email support from mailgun.com
-export MAILGUN_API_KEY="key-"
-
 # System API information. 
 export API_USERNAME="AC64861838b417b555d1c8868705e4453f" 
 export API_PASSWORD="YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o" 
+
+# Key for Email support from mailgun.com
+export MAILGUN_API_KEY="key-"
 
 # Key used for encrypting user information.
 export SECRET_FERNET_KEY="" # Change this
@@ -194,16 +194,28 @@ celery worker -n %h -P processes -c 15 --loglevel=DEBUG -Ofair
 
 Depending on the path where you clone the repo you may need to edit the file.
 
-```
-GUNICORN_LOGFILE=/usr/local/src/news_ml/log/gunicorn.log
-API_PORT=8081
-NUM_WORKERS=1
-TIMEOUT=60
-WORKER_CONNECTIONS=1000
-BACKLOG=500
-LOG_LEVEL=DEBUG
+Define NEWSML_ENV properly:
 
+```
+if platform.system() == 'Linux':
+    filepath = '/usr/local/src/news_ml/'
+else:
+    filepath = '/Users/gogasca/Documents/Development/dpe/news/'
+```
+
+
+```
 cd news_ml/api/version1_0
+
+export NEWSML_ENV="/usr/local/src/news_ml/"
+export GUNICORN_LOGFILE=/tmp/gunicorn.log
+export API_PORT=8081
+export NUM_WORKERS=1
+export TIMEOUT=60
+export WORKER_CONNECTIONS=1000
+export BACKLOG=500
+export LOG_LEVEL=DEBUG
+
 gunicorn news_ml:api_app --bind 0.0.0.0:$API_PORT --log-level=$LOG_LEVEL --log-file=$GUNICORN_LOGFILE --workers $NUM_WORKERS --worker-connections=$WORKER_CONNECTIONS --backlog=$BACKLOG --timeout $TIMEOUT &
 ```
 
@@ -236,7 +248,7 @@ curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H
 Request News from NEWS API using a Report:
 
 ```
-curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" -X POST -d '{ "provider": "news_api", "report": {"email": "noreply@google.com"}}' http://0.0.0.0:8081/api/1.0/campaign
+curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" -X POST -d '{ "provider": "news_api", "report": {"email": "no-reply@newsml.io"}}' http://0.0.0.0:8081/api/1.0/campaign
 ``` 
 
 Search for news including 'tensorflow' from NEWS API:
@@ -256,6 +268,8 @@ Read for news from amazon.com:
 ```
 curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" http://0.0.0.0:8081/api/1.0/news?source=amazon.com
 ```
+
+**Note:** If using zsh add: curl -w '\n' to avoid % at the end of response
 
 
 ## Manage services via supervisor (optional)

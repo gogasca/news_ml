@@ -35,16 +35,15 @@ def validate_date(date_value):
 
 
 def news_filter(request):
-    """Source parameters.
+    """Filter news based on source parameters:
+     -date
+     -source
 
-    -date
-    -source
-
-    # By date parameters: (YYYY-MM-DD), otherwise use latest. (
+    By date parameters: (YYYY-MM-DD), otherwise use latest. (
     settings.DATE_LATEST (u'latest'))
         http://0.0.0.0:8081/api/1.0/news?date=2018-10-09
 
-    # By source:
+    By source:
         http://0.0.0.0:8081/api/1.0/news?source=AMAZON.COM
 
     :param request:
@@ -106,6 +105,7 @@ def insert_campaign(status, description, reference, start, request_data,
     :param request_data:
     :param campaign_type:
     :param send_report:
+    :param articles:
     :param test:
     :return:
     """
@@ -131,7 +131,6 @@ def insert_person(name, mention_date):
     :return:
     """
     try:
-        # title, text, short_url
         if name:
             person = Person(name, mention_date)
             db.session.add(person)

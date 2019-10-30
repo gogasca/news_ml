@@ -28,8 +28,7 @@ def send_email_mailgun(email_recipients=None, subject='News ML Email sender',
     if not body:
         raise ValueError('Empty body')
 
-    url = 'https://api.mailgun.net/v3/sandboxd889a188057e4256a7c9d29e6688b406' \
-          '.mailgun.org/messages'
+    url = 'https://api.mailgun.net/v3/%s/messages' % settings.mailgun_domain
     response = requests.post(url,
                              auth=('api', settings.mailgun_api_key),
                              data={"from": '%s <%s>' % (
