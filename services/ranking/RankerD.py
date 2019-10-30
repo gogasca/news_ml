@@ -1,7 +1,9 @@
 """Main instance to sort Articles based on source."""
 
 import logging
-import ranker
+from .ranker import get_and_rank_news_articles
+from .ranker import update_articles
+from .ranker import sort_articles
 
 from api.version1_0.database import DbHelper
 from conf import settings
@@ -89,7 +91,7 @@ class RankerD(object):
         :return:
         """
         logging.info('Getting news from Database')
-        self.articles = ranker.get_and_rank_news_articles()
+        self.articles = get_and_rank_news_articles()
         self.num_of_articles = len(self.articles)
         logging.info('News found: %d.', self.num_of_articles)
         return self.articles
@@ -102,12 +104,12 @@ class RankerD(object):
         self.articles = self.get_articles()
         logging.info('Sorting %d articles by score.', len(self.articles))
         if self.articles:
-            self.sorted_articles = ranker.sort_articles(self.articles)
+            self.sorted_articles = sort_articles(self.articles)
         logging.info('Completed Ranking of %d articles(s).',
                      len(self.sorted_articles))
         if settings.update_rank_articles_db:
             logging.info('Updating database')
-            ranker.update_articles(self.sorted_articles)
+            update_articles(self.sorted_articles)
             for article in self.sorted_articles:
                 self.report.add_content(article._url,
                                         '%s | <b>Score</b>: %d | '

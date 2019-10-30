@@ -11,7 +11,7 @@ We will also extract entities from News content via Google Cloud NLP.
 
 You can use sample Python script (mini/app.py) 
 which collects News and stores them into a CSV file using News API Key 
-which can be obtained [here](www.newsapi.org).
+which can be obtained [here](https://www.newsapi.org).
 
 ## API Server
 
@@ -52,22 +52,22 @@ Python based API:
 
 ### Requirements
 
-Recomended OS: Ubuntu 16:
+Install a Compute Engine instance
+Recommended OS: Ubuntu 16:
 
 ```
-apt-get install python build-essential  -y
-apt-get install python-pip python-dev -y
-apt-get install libpq-dev python-dev     # Required for psycopg2
-apt-get install git -y
-apt-get install python-pip
-apt-get install libpq-dev
-apt-get install rabbitmq-server
+sudo apt-get install python build-essential  -y
+sudo apt-get install python-pip python-dev -y
+sudo apt-get install libpq-dev python-dev -y   # Required for psycopg2
+sudo apt-get install git -y
+sudo apt-get install python-pip -y
+sudo apt-get install libpq-dev -y
+sudo apt-get install rabbitmq-server -y
 ```
 
 Clone repo
 
 ```
-apt
 cd /usr/local/src
 git clone https://github.com/gogasca/news_ml.git
 ```
@@ -82,8 +82,8 @@ Install NLTK dependencies
 
 ```
 python
->>> import nltk
->>> nltk.download("stopwords")
+>>>import nltk
+>>>nltk.download("stopwords")
 [nltk_data] Downloading package stopwords to /root/nltk_data...
 [nltk_data]   Unzipping corpora/stopwords.zip.
 True
@@ -128,14 +128,14 @@ vim ~/.bashrc
 vim ~/.profile
 ```
 
-Change based on your settings:
+Change the following variables based on your settings:
 
 ```
 export DBHOST=127.0.0.1
 export DBPORT=5432
 export DBUSERNAME="postgres"
 export DBPASSWORD="postgres"
-export DBNAME="news"
+export DBNAME="newsml"
 
 # NEWS API
 export NEWS_API_KEY=""
@@ -143,13 +143,24 @@ export NEWS_API_KEY=""
 # Key for Email support from mailgun.com
 export MAILGUN_API_KEY="key-"
 
-# System API information
-export API_USERNAME=""
-export API_PASSWORD=""
+# System API information. 
+export API_USERNAME="AC64861838b417b555d1c8868705e4453f" 
+export API_PASSWORD="YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o" 
 
 # Key used for encrypting user information.
-export SECRET_FERNET_KEY=""
+export SECRET_FERNET_KEY="" # Change this
 ```
+
+Note: To generate SECRET_FERNET_KEY can be generated as follows:
+
+```
+>>> from cryptography.fernet import Fernet
+>>> key = Fernet.generate_key()
+>>> f = Fernet(key)
+>>> token = f.encrypt(b"YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o")
+>>> token
+```
+Use token value
 
 
 ## RabbitMQ
@@ -339,10 +350,10 @@ postgresql://username:password@hostname/database
 ```
 CREATE TABLE api_users
 (
-    id    serial primary key,
+    id              serial primary key,
     username        VARCHAR(256) unique not null,
 	password_hash   VARCHAR(256) not null,
-    created   timestamp(6) WITH TIME ZONE
+    created         timestamp(6) WITH TIME ZONE
 );
 ```
 

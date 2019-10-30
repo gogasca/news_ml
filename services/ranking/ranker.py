@@ -233,4 +233,4 @@ def print_articles(campaign):
     sorted_articles = sort_articles(articles)
     logging.info('Found %d articles. Printing results:', len(sorted_articles))
     for article in sorted_articles:
-        print article
+        print(article)

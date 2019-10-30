@@ -435,11 +435,9 @@ def main(_):
     :return:
     """
     logging.info('News collection started.')
-    # date_periods = GetDates('2018-03-15', '2018-03-15', 'daily')
     all_news = []
     date_from = _ToDatetimeObject('2018-01-01')
     news_api_client = NewsApiClient(FLAGS.api_key, _API_URL)
-    # SearchArticlesByKeyword(self, keyword, date_from, date_to, page_size):
     for query_term in _QUERY_TERMS:
         api_output = news_api_client.SearchArticlesByKeyword(keyword=query_term,
                                                              date_from=date_from,

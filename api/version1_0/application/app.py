@@ -11,18 +11,18 @@ from conf import logger
 from conf import settings
 
 from api.version1_0.database import Model
-from api_main import ApiBase
-from api_main import ApiUser
-from api_main import ApiUserList
-from api_main import Campaign
-from api_main import CampaignList
-from api_main import ClusteringList
-from api_main import GetToken
-from api_main import NewsList
-from api_main import Person
-from api_main import PersonList
-from api_main import RankList
-from api_main import Status
+from api.version1_0.application.api_main import ApiBase
+from api.version1_0.application.api_main import ApiUser
+from api.version1_0.application.api_main import ApiUserList
+from api.version1_0.application.api_main import Campaign
+from api.version1_0.application.api_main import CampaignList
+from api.version1_0.application.api_main import ClusteringList
+from api.version1_0.application.api_main import GetToken
+from api.version1_0.application.api_main import NewsList
+from api.version1_0.application.api_main import Person
+from api.version1_0.application.api_main import PersonList
+from api.version1_0.application.api_main import RankList
+from api.version1_0.application.api_main import Status
 
 from flask import Flask
 from werkzeug.contrib.fixers import ProxyFix
@@ -61,5 +61,5 @@ api_app.wsgi_app = ProxyFix(api_app.wsgi_app)
 
 # API Logs.
 log.info('Initializing News API >>>')
-banner.horizontal('News ML v0.1')
+banner.horizontal('News ML v0.3')
 log.info('News API Started... >>>')

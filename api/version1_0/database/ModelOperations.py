@@ -1,8 +1,14 @@
-import Model
+"""Database operations"""
+
+from .Model import ApiUsers
+from .Model import Campaign
+from .Model import db as db
+from .Model import News
+from .Model import Person
+
 import logging
 import re
 
-from Model import db as db
 from api.version1_0.database import DbHelper
 from conf import logger
 from conf import settings
@@ -21,7 +27,8 @@ def validate_date(date_value):
     :param date_value:
     :return:
     """
-    if not (DATE_FILTER_PATTERN.match(date_value) or date_value == settings.DATE_LATEST):
+    if not (DATE_FILTER_PATTERN.match(date_value) or
+            date_value == settings.DATE_LATEST):
         log.error('Invalid date value parameter: %r', date_value)
         return False
     return True
@@ -33,7 +40,8 @@ def news_filter(request):
     -date
     -source
 
-    # By date parameters: (YYYY-MM-DD), otherwise use latest. (settings.DATE_LATEST (u'latest'))
+    # By date parameters: (YYYY-MM-DD), otherwise use latest. (
+    settings.DATE_LATEST (u'latest'))
         http://0.0.0.0:8081/api/1.0/news?date=2018-10-09
 
     # By source:
@@ -46,21 +54,22 @@ def news_filter(request):
     date_value = request.args.get('date')
     source_value = request.args.get('source')
     # Check Date value and source value.
-    queryset = Model.News.query.order_by(Model.News.published_at.desc(), Model.News.source)
+    queryset = News.query.order_by(News.published_at.desc(), News.source)
     if date_value:
         logging.info('News date: %s', date_value)
         date_value = date_value.lower()
         if not validate_date(date_value):
             return None
         if settings.DATE_LATEST != date_value:
-            queryset = queryset.filter(Model.News.published_at == date_value)
+            queryset = queryset.filter(News.published_at == date_value)
     if source_value:
         logging.info('News source: %s', source_value)
         source_value = source_value.upper()
 
     # Process arguments.
     if source_value:
-        return queryset.filter(Model.News.source == source_value).limit(settings.max_news).all()
+        return queryset.filter(News.source == source_value).limit(
+            settings.max_news).all()
     if date_value:
         return queryset.limit(settings.max_news).all()
 
@@ -68,15 +77,14 @@ def news_filter(request):
 def insert_user(username, password, created):
     """
 
-    :param title:
-    :param text:
-    :param short_url:
-    :param source:
+    :param username:
+    :param password:
+    :param created:
     :return:
     """
     try:
         if username and password:
-            user = Model.ApiUsers(username, password, created)
+            user = ApiUsers(username, password, created)
             db.session.add(user)
             db.session.commit()
             return user.id
@@ -102,9 +110,9 @@ def insert_campaign(status, description, reference, start, request_data,
     :return:
     """
     try:
-        campaign = Model.Campaign(status, description, reference, start,
-                                  request_data, campaign_type, send_report,
-                                  articles, test)
+        campaign = Campaign(status, description, reference, start,
+                            request_data, campaign_type, send_report,
+                            articles, test)
         db.session.add(campaign)
         db.session.commit()
         return campaign.id
@@ -125,7 +133,7 @@ def insert_person(name, mention_date):
     try:
         # title, text, short_url
         if name:
-            person = Model.Person(name, mention_date)
+            person = Person(name, mention_date)
             db.session.add(person)
             db.session.commit()
             return person.id

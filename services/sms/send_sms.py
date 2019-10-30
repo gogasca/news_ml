@@ -22,7 +22,7 @@ def send_sms_alert(body='News ML', destination_number=None, **kwargs):
                 message = client.messages.create(to=destination_number,
                                                  from_=settings.twilio_from,
                                                  body=body)
-                print str(message)
+                print(str(message))
             else:
                 for number in settings.phone_numbers:
                     client.messages.create(to=number,
