@@ -1,6 +1,6 @@
 """Cluster instance."""
 
-import clustering
+from .clustering import ClusteredNews
 import logging
 import pandas as pd
 import re
@@ -249,11 +249,11 @@ class Clustering(object):
         # Iterate over each extracted article in table _news_ from DB.
         for article in self.articles:
             # Create an instance of each article.
-            clustered_article = clustering.ClusteredNews(news_id=article[0],
-                                                         title=article[1],
-                                                         content=article[2],
-                                                         source=article[3],
-                                                         url=article[4])
+            clustered_article = ClusteredNews(news_id=article[0],
+                                              title=article[1],
+                                              content=article[2],
+                                              source=article[3],
+                                              url=article[4])
             clustered_articles.append(clustered_article)
             # Use both title and content.
             title = '%s' % article[1].lstrip()

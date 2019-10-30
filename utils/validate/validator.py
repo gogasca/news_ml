@@ -92,7 +92,7 @@ def check_email_addresses(recipients, check_mx=settings.email_check_mx,
             if validate_email(email, check_mx=check_mx, verify=verify):
                 valid_addresses.append(email)
             else:
-                print 'Invalid email address: %s' % email
+                print('Invalid email address: %s' % email)
     if valid_addresses:
         return True
     return False

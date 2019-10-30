@@ -55,7 +55,7 @@ def validate_schema(schema_name):
                     # Validate POST for new person
                     validator.check_person(json_request=request.json)
             except Exception as exception:
-                print exception
+                print(exception)
                 msg = 'Request must be a valid JSON for %s' % schema_name
                 abort(400, description=msg)
             return f(*args, **kw)

@@ -58,12 +58,12 @@ def send_email(email_recipients=None, subject='Techie(8) Email sender',
     """
 
     if not settings.email_report:
-        print 'Email report is disabled in settings.email_report'
+        print('Email report is disabled in settings.email_report')
         return
 
     if email_recipients is None:
-        print 'Warning: email_recipients is empty using default ' \
-              'settings.email_to'
+        print('Warning: email_recipients is empty using default ' \
+              'settings.email_to')
         email_recipients = settings.email_to
 
     if not email_recipients:

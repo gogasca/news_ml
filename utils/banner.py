@@ -1,4 +1,6 @@
-letterforms = '''\
+"""Prints NewsML banner when API starts."""
+
+letter_forms = '''\
        |       |       |       |       |       |       | |
   XXX  |  XXX  |  XXX  |   X   |       |  XXX  |  XXX  |!|
   X  X |  X  X |  X  X |       |       |       |       |"|
@@ -97,10 +99,10 @@ X      | X     |  X    |   X   |    X  |     X |      X|\|
 '''.splitlines()
 
 table = {}
-for form in letterforms:
+for form in letter_forms:
     if '|' in form:
         table[form[-2]] = form[:-3].split('|')
-ROWS = len(table.values()[0])
+ROWS = len(list(table.values())[0])
 
 
 def horizontal(word):
@@ -111,9 +113,9 @@ def horizontal(word):
     """
     for row in range(ROWS):
         for c in word:
-            print table[c][row],
-        print
-    print
+            print(table[c][row], end=" ")
+        print()
+    print()
 
 
 def vertical(word):
@@ -124,7 +126,7 @@ def vertical(word):
     """
     for c in word:
         for row in zip(*table[c]):
-            print ' '.join(reversed(row))
-        print
+            print(' '.join(reversed(row)))
+        print()
 
 

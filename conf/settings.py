@@ -8,8 +8,9 @@ if platform.system() == 'Linux':
     filepath = '/usr/local/src/news_ml/'
 else:
     filepath = '/Users/gogasca/Documents/Development/dpe/news/'
-
 sys.path.append(filepath)
+
+# Parameters
 
 DATE_LATEST = u'latest'
 DEFAULT_PROVIDER = u'GOOGLEBLOG.COM'
@@ -154,17 +155,17 @@ phone_numbers = ['+1408XXXXXXX']
 # API configuration parameters
 # =========================================================
 
+api_version = '0.3'
 api_account = os.environ['API_USERNAME']
 api_password = os.environ['API_PASSWORD']
 api_logfile = filepath + '/log/apid.log'
 api_base_url = '/api/1.0/'
 api_scheme = 'http'
-api_frontend = 'api.googlecloud.io'
+api_frontend = 'api.newsml.io'
 api_ip_address = '0.0.0.0'
 api_external_port = 8080
 api_port = 8081
 api_url = '%s://%s:%d/api/1.0' % (api_scheme, api_frontend, api_external_port)
-api_version = '0.1'
 api_limits_enabled = True
 api_global_limits = '1000/second'
 max_news = 8
@@ -194,20 +195,20 @@ email_password = os.environ.get('EMAIL_PASSWORD')
 email_name = 'News ML Reporter'
 email_subject = 'News ML Daily summary'
 email_report = True
-email_to = ['gogasca@google.com']
+email_to = ['admin@newsml.io']
 email_check_mx = False
 email_verify = False
 
 # =========================================================
 # Email Mailgun
 # =========================================================
-mailgun_sender = 'news-ml@googleai.com'
+mailgun_sender = 'news-ml@newsml.io'
 mailgun_api_key = os.environ.get('MAILGUN_API_KEY')
 
 # =========================================================
 # Database
 # =========================================================
-# psql -h 127.0.0.1 -d postgres -U techie8db -W #dbhost = '127.0.0.1'
+# psql -h 127.0.0.1 -d postgres -U newsml -W #dbhost = '127.0.0.1'
 
 dbhost = os.environ['DBHOST']
 dbport = int(os.environ['DBPORT'])

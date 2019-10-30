@@ -222,7 +222,7 @@ class Db(object):
                 return rows
             else:
                 log.error('clean_up() Invalid Database parameters')
-                print'No connection to Database!'
+                print('No connection to Database!')
         except psycopg2.ProgrammingError as e:
             log.exception('clean_up() Database configuration: %r' % e)
         finally:
