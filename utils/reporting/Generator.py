@@ -4,6 +4,11 @@ import random
 import string
 import uuid
 
+try:
+    xrange
+except NameError:
+    xrange = range
+
 
 class Generator(object):
 

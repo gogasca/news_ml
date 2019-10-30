@@ -90,7 +90,7 @@ def get_campaign(json_request):
         email = json_request.get('report').get('email')
         if email:
             campaign_instance.email_recipients = \
-                json_request['report']['email'].split(settings._EMAIL_SEPARATOR)
+                json_request['report']['email'].split(settings.EMAIL_SEPARATOR)
     if translate:
         campaign_instance.translation_enable = True
         campaign_instance.translation_lang = json_request.get('translate').get(

@@ -18,7 +18,7 @@ curl 'https://newsapi.org/v2/top-headlines?sources=bbc&apiKey=<API_KEY>'
 import collections
 import logging
 import os
-import urllib
+from urllib.parse import urlencode
 
 from functools import partial
 from tornado import gen, httpclient, ioloop
@@ -135,7 +135,7 @@ class TornadoBacklog:
                         'pageSize': settings.news_page_size}
                     news_url = '%s%s?%s' % (
                         settings.news_api_url, 'everything',
-                        urllib.urlencode(url_params))
+                        urlencode(url_params))
                 else:
                     # Build News API URL.
                     url_params = {
@@ -146,7 +146,7 @@ class TornadoBacklog:
                         del url_params['sortBy']
                     news_url = '%s%s?%s' % (
                         settings.news_api_url, 'top-headlines',
-                        urllib.urlencode(url_params))
+                        urlencode(url_params))
                 request = httpclient.HTTPRequest(url=news_url,
                                                  headers=_get_auth_headers(
                                                      settings.news_api_key),
@@ -156,7 +156,7 @@ class TornadoBacklog:
                                    callback=partial(self.handle_request,
                                                     source))
 
-            except httpclient.HTTPError, exception:
+            except httpclient.HTTPError as exception:
                 gen_log.exception('crawl() %r' % exception)
                 self.api_errors += 1
                 if self.handle_errors(self.api_errors):
