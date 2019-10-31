@@ -29,13 +29,12 @@ from conf import settings
 from main.lib.news_api import top_news_handler as news_handler
 from main.lib.news_api import top_news_processor as news_processor
 
-log = logger.LoggerManager().getLogger('__app__')
-log.setLevel(level=logging.DEBUG)
-
 CONNECTION_TIMEOUT = 15
 REQUEST_TIMEOUT = 30
+DEFAULT_LANGUAGE = 'en'
 
-_DEFAULT_LANGUAGE = 'en'
+log = logger.LoggerManager().getLogger('__app__')
+log.setLevel(level=logging.DEBUG)
 
 
 def _get_auth_headers(api_key):
@@ -113,7 +112,7 @@ class TornadoBacklog:
 
         :return:
         """
-        log.info('Starting API requests...')
+        log.info('Sending API requests...')
         while True:
             try:
                 yield gen.sleep(self.delay)
@@ -130,7 +129,7 @@ class TornadoBacklog:
                     # Build News API URL for search query.
                     url_params = {
                         'q': source,
-                        'language': _DEFAULT_LANGUAGE,
+                        'language': DEFAULT_LANGUAGE,
                         'sortBy': settings.news_api_sort_order,
                         'pageSize': settings.news_page_size}
                     news_url = '%s%s?%s' % (

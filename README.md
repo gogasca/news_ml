@@ -151,7 +151,7 @@ export MAILGUN_API_KEY="key-"
 export SECRET_FERNET_KEY="" # Change this
 ```
 
-Note: To generate SECRET_FERNET_KEY can be generated as follows:
+Note: To generate `SECRET_FERNET_KEY` can be generated as follows:
 
 ```
 >>> from cryptography.fernet import Fernet
@@ -194,7 +194,7 @@ celery worker -n %h -P processes -c 15 --loglevel=DEBUG -Ofair
 
 Depending on the path where you clone the repo you may need to edit the file.
 
-Define NEWSML_ENV properly:
+Define `NEWSML_ENV`:
 
 ```
 if platform.system() == 'Linux':

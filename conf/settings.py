@@ -196,7 +196,7 @@ email_verify = False
 # Email Mailgun
 # =========================================================
 mailgun_sender = 'news-ml@newsml.io'
-maingun_domain = os.environ.get('MAILGUN_DOMAIN')
+mailgun_domain = os.environ.get('MAILGUN_DOMAIN')
 mailgun_api_key = os.environ.get('MAILGUN_API_KEY')
 
 # =========================================================
