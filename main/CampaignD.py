@@ -5,6 +5,7 @@ from api.version1_0.database import DbHelper
 from services.sms import send_sms
 from utils.reporting import Generator
 
+
 class CampaignD(object):
     """Crawler object in charge of launching Web requests."""
 

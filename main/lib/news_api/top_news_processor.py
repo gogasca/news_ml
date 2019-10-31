@@ -1,14 +1,17 @@
 """Read News from Google API."""
 
-from datetime import datetime
 import logging
+from datetime import datetime
 
 from api.version1_0.database import DbHelper
+
 from conf import settings
 from conf import logger
+
 from services.nlp import nlp
 from services.nlp import utils as nlp_utils
 from services.translate import utils as translate_utils
+
 from utils import url_extract
 from utils.reporting import Report
 
@@ -77,12 +80,13 @@ def process_articles(articles, news_provider, campaign_instance):
                 new_article = False
                 if not DbHelper.item_exists(article.url):
                     news_id = None
-                    log.info('New Article retrieved %r, %r' % (article.title, article.url))
+                    log.info('New Article retrieved: %r, %r' % (
+                    article.title, article.url))
                     try:
-                        logging.info('Process sentiment analysis')
+                        log.info('Process sentiment analysis')
                         score, magnitude = nlp_utils.get_sentiment_scores(
                             article.content or article.description)
-                        logging.info('Insert article into Database')
+                        log.info('Insert article into Database')
                         news_id = DbHelper.insert_news(title=article.title,
                                                        author=article.author,
                                                        description=article.description,
@@ -95,7 +99,8 @@ def process_articles(articles, news_provider, campaign_instance):
                                                        published_at=article.published_at,
                                                        score=score,
                                                        magnitude=magnitude,
-                                                       sentiment=nlp_utils.get_sentiment(score))
+                                                       sentiment=nlp_utils.get_sentiment(
+                                                           score))
                         if not news_id:
                             log.error('Unable to Insert record %s', article.url)
                             continue
@@ -107,6 +112,8 @@ def process_articles(articles, news_provider, campaign_instance):
                 else:
                     log.warning('Article %r already exists ', article.url)
 
+                log.info('Translation enabled: %s',
+                         campaign_instance.translation_enable)
                 if campaign_instance.translation_enable:
                     log.info('Translating: %s', article.url)
                     if new_article:
@@ -128,16 +135,25 @@ def process_articles(articles, news_provider, campaign_instance):
                         report.add_content(article.url, translated_text)
                 elif campaign_instance.send_report:
                     # Only send today articles in report.
+                    log.info('Reporting enabled: %s',
+                             campaign_instance.send_report)
                     today = datetime.now().date()
-                    published = datetime.strptime(article.published_at[:10], '%Y-%m-%d')
-                    if today == published:
-                        log.info('Adding article information to report: %s %s' % (article.title, article.url))
+                    published_at = datetime.strptime(article.published_at[:10],
+                                                  '%Y-%m-%d').date()
+                    if today == published_at:
+                        log.info(
+                            'Adding article information to report: %s %s' % (
+                            article.title, article.url))
                         report.add_content(article.url, article.title)
+                    else:
+                        log.warning(
+                            'Article published date is not today (%s), '
+                            'skipping article from report', published_at)
             else:
-                log.error('Not content found: %s', article.url)
+                log.error('Not description found in article: %s', article.url)
     else:
         log.error('No titles found')
     if campaign_instance.send_report:
-        log.info('Sending email notification...')
+        log.info('Sending Report via email...')
         report.send()
     log.info('Extraction completed')

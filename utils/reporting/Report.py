@@ -1,3 +1,5 @@
+"""Generate HTML Report."""
+
 from utils.reporting import Generator
 from services.email_client import email_client
 
@@ -79,7 +81,7 @@ class Report(object):
                 subject=self.subject,
                 body=self.content)
         else:
-            print('No content found')
+            print('No report content found')
 
     @property
     def id(self):
