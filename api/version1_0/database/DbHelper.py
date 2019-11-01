@@ -116,7 +116,7 @@ def insert_tag(tag_name='', source='', language='english'):
     """
     try:
         if tag_name:
-            if settings.remove_stop_words:
+            if settings.REMOVE_STOP_WORDS:
                 tag_name = remove_stopwords(tag_name, language)
             # Insert into database.
             db = Db.Db()
