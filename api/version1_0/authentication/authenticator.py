@@ -24,8 +24,8 @@ def _check_local(username, password):
     :param password:
     :return:
     """
-    return username == settings.api_account and password == \
-                                                settings.api_password
+    return username == settings.API_ACCOUNT and password == \
+                                                settings.API_PASSWORD
 
 
 def _check_db(username_or_token, password):
@@ -57,7 +57,7 @@ def _authentication_error():
     """
 
     response = jsonify({'message': "Authenticate."})
-    response.headers['WWW-Authenticate'] = settings.api_realm
+    response.headers['WWW-Authenticate'] = settings.API_REALM
     response.status_code = 401
     return response
 

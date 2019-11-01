@@ -22,7 +22,6 @@ from main.common import TornadoBacklog
 def launch(campaign_instance):
     """
 
-    :param self:
     :param campaign_instance:
     :return:
     """

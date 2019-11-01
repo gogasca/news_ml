@@ -1,8 +1,5 @@
-import platform
+import os
 import sys
 
-if platform.system() == 'Linux':
-    filepath = '/usr/local/src/news_ml/'
-else:
-    filepath = '/Users/gogasca/Documents/Development/dpe/news/'
+filepath = os.environ.get('NEWSML_ENV')
 sys.path.append(filepath)

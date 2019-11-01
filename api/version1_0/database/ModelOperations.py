@@ -14,7 +14,7 @@ from conf import logger
 from conf import settings
 
 log = logger.LoggerManager().getLogger("__app__",
-                                       logging_file=settings.api_logfile)
+                                       logging_file=settings.API_LOGFILE)
 log.setLevel(level=logging.DEBUG)
 
 DATE_FILTER_PATTERN = re.compile(
@@ -68,9 +68,9 @@ def news_filter(request):
     # Process arguments.
     if source_value:
         return queryset.filter(News.source == source_value).limit(
-            settings.max_news).all()
+            settings.MAX_NEWS).all()
     if date_value:
-        return queryset.limit(settings.max_news).all()
+        return queryset.limit(settings.MAX_NEWS).all()
 
 
 def insert_user(username, password, created):

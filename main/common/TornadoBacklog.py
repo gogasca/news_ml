@@ -18,8 +18,8 @@ curl 'https://newsapi.org/v2/top-headlines?sources=bbc&apiKey=<API_KEY>'
 import collections
 import logging
 import os
-from urllib.parse import urlencode
 
+from urllib.parse import urlencode
 from functools import partial
 from tornado import gen, httpclient, ioloop
 from tornado.log import gen_log
@@ -52,36 +52,35 @@ def _get_auth_headers(api_key):
 class BacklogClient(object):
     """Helper function to handle requests."""
 
-    MAX_CONCURRENT_REQUESTS = settings.max_api_client_requests
+    MAX_CONCURRENT_REQUESTS = settings.MAX_API_CLIENT_REQUESTS
 
-    def __init__(self, ioloop):
-        self.ioloop = ioloop
-        self.client = httpclient.AsyncHTTPClient(
+    def __init__(self, ioloop_instance):
+        self._ioloop = ioloop_instance
+        self._client = httpclient.AsyncHTTPClient(
             max_clients=self.MAX_CONCURRENT_REQUESTS)
-        self.client.configure(None, defaults=dict(connect_timeout=15,
-                                                  request_timeout=30))
-        self.backlog = collections.deque()
-        self.concurrent_requests = 0
+        self._client.configure(None, defaults=dict(connect_timeout=15,
+                                                   request_timeout=30))
+        self._backlog = collections.deque()
+        self._concurrent_requests = 0
 
     def __get_callback(self, function):
         def wrapped(*args, **kwargs):
-            self.concurrent_requests -= 1
+            self._concurrent_requests -= 1
             self.try_run_request()
             return function(*args, **kwargs)
 
         return wrapped
 
     def try_run_request(self):
-        while self.backlog and self.concurrent_requests < \
-            self.MAX_CONCURRENT_REQUESTS:
-            request, callback = self.backlog.popleft()
-            self.client.fetch(request, callback=callback)
-            self.concurrent_requests += 1
+        while self._backlog and self._concurrent_requests < \
+                self.MAX_CONCURRENT_REQUESTS:
+            request, callback = self._backlog.popleft()
+            self._client.fetch(request, callback=callback)
+            self._concurrent_requests += 1
 
     def fetch(self, request, callback=None):
         wrapped = self.__get_callback(callback)
-
-        self.backlog.append((request, wrapped))
+        self._backlog.append((request, wrapped))
         self.try_run_request()
 
 
@@ -98,13 +97,13 @@ class TornadoBacklog:
         self.backlog = BacklogClient(self.ioloop)
         log.info('TornadoBacklog() Initialized')
         if self.campaign:
-            body = {}
+            body = dict()
             body['campaign'] = campaign_instance.reference
         # Handles Search queries.
         if self.campaign.query:
             self.to_process = self.campaign.query.replace(' ', '').split(',')
         else:
-            self.to_process = settings.news_api_sources
+            self.to_process = settings.NEWS_API_SOURCES
 
     @gen.coroutine
     def crawl(self):
@@ -124,31 +123,30 @@ class TornadoBacklog:
                 # Read News providers from Queue.
                 source = self.to_process.pop()
                 gen_log.info(
-                    'Provider: %s Source: %s' % (settings.news_api, source))
+                    'Provider: %s Source: %s' % (settings.NEWS_API, source))
                 if self.campaign.query:
                     # Build News API URL for search query.
                     url_params = {
                         'q': source,
                         'language': DEFAULT_LANGUAGE,
-                        'sortBy': settings.news_api_sort_order,
-                        'pageSize': settings.news_page_size}
+                        'sortBy': settings.NEWS_API_SORT_ORDER,
+                        'pageSize': settings.NEWS_PAGE_SIZE}
                     news_url = '%s%s?%s' % (
-                        settings.news_api_url, 'everything',
+                        settings.NEWS_API_URL, 'everything',
                         urlencode(url_params))
                 else:
-                    # Build News API URL.
                     url_params = {
                         'sources': source,
-                        'sortBy': settings.news_api_sort_order,
-                        'pageSize': settings.news_page_size}
+                        'sortBy': settings.NEWS_API_SORT_ORDER,
+                        'pageSize': settings.NEWS_PAGE_SIZE}
                     if source == 'recode':
                         del url_params['sortBy']
                     news_url = '%s%s?%s' % (
-                        settings.news_api_url, 'top-headlines',
+                        settings.NEWS_API_URL, 'top-headlines',
                         urlencode(url_params))
                 request = httpclient.HTTPRequest(url=news_url,
                                                  headers=_get_auth_headers(
-                                                     settings.news_api_key),
+                                                     settings.NEWS_API_KEY),
                                                  connect_timeout=CONNECTION_TIMEOUT,
                                                  request_timeout=REQUEST_TIMEOUT)
                 self.backlog.fetch(request,
@@ -163,7 +161,7 @@ class TornadoBacklog:
             except IndexError:
                 break
         gen_log.info('Waiting for active Provider requests to complete...')
-        yield gen.sleep(settings.campaign_limit)
+        yield gen.sleep(settings.CAMPAIGN_LIMIT)
 
     def handle_request(self, news_provider, response):
         """
@@ -190,8 +188,8 @@ class TornadoBacklog:
         api_errors:
         :return:
         """
-        if api_errors >= settings.api_error_limit:
+        if api_errors >= settings.API_ERROR_LIMIT:
             gen_log.error('API Exceed Error limit: %d Hostname: %s' % (
-                settings.api_error_limit,
+                settings.API_ERROR_LIMIT,
                 os.uname()[1]))
             return True

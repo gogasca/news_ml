@@ -1,7 +1,6 @@
+"""Analyzes text using the Google Cloud Natural Language API."""
 #!/usr/bin/env python
 # coding=utf-8
-
-"""Analyzes text using the Google Cloud Natural Language API."""
 
 import logging
 import os
@@ -11,7 +10,6 @@ from conf import settings
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = settings.credentials
 
 logging.getLogger('googleapicliet.discovery_cache').setLevel(logging.ERROR)
 
@@ -22,7 +20,7 @@ def get_service():
 
     :return:
     """
-
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = settings.CREDENTIALS
     credentials = GoogleCredentials.get_application_default()
     return discovery.build('language', 'v1',
                            cache_discovery=False,
@@ -50,8 +48,8 @@ def analyze_entities(text, encoding='UTF32'):
         raise ValueError('Invalid text')
 
     body = {
-        'document'     : {
-            'type'   : 'PLAIN_TEXT',
+        'document': {
+            'type': 'PLAIN_TEXT',
             'content': text,
         },
         'encoding_type': encoding,
@@ -60,14 +58,19 @@ def analyze_entities(text, encoding='UTF32'):
     service = get_service()
     request = service.documents().analyzeEntities(body=body)
     response = request.execute()
-
     return response
 
 
 def analyze_sentiment(text, encoding='UTF32'):
+    """
+
+    :param text:
+    :param encoding:
+    :return:
+    """
     body = {
-        'document'     : {
-            'type'   : 'PLAIN_TEXT',
+        'document': {
+            'type': 'PLAIN_TEXT',
             'content': text,
         },
         'encoding_type': encoding
@@ -81,9 +84,15 @@ def analyze_sentiment(text, encoding='UTF32'):
 
 
 def analyze_syntax(text, encoding='UTF32'):
+    """
+
+    :param text:
+    :param encoding:
+    :return:
+    """
     body = {
-        'document'     : {
-            'type'   : 'PLAIN_TEXT',
+        'document': {
+            'type': 'PLAIN_TEXT',
             'content': text,
         },
         'encoding_type': encoding

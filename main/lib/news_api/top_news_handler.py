@@ -6,7 +6,7 @@ from conf import logger
 from main.common import NewsArticle
 
 log = logger.LoggerManager().getLogger("__app__",
-                                       logging_file=settings.app_logfile)
+                                       logging_file=settings.APP_LOGFILE)
 log.setLevel(level=logging.DEBUG)
 
 AUTHOR = 'author'
@@ -44,7 +44,7 @@ def handle_http_response(response):
                 # Create a News Article instance.
                 source_name = article[SOURCE][SOURCE_NAME]
                 log.info('Article: [%s] %s' % (source_name, article[TITLE]))
-                article_instance = NewsArticle.Article(settings.news_api)
+                article_instance = NewsArticle.Article(settings.NEWS_API)
                 article_instance.source_id = article[SOURCE][ID]
                 article_instance.source = source_name.upper()
                 article_instance.author = article[AUTHOR]

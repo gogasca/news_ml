@@ -16,6 +16,11 @@ from sklearn.cluster import KMeans
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+try:
+    xrange
+except NameError:
+    xrange = range
+
 
 def get_articles_by_date(date):
     """
@@ -25,7 +30,7 @@ def get_articles_by_date(date):
     """
     logging.info('Looking news for %s', date)
     articles = DbHelper.get_multiple_records(
-        settings.clustering_query_get_news % date)
+        settings.CLUSTERING_QUERY_GET_NEWS % date)
     logging.info('Total news found: %s', len(articles))
     return articles
 
@@ -204,7 +209,7 @@ class Clustering(object):
         :return:
         """
         logging.info('Finding cluster information:')
-        if self.num_of_clusters < settings.num_of_clusters:
+        if self.num_of_clusters < settings.NUM_OF_CLUSTERS:
             for idx in xrange(0, self.num_of_clusters):
                 logging.info(dataframe.ix[idx]['title'])
         else:
@@ -264,7 +269,7 @@ class Clustering(object):
             titles.append(title)
             urls.append(url)
             tokenize_only(document)
-            if settings.process_cosine_similarity:
+            if settings.PROCESS_COSINE_SIMILARITY:
                 get_cosine_similarity([document], documents)
         num_of_documents = len(documents)
         self._set_articles(num_of_articles=num_of_documents)
@@ -290,7 +295,7 @@ class Clustering(object):
                                           'news_article'])
         logging.info('Overview:\n%r.' % dataframe['cluster'].value_counts())
         cluster_dataframe = self.assign_cluster(dataframe)
-        if settings.update_clustering_articles_db:
+        if settings.UPDATE_CLUSTERING_ARTICLES_DB:
             logging.info(
                 'Inserting records in DB: %s.' % self.campaign_reference)
             self.insert_records(cluster_dataframe['news_article'].tolist(),
@@ -305,7 +310,7 @@ class Clustering(object):
 
         # Get latest date for News inserted in Database.
         if date == 'latest':
-            date = DbHelper.get_record(settings.clustering_query_date)
+            date = DbHelper.get_record(settings.CLUSTERING_QUERY_DATE)
             logging.info('Using latest date. The latest date found was: %s',
                          date)
         logging.info('Using date: %s', date)
@@ -329,5 +334,5 @@ class Clustering(object):
         if self.campaign_reference:
             sqlquery = 'UPDATE campaign SET campaign_end=\'%s\', status=%d ' \
                        'WHERE campaign.reference=\'%s\'' % (
-                           settings.dbnow, status, self.campaign_reference)
+                           settings.DBNOW, status, self.campaign_reference)
             DbHelper.update_database(sqlquery)

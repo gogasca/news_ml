@@ -3,8 +3,7 @@
 import os
 
 # Parameters
-filepath = os.environ.get('NEWSML_ENV')
-
+FILEPATH = os.environ.get('NEWSML_ENV')
 
 DATE_LATEST = u'latest'
 DEFAULT_PROVIDER = u'GOOGLEBLOG.COM'
@@ -16,44 +15,41 @@ EMAIL_SEPARATOR = ';'
 # Logging
 # =========================================================
 
-app_logfile = filepath + 'log/app.log'
-log_salience = False
+APP_LOGFILE = FILEPATH + 'log/app.log'
+LOG_SALIENCE = False
 
 # =========================================================
 # NLP settings
 # =========================================================
 
-credentials = filepath + 'conf/credentials/key.json'
-salience_score = 0.01
-content_size = 16384
-invalid_words = filepath + 'conf/dictionary/es_blacklist'
-entity_filter = filepath + 'conf/entity_blacklist'
+CREDENTIALS = FILEPATH + 'conf/credentials/key.json'
+SALIENCE_SCORE = 0.01
+CONTENT_SIZE = 16384
+INVALID_WORDS = FILEPATH + 'conf/dictionary/es_blacklist'
+ENTITY_FILTER = FILEPATH + 'conf/entity_blacklist'
 
 # =========================================================
 # NLP
 # =========================================================
-process_entities = True
-remove_stop_words = True
-default_language = 'en'
-translation_service = True
+PROCESS_ENTITIES = True
+REMOVE_STOP_WORDS = True
+DEFAULT_LANGUAGE = 'en'
+TRANSLATION_SERVICE = True
 translation_limit = 10000
-translation_default_language = 'es'
-translation_languages = ('es', 'fr', 'zh-CN', 'pt', 'de')
+TRANSLATION_DEFAULT_LANGUAGE = 'es'
+TRANSLATION_LANGUAGES = ('es', 'fr', 'zh-CN', 'pt', 'de')
 
 # Valid News providers.
-valid_providers = ('NEWS_API')
+VALID_PROVIDERS = ('NEWS_API')
 
 # =========================================================
 # Google News API
 # =========================================================
 
-news_api = 'NEWS_API'
-news_api_key = os.environ['NEWS_API_KEY']
-# news_api_url = 'https://newsapi.org/v1/articles?source=%s&apiKey=%s&sortBy=%s'
-# news_api_url = 'https://newsapi.org/v2/top-headlines?sources=%s&apiKey=%s' \
-#               '&sortBy=%s'
-news_api_url = 'https://newsapi.org/v2/'
-news_api_sources = ['ars-technica',
+NEWS_API = 'NEWS_API'
+NEWS_API_KEY = os.environ['NEWS_API_KEY']
+NEWS_API_URL = 'https://newsapi.org/v2/'
+NEWS_API_SOURCES = ['ars-technica',
                     'engadget',
                     'hacker-news',
                     'recode',
@@ -64,31 +60,31 @@ news_api_sources = ['ars-technica',
 
 # *Recode do not support sortBy=latest: CL Correct recode invalid sorting
 # algorithm.
-news_api_sort_order = 'latest'
-news_page_size = 100
+NEWS_API_SORT_ORDER = 'latest'
+NEWS_PAGE_SIZE = 100
+CAMPAIGN_LIMIT = 120
 
-# List of Google News API supported providers.
-ars_technica = 'ARS_TECHNICA'
-engadget = 'ENGADGET'
-hacker_news = 'HACKER_NEWS'
-recode = 'RECODE'
-techradar = 'TECHRADAR'
-the_next_web = 'THE_NEXT_WEB'
-campaign_limit = 120
+# List of News API supported providers.
+ARS_TECHNICA = 'ARS_TECHNICA'
+ENGADGET = 'ENGADGET'
+HACKER_NEWS = 'HACKER_NEWS'
+RECODE = 'RECODE'
+TECHRADAR = 'TECHRADAR'
+THE_NEXT_WEB = 'THE_NEXT_WEB'
 
 # =========================================================
 # Alexa Skill
 # =========================================================
 
-default_currency = 'USD'
-alexa_port = 8082
+DEFAULT_CURRENCY = 'USD'
+ALEXA_PORT = 8082
 
 # =========================================================
 # Ranking
 # =========================================================
-rank_articles = True
-update_rank_articles_db = True
-ranking_sources = ['amazon.com',
+RANK_ARTICLES = True
+UPDATE_RANK_ARTICLES_DB = True
+RANKING_SOURCES = ['amazon.com',
                    'fb.com',
                    'facebook.com',
                    'ibm.com',
@@ -102,16 +98,16 @@ ranking_sources = ['amazon.com',
                    'the next web',
                    'hackernoon.com']
 
-unknown_source_score = 5
-ranking_limit = 1000
-ranking_query_date = """SELECT to_char(published_at,'YYYY-MM-DD') AS date
+UNKNOWN_SOURCE_SCORE = 5
+RANKING_LIMIT = 1000
+RANKING_QUERY_DATE = """SELECT to_char(published_at,'YYYY-MM-DD') AS date
     FROM news WHERE inserted_at IS NOT NULL GROUP BY 1 ORDER BY date DESC LIMIT 1;"""
-ranking_query_get_news = """SELECT news_id, title, content, LOWER(source) AS
+RANKING_QUERY_GET_NEWS = """SELECT news_id, title, content, LOWER(source) AS
     source, url FROM news WHERE campaign = '%s' GROUP BY 1,2,3,4,5;"""
-ranking_query_get_news_by_date = """SELECT news_id, title, content,
+RANKING_QUERY_GET_NEWS_BY_DATE = """SELECT news_id, title, content,
     LOWER(source) AS source, url FROM news WHERE TO_CHAR(inserted_at,
     'YYYY-MM-DD') = '%s' AND inserted_at IS NOT NULL GROUP BY 1,2,3,4,5;"""
-ranking_query_get_news_filtered = """SELECT post_id, title, text,
+RANKING_QUERY_GET_NEWS_FILTERED = """SELECT post_id, title, text,
     LOWER(source), url FROM news WHERE to_char(published_at,'YYYY-MM-DD') = '%s'
     AND LOWER(source) != ANY('{%s}'::text[]) GROUP BY 1,2,3,4,5;"""
 
@@ -119,108 +115,116 @@ ranking_query_get_news_filtered = """SELECT post_id, title, text,
 # Clustering configuration parameters. Queries Ranked posts
 # =========================================================
 
-num_of_clusters = 8
-process_cosine_similarity = False
-update_clustering_articles_db = True
+NUM_OF_CLUSTERS = 8
+PROCESS_COSINE_SIMILARITY = False
+UPDATE_CLUSTERING_ARTICLES_DB = True
 api_num_of_clusters = 'clusters'
-clustering_provider = 'CLUSTERING'
-clustering_limit = 1000
-clustering_query_date = """SELECT to_char(inserted_at,'YYYY-MM-DD') AS date
+CLUSTERING_PROVIDER = 'CLUSTERING'
+CLUSTERING_LIMIT = 1000
+CLUSTERING_QUERY_DATE = """SELECT to_char(inserted_at,'YYYY-MM-DD') AS date
     FROM news WHERE inserted_at IS NOT NULL GROUP BY 1 ORDER BY date DESC LIMIT 1;"""
-clustering_query_get_news = """SELECT news_id, title, content, LOWER(source) AS
+CLUSTERING_QUERY_GET_NEWS = """SELECT news_id, title, content, LOWER(source) AS
     source, url FROM news WHERE TO_CHAR(inserted_at,'YYYY-MM-DD') = '%s' AND inserted_at IS NOT NULL GROUP
     BY 1,2,3,4,5;"""
-clustering_query_get_news_filtered = """SELECT news_id, title, content,
+CLUSTERING_QUERY_GET_NEWS_FILTERED = """SELECT news_id, title, content,
     LOWER(source) AS source, url FROM news WHERE TO_CHAR(inserted_at,
     'YYYY-MM-DD') = '%s' AND LOWER(source) != ALL('{%s}'::text[]) GROUP BY 1,
     2,3,4,5;"""
 
 # =========================================================
-# Twilio configuration parameters
+# Authentication
 # =========================================================
 
-sms_alerts = False
-twilio_from = '+14088053951'
-twilio_accountId = ''
-twilio_tokenId = ''
-phone_numbers = ['+1408XXXXXXX']
+API_KEY = os.environ['SECRET_FERNET_KEY']
+TOKEN_EXPIRATION_SECS = 600
 
 # =========================================================
 # API configuration parameters
 # =========================================================
 
-api_version = '0.3'
-api_account = os.environ['API_USERNAME']
-api_password = os.environ['API_PASSWORD']
-api_logfile = filepath + '/log/apid.log'
-api_base_url = '/api/1.0/'
-api_scheme = 'http'
-api_frontend = 'api.newsml.io'
-api_ip_address = '0.0.0.0'
-api_external_port = 8080
-api_port = 8081
-api_url = '%s://%s:%d/api/1.0' % (api_scheme, api_frontend, api_external_port)
-api_limits_enabled = True
-api_global_limits = '1000/second'
-max_news = 8
-items_per_page = 10
-api_error_limit = 50
-api_ok = 'News API version %s is active' % api_version
-api_mime_type = 'application/json'
-max_api_client_requests = 1000
+API_VERSION = '0.3'
+API_ACCOUNT = os.environ['API_USERNAME']
+API_PASSWORD = os.environ['API_PASSWORD']
+API_LOGFILE = FILEPATH + '/log/apid.log'
+API_BASE_URL = '/api/1.0/'
+API_SCHEME = 'http'
+API_FRONTEND = 'api.newsml.io'
+API_IP_ADDRESS = '0.0.0.0'
+API_EXTERNAL_PORT = 8080
+API_PORT = 8081
+API_URL = '%s://%s:%d/api/1.0' % (API_SCHEME, API_FRONTEND, API_EXTERNAL_PORT)
+API_REALM = 'Basic realm="newsml"'
+API_LIMITS_ENABLED = True
+API_GLOBAL_LIMITS = '1000/second'
+ITEMS_PER_PAGE = 10
+API_ERROR_LIMIT = 50
+API_OK = 'News API version %s is active' % API_VERSION
+API_MIME_TYPE = 'application/json'
+MAX_API_CLIENT_REQUESTS = 1000
+MAX_NEWS = 8
 
 # =========================================================
 # News processor
 # =========================================================
-max_crawler_processing = 3600  # Max time processing news task.
-max_task_processing = 3600  # Max time processing news task.
-max_rank_processing = 1800  # Max time ranking posts.
-max_api_processing = 600
+MAX_CRAWLER_PROCESSING = 3600  # Max time processing news task.
+MAX_TASK_PROCESSING = 3600  # Max time processing news task.
+MAX_RANK_PROCESSING = 1800  # Max time ranking posts.
+MAX_API_PROCESSING = 600
 
 # =========================================================
 # Email SMTP
 # =========================================================
 
-email_server = 'smtp.gmail.com'
-email_port = 587
-email_address = os.environ.get('EMAIL_USERNAME')
-email_password = os.environ.get('EMAIL_PASSWORD')
-email_name = 'News ML Reporter'
-email_subject = 'News ML Daily summary'
-email_report = True
-email_to = ['admin@newsml.io']
-email_check_mx = False
-email_verify = False
+EMAIL_SERVER = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_ADDRESS = os.environ.get('EMAIL_USERNAME')
+EMAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD')
+EMAIL_NAME = 'News ML Reporter'
+EMAIL_SUBJECT = 'News ML Daily summary'
+EMAIL_REPORT = True
+EMAIL_TO = ['admin@newsml.io']
+EMAIL_CHECK_MX = False
+EMAIL_VERIFY = False
 
 # =========================================================
 # Email Mailgun
 # =========================================================
-mailgun_sender = 'news-ml@newsml.io'
-mailgun_domain = os.environ.get('MAILGUN_DOMAIN')
-mailgun_api_key = os.environ.get('MAILGUN_API_KEY')
+MAILGUN_SENDER = 'news-ml@newsml.io'
+MAILGUN_DOMAIN = os.environ.get('MAILGUN_DOMAIN')
+MAILGUN_API_KEY = os.environ.get('MAILGUN_API_KEY')
+
+# =========================================================
+# Twilio configuration parameters
+# =========================================================
+
+SMS_ALERTS = False
+TWILIO_FROM = os.environ.get('TWILIO_FROM')
+TWILIO_ACCOUNTID = os.environ.get('TWILIO_ACCOUNTID')
+TWILIO_TOKENID = os.environ.get('TWILIO_TOKENID')
+PHONE_NUMBERS = ['+1408XXXXXXX']
 
 # =========================================================
 # Database
 # =========================================================
 # psql -h 127.0.0.1 -d postgres -U newsml -W #dbhost = '127.0.0.1'
 
-dbhost = os.environ['DBHOST']
-dbport = int(os.environ['DBPORT'])
-dbusername = os.environ['DBUSERNAME']
-dbpassword = os.environ['DBPASSWORD']
-dbname = os.environ['DBNAME']
+DBHOST = os.environ['DBHOST']
+DBPORT = int(os.environ['DBPORT'])
+DBUSERNAME = os.environ['DBUSERNAME']
+DBPASSWORD = os.environ['DBPASSWORD']
+DBNAME = os.environ['DBNAME']
 
-dbPasswordAllowEmptyPassword = False
-dbnow = 'now()'
+DBPASSWORD_ALLOW_EMPTY_PASSWORD = False
+DBNOW = 'now()'
 
 # =========================================================
 # SQLALCHEMY parameter
 # =========================================================
 
 SQLALCHEMY_DATABASE_URI = 'postgresql://%s:%s@%s/%s' % (
-    dbusername, dbpassword, dbhost, dbname)
+    DBUSERNAME, DBPASSWORD, DBHOST, DBNAME)
 SQLALCHEMY_DSN = 'dbname=%s host=%s port=%d user=%s password=%s' % (
-    dbname, dbhost, dbport, dbusername, dbpassword)
+    DBNAME, DBHOST, DBPORT, DBUSERNAME, DBPASSWORD)
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_POOL_SIZE = 1024
 SQLALCHEMY_POOL_TIMEOUT = 5
@@ -230,10 +234,3 @@ SQLALCHEMY_TRACK_MODIFICATIONS = True
 DATABASE_CONNECT_OPTIONS = None
 SQLALCHEMY_COMMIT_ON_TEARDOWN = True
 
-# =========================================================
-# Authentication
-# =========================================================
-
-api_key = os.environ['SECRET_FERNET_KEY']
-api_realm = 'Basic realm="newsml"'
-token_expiration_secs = 600

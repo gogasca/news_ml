@@ -5,7 +5,7 @@ from conf import settings
 from google.cloud import translate
 
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = settings.credentials
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = settings.CREDENTIALS
 
 
 def detect_language(text):

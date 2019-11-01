@@ -9,13 +9,13 @@ from main.lib.news_api import top_news as news_ml
 from services.nlp import utils as nlp_utils
 
 log = logger.LoggerManager().getLogger("__app__",
-                                       logging_file=settings.app_logfile)
+                                       logging_file=settings.APP_LOGFILE)
 log.setLevel(level=logging.DEBUG)
 
 
 @task(name='process_campaign', queue='gold', bind=True, default_retry_delay=30,
       max_retries=3,
-      soft_time_limit=settings.max_task_processing)
+      soft_time_limit=settings.MAX_TASK_PROCESSING)
 def process_campaign(self, campaign_instance):
     """Handle News request via API. Creates a celery task which run
     asynchronously.
@@ -28,7 +28,7 @@ def process_campaign(self, campaign_instance):
     log.info('process_campaign() Initializing...')
 
     # Select campaign instance based on Provider
-    if campaign_instance.provider == settings.news_api:
+    if campaign_instance.provider == settings.NEWS_API:
         log.info('process_campaign() News API')
         news_ml.launch(campaign_instance)
     else:
@@ -42,7 +42,7 @@ def process_campaign(self, campaign_instance):
 
 @task(name='process_clustering', queue='gold', bind=True,
       default_retry_delay=30, max_retries=3,
-      soft_time_limit=settings.max_task_processing)
+      soft_time_limit=settings.MAX_TASK_PROCESSING)
 def process_clustering(self, clustering_instance):
     """Handle Clustering request via API. Creates a celery task which run
     asynchronously.
@@ -73,7 +73,7 @@ def process_clustering(self, clustering_instance):
 
 
 @task(name='rank_news', queue='gold', bind=True, default_retry_delay=30, max_retries=3,
-      soft_time_limit=settings.max_rank_processing)
+      soft_time_limit=settings.MAX_RANK_PROCESSING)
 def rank_news(self, ranker_instance):
     """Rank a list of articles based on predefined algorithm.
         Algorithm in README.md file. Reads news then ranks them.
@@ -94,7 +94,7 @@ def rank_news(self, ranker_instance):
 
 
 @task(name='process_text', queue='gold', bind=True, default_retry_delay=30,
-      max_retries=3, soft_time_limit=settings.max_api_processing)
+      max_retries=3, soft_time_limit=settings.MAX_API_PROCESSING)
 def process_text(self, text_instance):
     """Process sentiment analysis u other text requests using Google Cloud
     NLP API.

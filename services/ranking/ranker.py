@@ -71,10 +71,10 @@ class RankedArticle(object):
         :return:
         """
         try:
-            self.ranking_source = 1 + settings.ranking_sources.index(
+            self.ranking_source = 1 + settings.RANKING_SOURCES.index(
                 self.source)
         except ValueError:
-            self.ranking_source = settings.unknown_source_score
+            self.ranking_source = settings.UNKNOWN_SOURCE_SCORE
 
         try:
             self.score += 200 // self.ranking_source
@@ -122,7 +122,7 @@ def get_and_rank_news_articles(date='latest'):
         raise ValueError('Invalid date')
 
     if date == 'latest':
-        date = DbHelper.get_record(settings.ranking_query_date)
+        date = DbHelper.get_record(settings.RANKING_QUERY_DATE)
         logging.info('Using latest date. The latest date found was: %s', date)
 
     logging.info('Using date: %s', date)
@@ -145,7 +145,7 @@ def get_articles_by_date(date):
     """
     logging.info('Looking news for %s', date)
     news = DbHelper.get_multiple_records(
-        settings.ranking_query_get_news_by_date % date)
+        settings.RANKING_QUERY_GET_NEWS_BY_DATE % date)
     if news:
         logging.info('Total news found: %s', len(news))
         return news
