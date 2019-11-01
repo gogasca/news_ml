@@ -16,7 +16,7 @@ from utils import url_extract
 from utils.reporting import Report
 
 log = logger.LoggerManager().getLogger("__app__",
-                                       logging_file=settings.app_logfile)
+                                       logging_file=settings.APP_LOGFILE)
 log.setLevel(level=logging.DEBUG)
 
 
@@ -26,11 +26,11 @@ def process_entities(article, news_id):
     :param article:
     :return:
     """
-    log.info('Processing content for : %s', article.url)
+    log.info('Processing content for : %s using NLP', article.url)
     entities = nlp.analyze_entities(
         '%r %r' % (article.title, article.description))
     num_of_entities = len(entities)
-    log.info('Processing %d entities: %s', num_of_entities, article.url)
+    log.info('Processing %d NLP entities: %s', num_of_entities, article.url)
     if num_of_entities > 1:
         # Extract tags and associate them with original article.
         log.info('Processing article tags: %s', article.url)
@@ -54,11 +54,15 @@ def process_entities(article, news_id):
                     for organization in organizations:
                         DbHelper.insert_company(organization)
     else:
-        log.error('No entities found')
+        log.error('No NLP entities found')
 
 
 def process_articles(articles, news_provider, campaign_instance):
-    """
+    """Get content from News API.
+    For each article verifies if exists in DB or not.
+    If exists, ignore it, otherwise, process each field.
+    Perform sentiment analysis on article content or description fields.
+
 
     :param articles:
     :param news_provider:
@@ -70,10 +74,12 @@ def process_articles(articles, news_provider, campaign_instance):
     if num_of_articles > 1:
         campaign_instance.set_articles(num_of_articles)
         # Create Report instance and attach recipients.
+        log.info('Reporting enabled: %s', campaign_instance.send_report)
         if campaign_instance.send_report:
             subject = 'News ML | %s' % news_provider
             report = Report.Report(subject=subject)
             report.email_recipients = campaign_instance.email_recipients
+
         for _, article in articles.items():
             if article.description:
                 log.info('Article %r, %r' % (article.title, article.url))
@@ -81,7 +87,7 @@ def process_articles(articles, news_provider, campaign_instance):
                 if not DbHelper.item_exists(article.url):
                     news_id = None
                     log.info('New Article retrieved: %r, %r' % (
-                    article.title, article.url))
+                        article.title, article.url))
                     try:
                         log.info('Process sentiment analysis')
                         score, magnitude = nlp_utils.get_sentiment_scores(
@@ -107,7 +113,7 @@ def process_articles(articles, news_provider, campaign_instance):
                     except (ValueError, UnicodeDecodeError) as exception:
                         log.exception(exception)
                     new_article = True
-                    if settings.process_entities:
+                    if settings.PROCESS_ENTITIES:
                         process_entities(article, news_id)
                 else:
                     log.warning('Article %r already exists ', article.url)
@@ -122,10 +128,11 @@ def process_articles(articles, news_provider, campaign_instance):
                             article.title + ' ' + article.description,
                             campaign_instance.translation_lang)
                         sql_query = translate_utils.create_sql_query(
-                            translated_text, settings.default_language, news_id)
+                            translated_text, settings.DEFAULT_LANGUAGE, news_id)
                         if sql_query:
                             DbHelper.update_database(sql_query)
                     else:
+                        log.warn('Article already exists, skipping DB update')
                         translated_text = translate_utils.translate_content(
                             article.title + ' ' + article.description,
                             campaign_instance.translation_lang)
@@ -135,8 +142,6 @@ def process_articles(articles, news_provider, campaign_instance):
                         report.add_content(article.url, translated_text)
                 elif campaign_instance.send_report:
                     # Only send today articles in report.
-                    log.info('Reporting enabled: %s',
-                             campaign_instance.send_report)
                     today = datetime.now().date()
                     published_at = datetime.strptime(article.published_at[:10],
                                                   '%Y-%m-%d').date()
@@ -154,6 +159,7 @@ def process_articles(articles, news_provider, campaign_instance):
     else:
         log.error('No titles found')
     if campaign_instance.send_report:
-        log.info('Sending Report via email...')
+        log.info('Sending report via email...')
         report.send()
+
     log.info('Extraction completed')

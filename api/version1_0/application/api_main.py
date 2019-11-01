@@ -27,7 +27,7 @@ from flask_restful import Resource
 
 api = flask_restful.Api
 log = logger.LoggerManager().getLogger('__app__',
-                                       logging_file=settings.api_logfile)
+                                       logging_file=settings.API_LOGFILE)
 log.setLevel(level=logging.DEBUG)
 
 
@@ -40,21 +40,21 @@ class ApiBase(Resource):
         """
         try:
             log.info('%s %r' % (request.remote_addr, request))
-            if request.headers['Content-Type'] == settings.api_mime_type:
-                log.info('api() | GET | Version %s' % settings.api_version)
-                response = json.dumps('Version: %s' % settings.api_version)
+            if request.headers['Content-Type'] == settings.API_MIME_TYPE:
+                log.info('api() | GET | Version %s' % settings.API_VERSION)
+                response = json.dumps('Version: %s' % settings.API_VERSION)
                 return Response(response, status=200,
-                                mimetype=settings.api_mime_type)
+                                mimetype=settings.API_MIME_TYPE)
         except KeyError as key_error:
             logging.exception(key_error)
             response = json.dumps(
-                'Invalid type headers. Use %s' % settings.api_mime_type)
+                'Invalid type headers. Use %s' % settings.API_MIME_TYPE)
             return Response(response, status=415,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
         except Exception as exception:
             log.exception(exception)
             return Response(json.dumps(errors.API_ERROR), status=500,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
 
 
 class ApiUser(Resource):
@@ -75,12 +75,12 @@ class ApiUser(Resource):
                 return jsonify(user.serialize())
             log.warn('api() | User %s not found. ' % id)
             return Response(json.dumps(errors.USER_NOT_FOUND), status=404,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
 
         except Exception as e:
             log.exception(e)
             return Response(json.dumps(errors.API_ERROR), status=500,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
 
 
 class ApiUserList(Resource):
@@ -121,13 +121,13 @@ class ApiUserList(Resource):
                 log.error('api() | Provide username and password.')
                 response = json.dumps('Provide username and password')
                 return Response(response, status=400,
-                                mimetype=settings.api_mime_type)
+                                mimetype=settings.API_MIME_TYPE)
             if Model.ApiUsers.query.filter_by(
                 username=username).first() is not None:
                 log.error('api() | Username already exists.')
                 response = json.dumps('Username already exists')
                 return Response(response, status=400,
-                                mimetype=settings.api_mime_type)
+                                mimetype=settings.API_MIME_TYPE)
             # Insert user into Postgres database.
             user_id = ModelOperations.insert_user(username, password, 'now()')
             response = jsonify({'id': user_id})
@@ -135,14 +135,14 @@ class ApiUserList(Resource):
                                                        ApiUser,
                                                        id=user_id,
                                                        _external=True,
-                                                       _scheme=settings.api_scheme)
+                                                       _scheme=settings.API_SCHEME)
             response.status_code = 201
             return response
         except Exception as exception:
             log.exception(exception)
             response = json.dumps(errors.API_ERROR)
             return Response(response, status=500,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
 
 
 class Campaign(Resource):
@@ -163,11 +163,11 @@ class Campaign(Resource):
                 return jsonify(campaign.serialize())
 
             log.warn('api() | Campaign not found: ' + ref)
-            return Response(status=404, mimetype=settings.api_mime_type)
+            return Response(status=404, mimetype=settings.API_MIME_TYPE)
         except Exception as exception:
             log.exception(exception)
             return Response(json.dumps(errors.API_ERROR), status=500,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
 
 
 class CampaignList(Resource):
@@ -202,7 +202,7 @@ class CampaignList(Resource):
                           request.data)
                 response = json.dumps(errors.INVALID_CAMPAIGN)
                 return Response(response, status=422,
-                                mimetype=settings.api_mime_type)
+                                mimetype=settings.API_MIME_TYPE)
             celery = Celery()
             celery.config_from_object("conf.celeryconfig")
             celery.send_task('process_campaign',
@@ -216,14 +216,14 @@ class CampaignList(Resource):
                                                        Campaign,
                                                        ref=campaign_instance.reference,
                                                        _external=True,
-                                                       _scheme=settings.api_scheme)
+                                                       _scheme=settings.API_SCHEME)
             response.status_code = 202
             return response
 
         except Exception as exception:
             log.exception(exception)
             return Response(json.dumps(errors.API_ERROR), status=500,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
 
         finally:
             # Insert campaign details into database.
@@ -231,7 +231,7 @@ class CampaignList(Resource):
                 campaign_instance.id = ModelOperations.insert_campaign(0,
                                                                        'Campaign %s' % campaign_instance.reference,
                                                                        campaign_instance.reference,
-                                                                       settings.dbnow,
+                                                                       settings.DBNOW,
                                                                        request.data,
                                                                        campaign_instance.provider,
                                                                        campaign_instance.send_report,
@@ -261,7 +261,7 @@ class ClusteringList(Resource):
                           request.data)
                 response = json.dumps(errors.INVALID_CAMPAIGN)
                 resp = Response(response, status=422,
-                                mimetype=settings.api_mime_type)
+                                mimetype=settings.API_MIME_TYPE)
                 return resp
             celery = Celery()
             celery.config_from_object("conf.celeryconfig")
@@ -278,7 +278,7 @@ class ClusteringList(Resource):
                                                        Campaign,
                                                        ref=clustering_instance.campaign_reference,
                                                        _external=True,
-                                                       _scheme=settings.api_scheme)
+                                                       _scheme=settings.API_SCHEME)
             response.status_code = 202
             return response
 
@@ -286,7 +286,7 @@ class ClusteringList(Resource):
             log.exception(exception)
             response = json.dumps(errors.INVALID_REQUEST)
             resp = Response(response, status=500,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
             return resp
 
         finally:
@@ -295,7 +295,7 @@ class ClusteringList(Resource):
                 clustering_instance.id = ModelOperations.insert_campaign(0,
                                                                          'Cluster %s' % clustering_instance.campaign_reference,
                                                                          clustering_instance.campaign_reference,
-                                                                         settings.dbnow,
+                                                                         settings.DBNOW,
                                                                          request.data,
                                                                          clustering_instance.provider,
                                                                          clustering_instance.send_report,
@@ -317,7 +317,7 @@ class GetToken(Resource):
         # stolen you can get a new token with the old one.
         # Consider accepting only username and password to get a new token.
 
-        duration = settings.token_expiration_secs
+        duration = settings.TOKEN_EXPIRATION_SECS
         token = g.user.generate_auth_token(duration)
         return jsonify({
             'token': token.decode('ascii'),
@@ -344,11 +344,11 @@ class Person(Resource):
                 log.info('api() | Person found: ' + person_id)
                 return jsonify(person.serialize())
             log.warn('api() | Person not found: ' + person_id)
-            return Response(status=404, mimetype=settings.api_mime_type)
+            return Response(status=404, mimetype=settings.API_MIME_TYPE)
         except Exception as exception:
             log.exception(exception)
             return Response(json.dumps(errors.API_ERROR), status=500,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
 
 
 class PersonList(Resource):
@@ -376,7 +376,7 @@ class PersonList(Resource):
         except Exception as exception:
             log.exception(exception)
             return Response(json.dumps(errors.API_ERROR), status=500,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
 
     @api_controller.validate_json
     @api_controller.validate_schema('person')
@@ -397,22 +397,22 @@ class PersonList(Resource):
                           request.data)
                 response = json.dumps(errors.INVALID_PERSON)
                 resp = Response(response, status=422,
-                                mimetype=settings.api_mime_type)
+                                mimetype=settings.API_MIME_TYPE)
                 return resp
             person_instance.id = ModelOperations.insert_person(
-                person_instance.name, settings.dbnow)
+                person_instance.name, settings.DBNOW)
             response = jsonify({'person_id': person_instance.id})
             response.headers['Location'] = api.url_for(api(current_app),
                                                        Person,
                                                        ref=person_instance.id,
                                                        _external=True,
-                                                       _scheme=settings.api_scheme)
+                                                       _scheme=settings.API_SCHEME)
             response.status_code = 202
             return response
         except Exception as exception:
             log.exception(exception)
             return Response(json.dumps(errors.API_ERROR), status=500,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
 
 
 class NewsList(Resource):
@@ -431,22 +431,23 @@ class NewsList(Resource):
             else:
                 news_list = Model.News.query.order_by(
                     Model.News.published_at.desc()).limit(
-                    settings.max_news).all()
+                    settings.MAX_NEWS).all()
             if news_list:
                 log.info('api() | %d News found ' % len(news_list))
-                # Extract fields: ['title', 'content', 'url', 'published_at', 'provider']
+                # Extract fields: ['title', 'content', 'url', 'published_at',
+                # 'provider']
                 response = [{field: getattr(news, field) for field in
                              settings.NEWS_FIELDS} for news in news_list]
                 return jsonify(news=response, status='ok', source='news_ml')
-            log.warn('api() | No News found')
+            log.warn('api() | No News articles found')
             return Response(json.dumps(errors.NO_NEWS), status=404,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
 
         except UnboundLocalError as exception:
             log.exception(exception)
             response = json.dumps(errors.INVALID_REQUEST)
             return Response(response, status=400,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
 
 
 class RankList(Resource):
@@ -468,7 +469,7 @@ class RankList(Resource):
                           request.data)
                 response = json.dumps(errors.INVALID_RANKER)
                 resp = Response(response, status=422,
-                                mimetype=settings.api_mime_type)
+                                mimetype=settings.API_MIME_TYPE)
                 return resp
             celery = Celery()
             celery.config_from_object("conf.celeryconfig")
@@ -484,7 +485,7 @@ class RankList(Resource):
                                                        Campaign,
                                                        ref=ranker_instance.campaign_reference,
                                                        _external=True,
-                                                       _scheme=settings.api_scheme)
+                                                       _scheme=settings.API_SCHEME)
             response.status_code = 202
             return response
 
@@ -492,7 +493,7 @@ class RankList(Resource):
             log.exception(e)
             response = json.dumps(errors.INVALID_REQUEST)
             resp = Response(response, status=500,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
             return resp
         finally:
             # Insert Ranker campaign details into database.
@@ -502,7 +503,7 @@ class RankList(Resource):
                                                                      '%s' %
                                                                      ranker_instance.campaign_reference,
                                                                      ranker_instance.campaign_reference,
-                                                                     settings.dbnow,
+                                                                     settings.DBNOW,
                                                                      request.data,
                                                                      'RANKER',
                                                                      ranker_instance.send_report,
@@ -524,47 +525,47 @@ class Status(Resource):
             log.info('api() | GET | Received request for Status')
             response = json.dumps('Status: GET. Hola %s!' % g.user.username)
             return Response(response, status=200,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
         except (TypeError, ValueError) as e:
             log.exception(e)
             return Response(json.dumps(errors.API_ERROR), status=500,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
 
     @authenticator.local_authentication
     def post(self):
         try:
             log.info('%s %r' % (request.remote_addr, request))
             log.info('api() | POST | Received request for Status')
-            response = json.dumps('Status: POST. %s' % settings.api_ok)
+            response = json.dumps('Status: POST. %s' % settings.API_OK)
             return Response(response, status=202,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
         except (TypeError, ValueError) as exception:
             log.exception(exception)
             return Response(json.dumps(errors.API_ERROR), status=500,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
 
     @authenticator.local_authentication
     def delete(self):
         try:
             log.info('%s %r' % (request.remote_addr, request))
             log.info('api() | DELETE | Received request for Status')
-            response = json.dumps('Status: DELETE. %s' % settings.api_ok)
+            response = json.dumps('Status: DELETE. %s' % settings.API_OK)
             return Response(response, status=202,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
         except (TypeError, ValueError) as exception:
             log.exception(exception)
             return Response(json.dumps(errors.API_ERROR), status=500,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
 
     @authenticator.local_authentication
     def put(self):
         try:
             log.info('%s %r' % (request.remote_addr, request))
             log.info('api() | PUT | Received request for Status')
-            response = json.dumps('Status: PUT. %s' % settings.api_ok)
+            response = json.dumps('Status: PUT. %s' % settings.API_OK)
             return Response(response, status=202,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)
         except (TypeError, ValueError) as exception:
             log.exception(exception)
             return Response(json.dumps(errors.API_ERROR), status=500,
-                            mimetype=settings.api_mime_type)
+                            mimetype=settings.API_MIME_TYPE)

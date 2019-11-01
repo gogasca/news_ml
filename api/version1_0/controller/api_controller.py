@@ -29,8 +29,9 @@ def validate_json(f):
         try:
             request.json
         except Exception:
-            msg = 'Invalid JSON Request. Use Content-Type: application/json'
-            abort(400, description=msg)
+            abort(400,
+                  description='Invalid JSON Request. Use Content-Type: '
+                              'application/json')
         return f(*args, **kw)
 
     return wrapper
@@ -111,11 +112,11 @@ def get_clustering(json_request):
     if not json_request:
         raise ValueError(errors.INVALID_CAMPAIGN)
 
-    clustering_instance = ClusterD.Clustering(settings.num_of_clusters)
-    clustering_instance.provider = settings.clustering_provider.upper()
+    clustering_instance = ClusterD.Clustering(settings.NUM_OF_CLUSTERS)
+    clustering_instance.provider = settings.CLUSTERING_PROVIDER.upper()
 
-    if settings.api_num_of_clusters in json_request:
-        num_of_clusters = json_request[settings.api_num_of_clusters]
+    if settings.API_NUM_OF_CLUSTERS in json_request:
+        num_of_clusters = json_request[settings.API_NUM_OF_CLUSTERS]
         if isinstance(num_of_clusters, int) and (num_of_clusters > 1):
             clustering_instance.num_of_clusters = num_of_clusters
         else:
@@ -125,8 +126,8 @@ def get_clustering(json_request):
         clustering_instance.send_report = True
         if constants.EMAIL in json_request[constants.REPORT]:
             clustering_instance.email_recipients = \
-            json_request[constants.REPORT][constants.EMAIL].split(
-                settings.EMAIL_SEPARATOR)
+                json_request[constants.REPORT][constants.EMAIL].split(
+                    settings.EMAIL_SEPARATOR)
     return clustering_instance
 
 
@@ -151,7 +152,8 @@ def get_ranker(json_request):
     if constants.REPORT in json_request:
         ranker_instance.send_report = True
         if constants.EMAIL in json_request[constants.REPORT]:
-            ranker_instance.email_recipients = json_request[constants.REPORT][constants.EMAIL].split(
+            ranker_instance.email_recipients = json_request[constants.REPORT][
+                constants.EMAIL].split(
                 settings.EMAIL_SEPARATOR)
     return ranker_instance
 

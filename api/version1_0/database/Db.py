@@ -5,14 +5,14 @@ import bleach
 import psycopg2
 import psycopg2.extensions
 
-psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
-psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
-
 from conf import logger
 from conf import settings
 
+psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
+psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
+
 log = logger.LoggerManager().getLogger("__app__",
-                                       logging_file=settings.app_logfile)
+                                       logging_file=settings.APP_LOGFILE)
 log.setLevel(level=logging.DEBUG)
 
 
@@ -20,11 +20,11 @@ class Db(object):
     """Database handling."""
 
     def __init__(self,
-                 server=settings.dbhost,
-                 username=settings.dbusername,
-                 password=settings.dbpassword,
-                 database=settings.dbname,
-                 port=settings.dbport, **kwargs):
+                 server=settings.DBHOST,
+                 username=settings.DBUSERNAME,
+                 password=settings.DBPASSWORD,
+                 database=settings.DBNAME,
+                 port=settings.DBPORT, **kwargs):
         """
         :param server:
         :param username:
@@ -210,7 +210,7 @@ class Db(object):
         :return:
         """
         query = "select pg_terminate_backend(pid) from pg_stat_activity where " \
-                "usename = '" + settings.dbusername + \
+                "usename = '" + settings.DBUSERNAME + \
                 "' and state = 'idle' and query_start < current_timestamp - " \
                 "interval '5 minutes';"
         try:

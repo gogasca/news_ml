@@ -11,12 +11,12 @@ from api.version1_0.database import Db
 from conf import logger
 from conf import settings
 
-if settings.remove_stop_words:
+if settings.REMOVE_STOP_WORDS:
     from nltk.corpus import stopwords
     from nltk.tokenize import word_tokenize
 
 log = logger.LoggerManager().getLogger("__app__",
-                                       logging_file=settings.app_logfile)
+                                       logging_file=settings.APP_LOGFILE)
 log.setLevel(level=logging.DEBUG)
 
 DB_NOW = 'now()'
@@ -76,7 +76,7 @@ def insert_news(title=None, author='', description='', content='', url='',
             % (title.replace("'", "''"),
                author.replace("'", "''"),
                description.replace("'", "''"),
-               content[:settings.content_size].replace("'", "''"),
+               content[:settings.CONTENT_SIZE].replace("'", "''"),
                url,
                url_to_image,
                source_id,
@@ -116,7 +116,7 @@ def insert_tag(tag_name='', source='', language='english'):
     """
     try:
         if tag_name:
-            if settings.remove_stop_words:
+            if settings.REMOVE_STOP_WORDS:
                 tag_name = remove_stopwords(tag_name, language)
             # Insert into database.
             db = Db.Db()
@@ -225,7 +225,7 @@ def insert_cluster_article(news_id=-1, title=None, content='', source='',
                         % (news_id,
                            DB_NOW,
                            title.replace("'", "''"),
-                           content[:settings.content_size].replace("'", "''"),
+                           content[:settings.CONTENT_SIZE].replace("'", "''"),
                            url,
                            source,
                            cluster,

@@ -12,7 +12,7 @@ from conf import settings
 from conf import logger
 
 log = logger.LoggerManager().getLogger("__app__",
-                                       logging_file=settings.app_logfile)
+                                       logging_file=settings.APP_LOGFILE)
 log.setLevel(level=logging.DEBUG)
 
 _ENTITIES = 'entities'
@@ -26,7 +26,7 @@ _PERSON = 'PERSON'
 STOP_WORDS = set(stopwords.words("english"))
 
 
-def extract_filter(dictionary=settings.entity_filter):
+def extract_filter(dictionary=settings.ENTITY_FILTER):
     """
 
     :param dictionary:
@@ -46,7 +46,7 @@ def extract_tags(text):
         relevant_words = []
         if _ENTITIES in text:
             for entity in text[_ENTITIES]:
-                if entity[_SALIENCE] > settings.salience_score and text[
+                if entity[_SALIENCE] > settings.SALIENCE_SCORE and text[
                     'language'] == 'en' \
                         or text['language'] == 'es':
                     if _MENTIONS in entity:
@@ -57,8 +57,8 @@ def extract_tags(text):
                                 'content'].replace("u'", "").replace("'", "''")
                             relevant_words.append(word)
                 elif entity[
-                    _SALIENCE] < settings.salience_score and \
-                        settings.log_salience:
+                    _SALIENCE] < settings.SALIENCE_SCORE and \
+                        settings.LOG_SALIENCE:
                     log.warning('extract_tags() Salience score is too low [%r]',
                                 entity[_SALIENCE])
         log.info('extract_tags() Found relevant keywords: %r',

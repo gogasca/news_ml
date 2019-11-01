@@ -6,7 +6,7 @@ from conf import logger
 from conf import settings
 
 log = logger.LoggerManager().getLogger("__app__",
-                                       logging_file=settings.app_logfile)
+                                       logging_file=settings.APP_LOGFILE)
 log.setLevel(level=logging.DEBUG)
 
 

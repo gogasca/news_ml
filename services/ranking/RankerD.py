@@ -22,7 +22,7 @@ class RankerD(object):
         self._campaign_reference = Generator.Generator().generate_job(10)
         self._articles = []
         self._sorted_articles = []
-        self._limit = settings.ranking_limit
+        self._limit = settings.RANKING_LIMIT
         self._num_of_articles = 0
         self._provider = None
         self.report = Report.Report(subject='News ML | Daily Ranked Report')
@@ -107,7 +107,7 @@ class RankerD(object):
             self.sorted_articles = sort_articles(self.articles)
         logging.info('Completed Ranking of %d articles(s).',
                      len(self.sorted_articles))
-        if settings.update_rank_articles_db:
+        if settings.UPDATE_RANK_ARTICLES_DB:
             logging.info('Updating database')
             update_articles(self.sorted_articles)
             for article in self.sorted_articles:
@@ -131,5 +131,5 @@ class RankerD(object):
 
         if self.campaign_reference:
             sqlquery = 'UPDATE campaign SET campaign_end=\'%s\', status=%d WHERE campaign.reference=\'%s\'' % (
-                settings.dbnow, status, self.campaign_reference)
+                settings.DBNOW, status, self.campaign_reference)
             DbHelper.update_database(sqlquery)

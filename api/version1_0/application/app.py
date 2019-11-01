@@ -30,7 +30,7 @@ from werkzeug.contrib.fixers import ProxyFix
 from utils import banner
 
 log = logger.LoggerManager().getLogger("__app__",
-                                       logging_file=settings.api_logfile)
+                                       logging_file=settings.API_LOGFILE)
 log.setLevel(level=logging.DEBUG)
 
 # Flask Main Application.
@@ -43,7 +43,7 @@ news_api = flask_restful.Api(api_app)
 db = Model.db.init_app(api_app)
 
 # API Endpoint definition.
-news_api.add_resource(ApiBase, settings.api_base_url)
+news_api.add_resource(ApiBase, settings.API_BASE_URL)
 news_api.add_resource(ApiUser, '/api/1.0/users/<int:id>')
 news_api.add_resource(ApiUserList, '/api/1.0/users')
 news_api.add_resource(Campaign, '/api/1.0/campaign/<string:ref>')

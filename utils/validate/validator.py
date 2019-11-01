@@ -29,9 +29,7 @@ def required(**mandatory):
                             'Key "%s" is missing from argument "%s"' % (
                                 key, argname))
             return f(**dicts)
-
         return wrapper
-
     return decorator
 
 
@@ -70,13 +68,13 @@ def check_provider(provider_request):
     :param provider_request:
     :return: bool
     """
-    if (provider_request[PROVIDER]).upper() in settings.valid_providers:
+    if (provider_request[PROVIDER]).upper() in settings.VALID_PROVIDERS:
         return True
     return False
 
 
-def check_email_addresses(recipients, check_mx=settings.email_check_mx,
-                          verify=settings.email_verify):
+def check_email_addresses(recipients, check_mx=settings.EMAIL_CHECK_MX,
+                          verify=settings.EMAIL_VERIFY):
     """
 
     :param recipients:
@@ -122,6 +120,6 @@ def check_translation(translation_request):
     if translation_request[TRANSLATE] and LANG in translation_request[
         TRANSLATE]:
         if translation_request[TRANSLATE][
-            LANG] in settings.translation_languages:
+                LANG] in settings.TRANSLATION_LANGUAGES:
             return True
     return False

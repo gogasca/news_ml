@@ -384,14 +384,14 @@ CREATE TABLE api_users
         """
     
         try:
-            self._ranking_source = settings.ranking_sources.index(self._source)
+            self._ranking_source = settings.RANKING_SOURCES.index(self._source)
         except ValueError:
-            self._ranking_source = settings.unknown_source_score
+            self._ranking_source = settings.UNKNOWN_SOURCE_SCORE
 
         try:
-            self._ranking_provider = settings.ranking_providers.index(self._provider)
+            self._ranking_provider = settings.RANKING_PROVIDERS.index(self._provider)
         except ValueError:
-            self._ranking_provider = settings.unknown_provider_score
+            self._ranking_provider = settings.UNKNOWN_PROVIDER_SCORE
 
         # Articles which are read first are prioritized. Divide 100 by weight to prioritize higher values
         self.score += 20 // self._ranking_source

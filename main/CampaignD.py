@@ -143,7 +143,7 @@ class CampaignD(object):
         if self.reference:
             sqlquery = 'UPDATE campaign SET campaign_end=\'%s\', status=%s ' \
                        'WHERE campaign.reference=\'%s\'' % (
-                           settings.dbnow, status, self.reference)
+                           settings.DBNOW, status, self.reference)
             DbHelper.update_database(sqlquery)
         # Notify via SMS.
         send_sms.send_sms_alert(

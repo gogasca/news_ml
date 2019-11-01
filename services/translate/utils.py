@@ -22,7 +22,7 @@ def create_sql_query(translation, detected_language, news_id):
     return settings.EMPTY_TEXT
 
 
-def translate_content(text, language=settings.translation_default_language):
+def translate_content(text, language=settings.TRANSLATION_DEFAULT_LANGUAGE):
     """
 
     :param post_id:
@@ -31,13 +31,13 @@ def translate_content(text, language=settings.translation_default_language):
     :return:
     """
     translation = settings.EMPTY_TEXT
-    if not settings.translation_service:
+    if not settings.TRANSLATION_SERVICE:
         print('Translation service is disabled in settings.translation_service')
         return settings.EMPTY_TEXT
     if not text:
         raise ValueError('Invalid text')
-    # Limited text (Limit requests to settings.translation_limit)
-    limited_text = text[:settings.translation_limit]
+    # Limited text (Limit requests to settings.TRANSLATION_LIMIT)
+    limited_text = text[:settings.TRANSLATION_LIMIT]
     detected_language = translate.detect_language(limited_text)
     # Submit translation request.
     if detected_language != language:

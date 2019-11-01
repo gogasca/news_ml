@@ -131,7 +131,7 @@ class ApiUsers(db.Model, AutoSerialize, Serializer):
 
         return False
 
-    def generate_auth_token(self, expiration=settings.token_expiration_secs):
+    def generate_auth_token(self, expiration=settings.TOKEN_EXPIRATION_SECS):
         """Generates a token.
 
         :param expiration: (int) Expiration time in seconds.
