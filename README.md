@@ -2,10 +2,12 @@
 
 ## Introduction
 
-This Python application collects article and news information from News 
-API. App collects information from fixed sources and if search is enabled
-it will look into all news available in API for a specific time period.
-We will also extract entities from News content via Google Cloud NLP.
+This application collects news information from News 
+API. App collects information from fixed sources, if search feature is
+used API will look into all news in API for a specific time period that
+match search pattern.
+App extract entities from News content via Google Cloud NLP and 
+perform sentiment analysis.
 
 ## Quick start
 
@@ -13,7 +15,7 @@ You can use sample Python script (mini/app.py)
 which collects News and stores them into a CSV file using News API Key 
 which can be obtained [here](https://www.newsapi.org).
 
-## API Server
+## Full installation
 
 I created an [API](https://medium.com/ymedialabs-innovation/deploy-flask-app-with-nginx-using-gunicorn-and-supervisor-d7a93aa07c18) which is able to handle requests to collect News.
 The API [stack](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-14-04)
@@ -24,6 +26,9 @@ is composed of the following modules:
  - [Flask](http://flask.pocoo.org/) (Python Web App)
  - [RabbitMQ](https://www.rabbitmq.com/) (Message Queue)
  - [PostgreSQL](https://www.postgresql.org/) (Relational Database)
+
+## Docker containers
+
 
 ## Architecture
 
@@ -46,14 +51,11 @@ Python based API:
  - Ngnix
  - Google Cloud NLP
  - Ngnix -> Gunicorn -> Flask -> RabbitMQ/Celery/PostgreSQL.
-  
-## Installation
-
+ 
 
 ### Requirements
 
-Install a Compute Engine instance
-Recommended OS: Ubuntu 16:
+Install a Compute Engine instance using Ubuntu 16.
 
 ```
 sudo apt-get install python build-essential  -y
@@ -65,7 +67,7 @@ sudo apt-get install libpq-dev -y
 sudo apt-get install rabbitmq-server -y
 ```
 
-Clone repo
+Clone GitHub repo
 
 ```
 cd /usr/local/src
@@ -94,14 +96,16 @@ True
 
 ## Database information
 
-You need to create a new Database based on PostgreSQL:
+You need to create a new Database based on PostgreSQL server:
 Check the database example:
 
 ```
-Check news_ml/conf/database for extracted schema.
+Check news_ml/conf/database/newsdb.sql for extracted schema.
 ```
 
 ## RabbitMQ
+
+Start RabbitMQ server:
 
 ```
 /usr/local/sbin/rabbitmq-server
@@ -116,10 +120,11 @@ rabbitmqctl set_permissions -p / news_ml ".*" ".*" ".*"
 ## Celery
 
 ```
+cd /usr/local/src/news_ml/conf/
 celery worker -n 1 -P processes -c 15 --loglevel=DEBUG -Ofair
 ```
 
-## Authentication
+## Environment variables
 
 Update these parameters accordingly in the following files:
 
@@ -131,6 +136,12 @@ vim ~/.profile
 Change the following variables based on your settings:
 
 ```
+export NEWSML_ENV="/usr/local/src/news_ml/"
+```
+
+Configure Database parameters:
+
+```
 export DBHOST=127.0.0.1
 export DBPORT=5432
 export DBUSERNAME="postgres"
@@ -138,17 +149,17 @@ export DBPASSWORD="postgres"
 export DBNAME="newsml"
 
 # NEWS API
-export NEWS_API_KEY=""
+export NEWS_API_KEY=""  # Change this
 
 # System API information. 
 export API_USERNAME="AC64861838b417b555d1c8868705e4453f" 
 export API_PASSWORD="YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o" 
 
 # Key for Email support from mailgun.com
-export MAILGUN_API_KEY="key-"
+export MAILGUN_API_KEY="key-"  # Change this
 
 # Key used for encrypting user information.
-export SECRET_FERNET_KEY="" # Change this
+export SECRET_FERNET_KEY=""  # Change this
 ```
 
 Note: To generate `SECRET_FERNET_KEY` can be generated as follows:
@@ -162,33 +173,15 @@ Note: To generate `SECRET_FERNET_KEY` can be generated as follows:
 ```
 Use token value
 
+## Database schema generation
 
-## RabbitMQ
-
-```
-Edit /etc/hosts or your DNS server with rabbitmq hostname.
-This needs to match the /conf/celeryconfig.py File
-
-BROKER_URL = 'amqp://news_ml:news_ml@rabbitmq:5672'
-```
-
-Start RabbitMQ
+How to generate schema? Please read here:
+https://pydigger.com/pypi/sqlacodegen
 
 ```
-/usr/local/sbin/rabbitmq-server
+postgresql://username:password@hostname/database
 ```
 
-```
-rabbitmqctl add_user news_ml news_ml
-rabbitmqctl set_user_tags news_ml administrator
-rabbitmqctl set_permissions -p / news_ml ".*" ".*" ".*"
-```
-
-## Celery (manually)
-
-```
-celery worker -n %h -P processes -c 15 --loglevel=DEBUG -Ofair
-```
 
 ## Start API (manually)
 
@@ -200,14 +193,11 @@ Define `NEWSML_ENV`:
 if platform.system() == 'Linux':
     filepath = '/usr/local/src/news_ml/'
 else:
-    filepath = '/Users/gogasca/Documents/Development/dpe/news/'
+    filepath = '/Users/user/Documents/Development/news/'
 ```
 
 
 ```
-cd news_ml/api/version1_0
-
-export NEWSML_ENV="/usr/local/src/news_ml/"
 export GUNICORN_LOGFILE=/tmp/gunicorn.log
 export API_PORT=8081
 export NUM_WORKERS=1
@@ -215,7 +205,12 @@ export TIMEOUT=60
 export WORKER_CONNECTIONS=1000
 export BACKLOG=500
 export LOG_LEVEL=DEBUG
+```
 
+Start API server
+
+```
+cd /usr/src/src/news_ml/api/version1_0
 gunicorn news_ml:api_app --bind 0.0.0.0:$API_PORT --log-level=$LOG_LEVEL --log-file=$GUNICORN_LOGFILE --workers $NUM_WORKERS --worker-connections=$WORKER_CONNECTIONS --backlog=$BACKLOG --timeout $TIMEOUT &
 ```
 
@@ -251,10 +246,10 @@ Request News from NEWS API using a Report:
 curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" -X POST -d '{ "provider": "news_api", "report": {"email": "no-reply@newsml.io"}}' http://0.0.0.0:8081/api/1.0/campaign
 ``` 
 
-Search for news including 'tensorflow' from NEWS API:
+Search for news including 'tensorflow, keras and sagemaker' from NEWS API:
 
 ```
-curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" -X POST -d '{ "provider": "news_api", "query": "tensorflow, sagemaker, keras, petastorm"}' http://0.0.0.0:8081/api/1.0/campaign
+curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" -X POST -d '{ "provider": "news_api", "query": "tensorflow, sagemaker, keras"}' http://0.0.0.0:8081/api/1.0/campaign
 ``` 
 
 Read for existing news:
@@ -271,8 +266,46 @@ curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H
 
 **Note:** If using zsh add: curl -w '\n' to avoid % at the end of response
 
+## API performance
 
-## Manage services via supervisor (optional)
+Use Apache ab tool to measure API performance.
+
+```
+ab -n 10 -A username:password https://<API_HOSTNAME>/api/1.0/status
+```
+
+## Create API Users
+
+
+```
+curl -H "Content-Type: application/json" 
+     -X POST -d '{"username":"noreply@google.com", "password":"54321"}' 
+     http://0.0.0.0:8080/api/1.0/users
+```
+
+Table api_users is the following:
+
+```
+CREATE TABLE api_users
+(
+    id              serial primary key,
+    username        VARCHAR(256) unique not null,
+	password_hash   VARCHAR(256) not null,
+    created         timestamp(6) WITH TIME ZONE
+);
+```
+
+
+## Token authentication
+
+There is a good chance for Man in the middle attack while requesting data. 
+In case of HTTP Basic Authentication, user credentials are sent along with every request which can be breached. 
+So we use token based authentication, users request for a token and in the subsequent requests users use the obtained 
+token to access data. This token lives for a short span of time, even if the attacker manages to get hold of the token, 
+its only valid for short span of time. This way we can add one more layer of security to the REST API.
+
+
+## Manage services via supervisor 
 
 Add the following ENV ```export C_FORCE_ROOT="true"``` to the following files:
 
@@ -281,7 +314,6 @@ Add the following ENV ```export C_FORCE_ROOT="true"``` to the following files:
 vim ~/.bashrc
 vim ~/.profile
 ```
-
 
 ```
 mkdir -p /etc/supervisor/conf.d
@@ -313,9 +345,9 @@ supervisorctl restart all
 supervisorctl status
 ```
 
-## Loadbalancer (Optional)
+## Load balancer (Optional)
 
-Ngnix acts as our API loadbalancer.
+Ngnix acts as our API load balancer.
 
 ```
     apt-get update
@@ -325,53 +357,6 @@ Ngnix acts as our API loadbalancer.
     vim /etc/nginx/sites-available/default
     vim nginx.conf 
 ```
-
-## API performance
-
-Use Apache ab tool to measure API performance.
-
-```
-ab -n 10 -A username:password https://<API_HOSTNAME>/api/1.0/status
-```
-
-
-## Create API Users
-
-```
-curl -H "Content-Type: application/json" 
-     -X POST -d '{"username":"noreply@google.com", "password":"54321"}' 
-     http://0.0.0.0:8080/api/1.0/users
-```
-
-## Token authentication
-
-There is a good chance for Man in the middle attack while requesting data. 
-In case of HTTP Basic Authentication, user credentials are sent along with every request which can be breached. 
-So we use token based authentication, users request for a token and in the subsequent requests users use the obtained 
-token to access data. This token lives for a short span of time, even if the attacker manages to get hold of the token, 
-its only valid for short span of time. This way we can add one more layer of security to the REST API.
-
-
-## Database information
-
-How to generate schema? Please read here:
-https://pydigger.com/pypi/sqlacodegen
-
-```
-postgresql://username:password@hostname/database
-```
-
-```
-CREATE TABLE api_users
-(
-    id              serial primary key,
-    username        VARCHAR(256) unique not null,
-	password_hash   VARCHAR(256) not null,
-    created         timestamp(6) WITH TIME ZONE
-);
-```
-
-
 
 ## Ranking algorithm
 
@@ -442,5 +427,4 @@ Solution: ```sudo -i```, verify ```.bashrc``` and ```.profile```.
 
 ## Questions?
 
-Bugs and issues can be reported at gogasca [at] google [dot] com
-
+Bugs and issues can be reported at support [at] newsml [dot] io

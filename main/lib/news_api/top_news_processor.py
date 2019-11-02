@@ -24,13 +24,15 @@ def process_entities(article, news_id):
     """
 
     :param article:
+    :param news_id:
     :return:
     """
-    log.info('Processing content for : %s using NLP', article.url)
+    log.info('process_entities() Processing content for : %s using NLP',
+             article.url)
     entities = nlp.analyze_entities(
         '%r %r' % (article.title, article.description))
     num_of_entities = len(entities)
-    log.info('Processing %d NLP entities: %s', num_of_entities, article.url)
+    log.info('Processing %d entities: %s', num_of_entities, article.url)
     if num_of_entities > 1:
         # Extract tags and associate them with original article.
         log.info('Processing article tags: %s', article.url)
@@ -42,17 +44,18 @@ def process_entities(article, news_id):
                                                  article.url))
                 if news_id and tag_id:
                     DbHelper.associate_tag_news(news_id, tag_id)
-                    log.info('Processing persons: %s', article.url)
-                    persons = nlp_utils.extract_entity(entities)
-                    log.info('Found %d persons', len(persons))
-                    for person in persons:
-                        DbHelper.insert_person(person)
-                    log.info('Processing organizations: %s', article.url)
-                    organizations = nlp_utils.extract_entity(entities,
-                                                             'ORGANIZATION')
-                    log.info('Found %d organizations', len(organizations))
-                    for organization in organizations:
-                        DbHelper.insert_company(organization)
+                    log.info('Processing persons in tags: %s', article.url)
+        # Extract entities.
+        persons = nlp_utils.extract_entity(entities, 'PERSON')
+        log.info('Found %d persons', len(persons))
+        for person in persons:
+            DbHelper.insert_person(person)
+        log.info('Processing organizations in tags: %s',
+                 article.url)
+        organizations = nlp_utils.extract_entity(entities, 'ORGANIZATION')
+        log.info('Found %d organizations', len(organizations))
+        for organization in organizations:
+            DbHelper.insert_company(organization)
     else:
         log.error('No NLP entities found')
 

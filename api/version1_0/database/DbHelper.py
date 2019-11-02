@@ -123,9 +123,7 @@ def insert_tag(tag_name='', source='', language='english'):
             db.initialize(dsn=settings.SQLALCHEMY_DSN)
             sql_query = "INSERT INTO tags (tag_name) VALUES ('%s')" % tag_name
             return db.insert_content(sql_query, 'tag_id')
-    except psycopg2.DataError as exception:
-        log.exception(exception)
-    except psycopg2.ProgrammingError as exception:
+    except (psycopg2.DataError, psycopg2.ProgrammingError) as exception:
         log.exception(exception)
 
 
