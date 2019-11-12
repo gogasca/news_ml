@@ -101,7 +101,7 @@ class TornadoBacklog:
             body['campaign'] = campaign_instance.reference
         # Handles Search queries.
         if self.campaign.query:
-            self.to_process = self.campaign.query.replace(' ', '').split(',')
+            self.to_process = self.campaign.query.split(',')
         else:
             self.to_process = settings.NEWS_API_SOURCES
 

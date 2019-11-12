@@ -148,10 +148,13 @@ def process_articles(articles, news_provider, campaign_instance):
                     today = datetime.now().date()
                     published_at = datetime.strptime(article.published_at[:10],
                                                   '%Y-%m-%d').date()
-                    if today == published_at:
+                    if today == published_at or \
+                        settings.REPORT_ALL_DATES_ARTICLES:
+                        if settings.REPORT_ALL_DATES_ARTICLES:
+                            log.info('Publishing all dates articles')
                         log.info(
                             'Adding article information to report: %s %s' % (
-                            article.title, article.url))
+                                article.title, article.url))
                         report.add_content(article.url, article.title)
                     else:
                         log.warning(
@@ -159,10 +162,13 @@ def process_articles(articles, news_provider, campaign_instance):
                             'skipping article from report', published_at)
             else:
                 log.error('Not description found in article: %s', article.url)
+
+        if campaign_instance.send_report:
+            log.info('Sending report via email...')
+            report.send()
     else:
         log.error('No titles found')
-    if campaign_instance.send_report:
-        log.info('Sending report via email...')
-        report.send()
+        if campaign_instance.send_report:
+            log.warning('Skipping report via email...')
 
     log.info('Extraction completed')
