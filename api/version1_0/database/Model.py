@@ -233,7 +233,7 @@ class Company(db.Model, AutoSerialize, Serializer):
 
     company_id = Column(Integer, primary_key=True, server_default=text(
         "nextval('company_company_id_seq'::regclass)"))
-    name = Column(String(64), nullable=False)
+    name = Column(String(1024), nullable=False)
     Column('mention_date', Time)
 
     def serialize(self):

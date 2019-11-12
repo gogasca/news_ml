@@ -35,7 +35,7 @@ PROCESS_ENTITIES = True
 REMOVE_STOP_WORDS = True
 DEFAULT_LANGUAGE = 'en'
 TRANSLATION_SERVICE = True
-translation_limit = 10000
+TRANSLATION_LIMIT = 10000
 TRANSLATION_DEFAULT_LANGUAGE = 'es'
 TRANSLATION_LANGUAGES = ('es', 'fr', 'zh-CN', 'pt', 'de')
 
@@ -204,15 +204,21 @@ TWILIO_TOKENID = os.environ.get('TWILIO_TOKENID')
 PHONE_NUMBERS = ['+1408XXXXXXX']
 
 # =========================================================
+# Report configuration parameters
+# =========================================================
+
+REPORT_ALL_DATES_ARTICLES = True
+
+# =========================================================
 # Database
 # =========================================================
 # psql -h 127.0.0.1 -d postgres -U newsml -W #dbhost = '127.0.0.1'
 
-DBHOST = os.environ['DBHOST']
-DBPORT = int(os.environ['DBPORT'])
-DBUSERNAME = os.environ['DBUSERNAME']
-DBPASSWORD = os.environ['DBPASSWORD']
-DBNAME = os.environ['DBNAME']
+DBHOST = os.environ.get('DBHOST')
+DBPORT = int(os.environ.get('DBPORT'))
+DBUSERNAME = os.environ.get('DBUSERNAME')
+DBPASSWORD = os.environ.get('DBPASSWORD')
+DBNAME = os.environ.get('DBNAME')
 
 DBPASSWORD_ALLOW_EMPTY_PASSWORD = False
 DBNOW = 'now()'

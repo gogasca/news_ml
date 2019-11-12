@@ -67,7 +67,7 @@ def validate_schema(schema_name):
 
 
 def get_campaign(json_request):
-    """
+    """Process Campaign request information.
 
     :param json_request:
     :return:
@@ -82,6 +82,7 @@ def get_campaign(json_request):
     query = json_request.get('query')
     report = json_request.get('report')
     translate = json_request.get('translate')
+
     if provider:
         campaign_instance.provider = json_request['provider'].upper()
     if query:
