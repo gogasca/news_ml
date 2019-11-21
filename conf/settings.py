@@ -207,7 +207,7 @@ PHONE_NUMBERS = ['+1408XXXXXXX']
 # Report configuration parameters
 # =========================================================
 
-REPORT_ALL_DATES_ARTICLES = True
+REPORT_ALL_DATES_ARTICLES = False
 
 # =========================================================
 # Database

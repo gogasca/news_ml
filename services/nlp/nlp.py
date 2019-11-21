@@ -8,6 +8,7 @@ import sys
 
 from conf import settings
 from googleapiclient import discovery
+from googleapiclient.errors import HttpError
 from oauth2client.client import GoogleCredentials
 
 
@@ -57,7 +58,10 @@ def analyze_entities(text, encoding='UTF32'):
 
     service = get_service()
     request = service.documents().analyzeEntities(body=body)
-    response = request.execute()
+    try:
+        response = request.execute()
+    except HttpError:
+        return
     return response
 
 
@@ -78,8 +82,10 @@ def analyze_sentiment(text, encoding='UTF32'):
 
     service = get_service()
     request = service.documents().analyzeSentiment(body=body)
-    response = request.execute()
-
+    try:
+        response = request.execute()
+    except HttpError:
+        return
     return response
 
 
@@ -100,6 +106,8 @@ def analyze_syntax(text, encoding='UTF32'):
 
     service = get_service()
     request = service.documents().analyzeSyntax(body=body)
-    response = request.execute()
-
+    try:
+        response = request.execute()
+    except HttpError:
+        return
     return response
