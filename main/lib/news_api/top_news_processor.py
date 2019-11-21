@@ -31,7 +31,10 @@ def process_entities(article, news_id):
              article.url)
     entities = nlp.analyze_entities(
         '%r %r' % (article.title, article.description))
-    num_of_entities = len(entities)
+    if entities:
+        num_of_entities = len(entities)
+    else:
+        num_of_entities = 0
     log.info('Processing %d entities: %s', num_of_entities, article.url)
     if num_of_entities > 1:
         # Extract tags and associate them with original article.

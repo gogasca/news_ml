@@ -201,21 +201,24 @@ def get_sentiment_scores(text):
             "score": 0.4
         },
 
-    https://cloud.google.com/natural-language/docs/basics#interpreting_sentiment_analysis_values
-
+    https://cloud.google.com/natural-language/docs/basics
+        #interpreting_sentiment_analysis_values
     :param text:
 
     :return: a tuple score and magnitude.
     """
     if not text:
         raise ValueError('No text')
-    sentiment_anaysis_result = nlp.analyze_sentiment(text)
-    document_sentiment = sentiment_anaysis_result.get('documentSentiment')
-    score = document_sentiment.get('score')
-    magnitude = document_sentiment.get('magnitude')
-    if score and magnitude:
-        return score, magnitude
-    return 0, 0
+    magnitude = 0
+    score = 0
+    sentiment_analysis_result = nlp.analyze_sentiment(text)
+    if sentiment_analysis_result is not None:
+        document_sentiment = sentiment_analysis_result.get('documentSentiment')
+        magnitude = document_sentiment.get('magnitude')
+        score = document_sentiment.get('score')
+        if score and magnitude:
+            return score, magnitude
+    return score, magnitude
 
 
 def get_sentiment(score):
