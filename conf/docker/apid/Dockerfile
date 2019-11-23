@@ -1,5 +1,5 @@
 #
-# IMBUE Dockerfile
+# NewsML
 #
 # Pull base image.
 FROM python:3.6.4
@@ -7,8 +7,6 @@ FROM python:3.6.4
 # File Author / Maintainer
 MAINTAINER Gonzalo Gasca Meza gogasca@
 
-
-# Update the repository
 # Set the locale
 RUN apt-get update --fix-missing
 
@@ -36,13 +34,14 @@ RUN apt-get install gunicorn -y
 RUN apt-get install sudo -y
 RUN pip3 install --upgrade pip
 
-ENV NOTVISIBLE "in users profile"
-RUN echo "export VISIBLE=now" >> /etc/profile
 RUN echo "export SECRET_FERNET_KEY=\"gAAAAABdt9nRsks3WHobSX-CZo3erIuG93Hs_riSl4sOZGvBNQ6DmSp6sEnMmpMttPjxXuGaBlp76e-9w4ItnBv90CyTuDzxVHS4P9-jEB_0_FvJ-whk9IMaMV4LI4FVAUmXGgIlBqV4\"" >> ~/.profile
 RUN echo "export C_FORCE_ROOT=\"true\"" >> ~/.profile
 
-RUN cd /usr/local/src
-RUN git clone https://github.com/gogasca/news_ml.git
+# Install dependencies.
+ADD requirements.txt requirements.txt
+RUN pip3 install -r requirements.txt -U
+# Install NLTK dependencies.
+RUN python3 -c 'import nltk;nltk.download("stopwords");nltk.download("punkt")'
 
 # Supervisor Install
 RUN pip3 install supervisor
@@ -54,11 +53,8 @@ RUN cp /usr/local/bin/supervisorctl /usr/bin/
 RUN cp /usr/local/bin/supervisord /usr/bin/
 
 # Supervisor configuration file
-RUN rm -rf /etc/supervisor/conf.d/supervisord.conf
-ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-RUN cat /etc/supervisor/conf.d/supervisord.conf
-
-# Supervisor API and App Application
+RUN rm -rf /etc/supervisor/supervisord.conf
+ADD supervisord.conf /etc/supervisor/supervisord.conf
 ADD apid.conf /etc/supervisor/conf.d/
 ADD celeryd.conf /etc/supervisor/conf.d/
 
@@ -66,17 +62,11 @@ ADD celeryd.conf /etc/supervisor/conf.d/
 RUN mkdir -p /usr/local/src/news_ml/log
 
 # Define mountable directories.
-VOLUME ["/usr/local/src/news_ml/conf/", "/usr/local/src/news_ml/api/", "/usr/local/src/news_ml/log"]
-
-ADD requirements.txt /usr/local/src/news_ml/
-RUN pip3 install -r /usr/local/src/news_ml/requirements.txt -U
-
-# Install NLTK dependencies
-RUN python3 -c 'import nltk;nltk.download("stopwords");nltk.download("punkt")'
+VOLUME ["/usr/local/src/news_ml/log"]
 
 WORKDIR /usr/local/src/news_ml
 
-# Expose ports. App
+# Expose ports. API
 EXPOSE 8081
 
 CMD ["/usr/bin/supervisord"]

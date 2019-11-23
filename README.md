@@ -9,7 +9,7 @@ match search pattern.
 App extract entities from News content via Google Cloud NLP and 
 perform sentiment analysis.
 
-## Quick start
+## Quickstart
 
 You can use sample Python script (mini/app.py) 
 which collects News and stores them into a CSV file using News API Key 
@@ -29,6 +29,7 @@ is composed of the following modules:
 
 ## Docker containers
 
+Take a look at conf/docker for more information about Docker.
 
 ## Architecture
 
@@ -238,6 +239,14 @@ gunicorn news_ml:api_app --bind 0.0.0.0:$API_PORT --log-level=$LOG_LEVEL --log-f
 
 Check API status
 
+Local Authentication:
+
+```
+curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" http://0.0.0.0:8081/api/1.0/
+```
+
+Database authentication:
+
 ```
 curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o http://0.0.0.0:8081/api/1.0/status
 ```
@@ -347,8 +356,7 @@ cp /usr/local/src/news_ml/conf/supervisor/supervisord.conf /etc/supervisor/
 Start supervisor after reboot:
 
 ```
-cd /etc/supervisor/
-supervisord -c supervisord.conf
+supervisord -c /etc/supervisor/supervisord.conf
 ```
 
 Use supervisorctl to check services status.

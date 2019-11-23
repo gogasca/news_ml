@@ -139,7 +139,7 @@ class ApiUsers(db.Model, AutoSerialize, Serializer):
         """
 
         s = SecSerializer(
-            settings.api_key,
+            settings.API_KEY,
             expires_in=expiration
         )
         return s.dumps({'id': self.id})
@@ -154,7 +154,7 @@ class ApiUsers(db.Model, AutoSerialize, Serializer):
         :param token: (str) Token information for user
         """
 
-        s = SecSerializer(settings.api_key)
+        s = SecSerializer(settings.API_KEY)
         try:
             data = s.loads(token)
         except SignatureExpired:
