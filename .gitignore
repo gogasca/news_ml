@@ -8,6 +8,7 @@
 
 # Security Keys
 key.json
+ngnix.key
 
 #Visual Studio files
 *.[Oo]bj

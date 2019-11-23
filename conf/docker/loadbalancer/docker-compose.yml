@@ -1,0 +1,10 @@
+loadbalancer:
+  image: news_ml/loadbalancer
+  hostname: loadbalancer
+  ports:
+    - "8443:8443"
+  volumes:
+    - /usr/local/src/containers/loadbalancer/volumes/sites-available:/etc/nginx/sites-available
+    - /usr/local/src/containers/loadbalancer/volumes/html:/usr/share/nginx/html
+    - /usr/local/src/containers/loadbalancer/volumes/conf.d:/etc/nginx/conf.d
+    - /usr/local/src/containers/loadbalancer/volumes/log:/var/log/nginx

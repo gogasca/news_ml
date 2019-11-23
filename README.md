@@ -11,7 +11,7 @@ perform sentiment analysis.
 
 ## Quickstart
 
-You can use sample Python script (mini/app.py) 
+You can use sample Python script [mini/app.py] 
 which collects News and stores them into a CSV file using News API Key 
 which can be obtained [here](https://www.newsapi.org).
 
@@ -29,7 +29,13 @@ is composed of the following modules:
 
 ## Docker containers
 
-Take a look at conf/docker for more information about Docker.
+Take a look at [conf/docker] for more information about how to run
+this server with Docker.
+You need:
+
+- [Docker API](conf/docker/apid/)
+- [Docker RabbitMQ](conf/docker/rabbitmq) or external RabbitMQ server
+- External PostgreSQL database
 
 ## Architecture
 
@@ -105,11 +111,7 @@ True
 ## Database information
 
 You need to create a new Database based on PostgreSQL server:
-Check the database example:
-
-```
-Check news_ml/conf/database/newsdb.sql for extracted schema.
-```
+Check [conf/database/newsdb.sql] for Database schema.
 
 ## RabbitMQ
 
@@ -127,7 +129,14 @@ rabbitmqctl set_permissions -p / news_ml ".*" ".*" ".*"
 
 ## Celery
 
+Start Celery and verify RabbitMQ tasks are successful.
+
 ```
+export RABBITMQ_USER=news_ml
+export RABBITMQ_PASSWORD=news_ml
+export RABBITMQ_HOSTNAME=rabbitmq
+export RABBITMQ_PORT=5672
+
 cd /usr/local/src/news_ml/conf/
 celery worker -n 1 -P processes -c 15 --loglevel=DEBUG -Ofair
 ```
@@ -157,7 +166,7 @@ export DBPASSWORD="postgres"
 export DBNAME="newsml"
 
 # NEWS API
-export NEWS_API_KEY=""  # Change this
+export NEWS_API_KEY=""  # Change this www.newsapi.org
 
 # System API information. 
 export API_USERNAME="AC64861838b417b555d1c8868705e4453f" 
@@ -237,7 +246,7 @@ gunicorn news_ml:api_app --bind 0.0.0.0:$API_PORT --log-level=$LOG_LEVEL --log-f
 
 ## Example:
 
-Check API status
+- Check API status
 
 Local Authentication:
 
@@ -251,31 +260,31 @@ Database authentication:
 curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o http://0.0.0.0:8081/api/1.0/status
 ```
 
-Request News from NEWS API:
+- Request News from NEWS API:
 
 ```
 curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" -X POST -d '{ "provider": "news_api"}' http://0.0.0.0:8081/api/1.0/campaign
 ```
 
-Request News from NEWS API using a Report:
+- Request News from NEWS API using a Report:
 
 ```
 curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" -X POST -d '{ "provider": "news_api", "report": {"email": "no-reply@newsml.io"}}' http://0.0.0.0:8081/api/1.0/campaign
 ``` 
 
-Search for news including 'tensorflow, keras and sagemaker' from NEWS API:
+- Search for news including 'tensorflow, keras and sagemaker' from NEWS API:
 
 ```
 curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" -X POST -d '{ "provider": "news_api", "query": "tensorflow, sagemaker, keras"}' http://0.0.0.0:8081/api/1.0/campaign
 ``` 
 
-Read for existing news:
+- Read for existing news:
 
 ```
 curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" http://0.0.0.0:8081/api/1.0/news
 ``` 
 
-Read for news from amazon.com:
+- Read for news from amazon.com:
 
 ```
 curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" http://0.0.0.0:8081/api/1.0/news?source=amazon.com
@@ -332,8 +341,10 @@ pip3 install supervisor
 
 Add the following environment variables:
 
+```
 export NEWSML_ENV="/usr/local/src/news_ml/"
 export C_FORCE_ROOT="true"
+```
 
 to the following files:
 
