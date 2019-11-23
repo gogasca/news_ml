@@ -6,7 +6,6 @@ from kombu import Queue
 import os
 import sys
 
-
 filepath = os.environ.get('NEWSML_ENV')
 sys.path.append(filepath)
 
@@ -17,7 +16,12 @@ CELERY_ACCEPT_CONTENT = ['json', 'pickle']
 CELERY_IGNORE_RESULT = True
 CELERY_RESULT_BACKEND = 'amqp'
 CELERY_RESULT_PERSISTENT = True
-BROKER_URL = 'amqp://news_ml:news_ml@rabbitmq:5672'
+RABBITMQ_USER = 'news_ml'
+RABBITMQ_PASSWORD = 'news_ml'
+RABBITMQ_HOSTNAME = 'rabbitmq'
+RABBITMQ_PORT = '5672'
+BROKER_URL = 'amqp://{}:{}@{}:{}'.format(RABBITMQ_USER, RABBITMQ_PASSWORD,
+                                         RABBITMQ_HOSTNAME, RABBITMQ_PORT)
 BROKER_CONNECTION_TIMEOUT = 15
 BROKER_CONNECTION_MAX_RETRIES = 5
 CELERY_DISABLE_RATE_LIMITS = True
@@ -37,9 +41,9 @@ CELERY_TRACK_STARTED = True
 
 CELERY_ROUTES = {
     'process_campaign': {'queue': 'gold', 'routing_key': 'news_ml.gold',
-                         'exchange': 'news_ml',},
+                         'exchange': 'news_ml', },
     'process_clustering': {'queue': 'gold', 'routing_key': 'news_ml.gold',
-                         'exchange': 'news_ml',},
+                           'exchange': 'news_ml', },
     'rank_news': {'queue': 'gold', 'routing_key': 'news_ml.gold',
-                         'exchange': 'news_ml',},
+                  'exchange': 'news_ml', },
 }

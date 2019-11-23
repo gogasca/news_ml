@@ -1,3 +1,5 @@
+"""Process News response."""
+
 import json
 import logging
 

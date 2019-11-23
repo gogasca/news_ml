@@ -39,7 +39,7 @@ REST API Server -> News collector -> PostgresSQL
                            Celery
 ```    
 
-## Software 
+## Software requirements
 
 Python based API:
 
@@ -57,13 +57,13 @@ Python based API:
 
 Install a Compute Engine instance using Ubuntu 16.
 
+Python version: 3.6
+ 
 ```
 sudo apt-get install python build-essential  -y
-sudo apt-get install python-pip python-dev -y
 sudo apt-get install libpq-dev python-dev -y   # Required for psycopg2
 sudo apt-get install git -y
-sudo apt-get install python-pip -y
-sudo apt-get install libpq-dev -y
+sudo apt-get install python3-pip -y
 sudo apt-get install rabbitmq-server -y
 ```
 
@@ -77,10 +77,17 @@ git clone https://github.com/gogasca/news_ml.git
 Install dependencies
 
 ```
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 Install NLTK dependencies
+
+Single line command:
+```
+python3 -c 'import nltk; nltk.download("stopwords"); nltk.download("punkt")'
+```
+
+Python Terminal:
 
 ```
 python
@@ -89,7 +96,7 @@ python
 [nltk_data] Downloading package stopwords to /root/nltk_data...
 [nltk_data]   Unzipping corpora/stopwords.zip.
 True
->>>nltk.download('punkt')
+>>>nltk.download("punkt")
 [nltk_data] Downloading package punkt to /root/nltk_data...
 [nltk_data]   Unzipping tokenizers/punkt.zip.
 ```
@@ -157,6 +164,7 @@ export API_PASSWORD="YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o"
 
 # Key for Email support from mailgun.com
 export MAILGUN_API_KEY="key-"  # Change this
+export MAILGUN_DOMAIN=""
 
 # Key used for encrypting user information.
 export SECRET_FERNET_KEY=""  # Change this
@@ -305,10 +313,20 @@ token to access data. This token lives for a short span of time, even if the att
 its only valid for short span of time. This way we can add one more layer of security to the REST API.
 
 
-## Manage services via supervisor 
+## Manage NewsML Services via supervisor 
 
-Add the following ENV ```export C_FORCE_ROOT="true"``` to the following files:
 
+
+```
+pip3 install supervisor
+```
+
+Add the following environment variables:
+
+export NEWSML_ENV="/usr/local/src/news_ml/"
+export C_FORCE_ROOT="true"
+
+to the following files:
 
 ```
 vim ~/.bashrc
@@ -333,7 +351,8 @@ cd /etc/supervisor/
 supervisord -c supervisord.conf
 ```
 
-Use supervisorctl to check services status
+Use supervisorctl to check services status.
+
 
 ### Upgrades
 
