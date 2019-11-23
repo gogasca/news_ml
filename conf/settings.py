@@ -142,7 +142,7 @@ TOKEN_EXPIRATION_SECS = 600
 # API configuration parameters
 # =========================================================
 
-API_VERSION = '0.3'
+API_VERSION = '0.4'
 API_ACCOUNT = os.environ['API_USERNAME']
 API_PASSWORD = os.environ['API_PASSWORD']
 API_LOGFILE = FILEPATH + '/log/apid.log'
@@ -206,7 +206,6 @@ PHONE_NUMBERS = ['+1408XXXXXXX']
 # =========================================================
 # Report configuration parameters
 # =========================================================
-
 REPORT_ALL_DATES_ARTICLES = False
 
 # =========================================================
@@ -219,7 +218,6 @@ DBPORT = int(os.environ.get('DBPORT'))
 DBUSERNAME = os.environ.get('DBUSERNAME')
 DBPASSWORD = os.environ.get('DBPASSWORD')
 DBNAME = os.environ.get('DBNAME')
-
 DBPASSWORD_ALLOW_EMPTY_PASSWORD = False
 DBNOW = 'now()'
 
