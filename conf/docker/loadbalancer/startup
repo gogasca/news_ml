@@ -1,0 +1,32 @@
+#!/bin/bash -e
+
+confd=/etc/nginx/conf.d
+ssl=/etc/nginx/ssl
+log=/var/log/nginx
+html=/usr/share/nginx/html
+available=/etc/nginx/sites-available
+enabled=/etc/nginx/sites-enabled
+
+chown -R www-data:adm $log
+chmod 0750 $log
+
+chown -R root:root $html
+chmod 755 $html
+
+chown -R root:root $available
+chmod 755 $available
+
+chown -R root:root $confd
+chmod 755 $confd
+
+chown -R root:root $ssl
+chmod 755 $ssl
+
+# Enable available sites
+for site in $(ls $available); do
+    if [ ! -e $enabled/$site ]; then
+        ln -s $available/$site $enabled/$site
+    fi
+done
+
+exec supervisord
