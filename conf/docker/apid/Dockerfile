@@ -23,9 +23,6 @@ ENV LC_ALL en_US.UTF-8
 ENV LC_CTYPE en_US.UTF-8
 
 # Install dependencies
-RUN apt-get install nano vim wget curl dialog net-tools iputils-ping openssh-server -y
-RUN apt-get upgrade -y && apt-get dist-upgrade -y && apt-get install -y build-essential git-core
-RUN apt-get install git -y
 RUN apt-get install python build-essential  -y
 RUN apt-get install python3-pip -y
 RUN apt-get install libpq-dev python-dev -y   # Required for psycopg2
