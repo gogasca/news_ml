@@ -9,7 +9,7 @@ match search pattern.
 App extract entities from News content via Google Cloud NLP and 
 perform sentiment analysis.
 
-## Quick start
+## Quickstart
 
 You can use sample Python script (mini/app.py) 
 which collects News and stores them into a CSV file using News API Key 
@@ -29,6 +29,7 @@ is composed of the following modules:
 
 ## Docker containers
 
+Take a look at conf/docker for more information about Docker.
 
 ## Architecture
 
