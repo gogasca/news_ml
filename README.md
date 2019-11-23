@@ -11,7 +11,7 @@ perform sentiment analysis.
 
 ## Quickstart
 
-You can use sample Python script [mini/app.py] 
+You can use [this](mini/app.py) sample Python script  
 which collects News and stores them into a CSV file using News API Key 
 which can be obtained [here](https://www.newsapi.org).
 
@@ -27,15 +27,6 @@ is composed of the following modules:
  - [RabbitMQ](https://www.rabbitmq.com/) (Message Queue)
  - [PostgreSQL](https://www.postgresql.org/) (Relational Database)
 
-## Docker containers
-
-Take a look at [conf/docker] for more information about how to run
-this server with Docker.
-You need:
-
-- [Docker API](conf/docker/apid/)
-- [Docker RabbitMQ](conf/docker/rabbitmq) or external RabbitMQ server
-- External PostgreSQL database
 
 ## Architecture
 
@@ -59,6 +50,15 @@ Python based API:
  - Google Cloud NLP
  - Ngnix -> Gunicorn -> Flask -> RabbitMQ/Celery/PostgreSQL.
  
+## Docker containers
+
+Take a look at [conf/docker] for more information about how to run
+this server with Docker.
+You need:
+
+- [Docker API](conf/docker/apid/)
+- [Docker RabbitMQ](conf/docker/rabbitmq) or external RabbitMQ server
+- External PostgreSQL database
 
 ### Requirements
 
@@ -201,7 +201,7 @@ postgresql://username:password@hostname/database
 ```
 
 
-## Start API (manually)
+## Configure API settings
 
 Depending on the path where you clone the repo you may need to edit the file.
 
