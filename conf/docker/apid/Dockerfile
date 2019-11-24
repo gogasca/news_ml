@@ -25,7 +25,7 @@ ENV LC_CTYPE en_US.UTF-8
 # Install dependencies
 RUN apt-get install python build-essential  -y
 RUN apt-get install python3-pip -y
-RUN apt-get install libpq-dev python-dev -y   # Required for psycopg2
+RUN apt-get install libpq-dev python3-dev -y   # Required for psycopg2
 
 RUN apt-get install gunicorn -y
 RUN apt-get install sudo -y
@@ -57,9 +57,6 @@ ADD celeryd.conf /etc/supervisor/conf.d/
 
 # mkdir log folder
 RUN mkdir -p /usr/local/src/news_ml/log
-
-# Define mountable directories.
-VOLUME ["/usr/local/src/news_ml/log"]
 
 WORKDIR /usr/local/src/news_ml
 
