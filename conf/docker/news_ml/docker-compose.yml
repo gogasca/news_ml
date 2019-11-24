@@ -7,11 +7,20 @@
 
 # RABBITMQ TCP:5672
 rabbitmq:
-  image: news_ml/rabbitmq-server
+  image: rabbitmq:3-management
   hostname: rabbitmq
+  environment:
+    - RABBITMQ_ERLANG_COOKIE="secret string"
+    - RABBITMQ_NODENAME=rabbitmq
+    - RABBITMQ_DEFAULT_USER=news_ml
+    - RABBITMQ_DEFAULT_PASS=news_ml
   ports:
+    - "4369:4369"
+    - "5671:5671"
     - "5672:5672"
+    - "15671:15671"
     - "15672:15672"
+    - "25672:25672"
 
 # LOAD BALANCER TCP:8080 TODO gogasca@
 loadbalancer:
