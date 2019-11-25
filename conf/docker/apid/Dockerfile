@@ -44,7 +44,7 @@ RUN python3 -c 'import nltk;nltk.download("stopwords");nltk.download("punkt")'
 RUN pip3 install supervisor
 
 RUN mkdir -p /etc/supervisor/conf.d
-RUN mkdir /var/log/supervisor/
+RUN mkdir -p /var/log/supervisor/
 
 RUN cp /usr/local/bin/supervisorctl /usr/bin/
 RUN cp /usr/local/bin/supervisord /usr/bin/

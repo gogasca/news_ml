@@ -5,7 +5,7 @@
 #
 
 # Pull base image.
-FROM ubuntu
+FROM nginx
 
 # File Author / Maintainer
 MAINTAINER Gonzalo Gasca Meza gonzalo@
@@ -28,27 +28,16 @@ ENV LC_CTYPE en_US.UTF-8
 # Set hostname
 RUN echo $(grep $(hostname) /etc/hosts | cut -f1) loadbalancer >> /etc/hosts
 
-RUN apt-get update
+RUN apt-get update && apt upgrade
 RUN locale-gen en_US en_US.UTF-8
 # Install necessary tools
 RUN apt-get install -y nano vim wget dialog net-tools
 
-# Download and Install Nginx
-RUN apt-get install -y nginx nginx-common nginx-extras
-RUN update-rc.d -f nginx disable
-
-# Supervisor
-RUN apt-get install supervisor -y
-RUN update-rc.d -f supervisor disable
-
-# Supervisor
-ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+RUN apt install nginx-extras -y
 
 # start script
 ADD startup /usr/local/bin/startup
 RUN chmod +x /usr/local/bin/startup
-
-CMD ["/usr/local/bin/startup"]
 
 RUN mkdir /etc/nginx/ssl
 # Copy a configuration file from the current directory
@@ -61,3 +50,5 @@ VOLUME ["/etc/nginx/sites-enabled", "/etc/nginx/certs", "/etc/nginx/conf.d", "/v
 
 # Expose ports.
 EXPOSE 8443
+
+CMD ["/usr/local/bin/startup"]

@@ -29,4 +29,4 @@ for site in $(ls $available); do
     fi
 done
 
-exec supervisord
+exec nginx
