@@ -137,7 +137,10 @@ def _ToString(value):
     if not value:
         logging.warning('Empty value')
         return None
-
+    try:
+        unicode = str
+    except:
+        pass
     if isinstance(value, unicode):
         return value.encode('utf-8')
     else:
