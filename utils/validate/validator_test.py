@@ -1,6 +1,7 @@
 import unittest
 import json
-import validator
+from .validator import check_campaign, check_person, check_email_addresses, \
+    check_report, check_translation
 
 
 class TestValidator(unittest.TestCase):
@@ -11,7 +12,7 @@ class TestValidator(unittest.TestCase):
 
         :return:
         """
-        self.assertTrue(validator.check_campaign(
+        self.assertTrue(check_campaign(
             json_request=json.loads("""{
                 "provider": "techmeme",
                 "report": {
@@ -20,14 +21,14 @@ class TestValidator(unittest.TestCase):
                 "translate": {
                     "language": "es"
                 }}""")))
-        self.assertTrue(validator.check_campaign(
+        self.assertTrue(check_campaign(
             json_request=json.loads("""{
                 "provider": "techmeme",
                 "report": {
                     "email": "gonzalo@techie8.com"
                 }}""")))
         # Invalid language.
-        self.assertFalse(validator.check_campaign(
+        self.assertFalse(check_campaign(
             json_request=json.loads("""{
                 "provider": "techmeme",
                 "report": {
@@ -42,7 +43,7 @@ class TestValidator(unittest.TestCase):
 
         :return:
         """
-        self.assertTrue(validator.check_person(
+        self.assertTrue(check_person(
             json_request=json.loads("""{"name": "Elon Musk"}""")))
 
     def test_email(self):
@@ -50,41 +51,41 @@ class TestValidator(unittest.TestCase):
         The actual test.
         Any method which starts with ``test_`` will considered as a test case.
         """
-        self.assertTrue(validator.check_email_addresses('gonzalo@techie8.com'))
-        self.assertTrue(validator.check_email_addresses(
+        self.assertTrue(check_email_addresses('gonzalo@techie8.com'))
+        self.assertTrue(check_email_addresses(
             'gonzalo@techie8.com;carlos@techie8.com'))
-        self.assertTrue(validator.check_email_addresses('gonzalo@techie8.com;'))
+        self.assertTrue(check_email_addresses('gonzalo@techie8.com;'))
         self.assertTrue(
-            validator.check_email_addresses(';gonzalo@techie8.com;'))
+            check_email_addresses(';gonzalo@techie8.com;'))
         self.assertFalse(
-            validator.check_email_addresses('gonzalo@techie8', check_mx=True))
+            check_email_addresses('gonzalo@techie8', check_mx=True))
 
     def test_report(self):
         """
 
         :return:
         """
-        self.assertTrue(validator.check_report(
+        self.assertTrue(check_report(
             json.loads("""{"report": { "email": "gonzalo@techie8.com"}}""")))
-        self.assertFalse(validator.check_report(
+        self.assertFalse(check_report(
             json.loads("""{"report": { "email": ""}}""")))
         self.assertFalse(
-            validator.check_report(json.loads("""{"report": { }}""")))
+            check_report(json.loads("""{"report": { }}""")))
 
     def test_language(self):
         """
 
         :return:
         """
-        self.assertTrue(validator.check_translation(
+        self.assertTrue(check_translation(
             json.loads("""{"translate": {"language": "es"}}""")))
-        self.assertTrue(validator.check_translation(
+        self.assertTrue(check_translation(
             json.loads("""{"translate": {"language": "fr"}}""")))
-        self.assertTrue(validator.check_translation(
+        self.assertTrue(check_translation(
             json.loads("""{"translate": {"language": "de"}}""")))
-        self.assertFalse(validator.check_translation(
+        self.assertFalse(check_translation(
             json.loads("""{"translate": {"language": "xx"}}""")))
-        self.assertFalse(validator.check_translation(
+        self.assertFalse(check_translation(
             json.loads("""{"translate": {"language": 1}}""")))
 
 
