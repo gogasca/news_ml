@@ -15,7 +15,7 @@ def encrypt(plain_text):
     crypto = Fernet(os.environ.get('SECRET_FERNET_KEY'))
     if not crypto:
         raise Exception('decrypt() No Key defined in ENV')
-    if isinstance(plain_text, basestring):
+    if isinstance(plain_text, str):
         string_text = str(plain_text)
         return crypto.encrypt(bytes(string_text))
     else:
