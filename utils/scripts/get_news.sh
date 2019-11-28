@@ -57,7 +57,6 @@ function cluster_news() {
   local JSON_REQUEST=$1
   echo_log "($REQUEST_IDENTIFIER) Clustering news information...${JSON_REQUEST}"
   curl -k -u ${API_USERNAME}:${API_PASSWORD} -H "Content-Type: application/json" --data "${JSON_REQUEST}" ${CLUSTER_URL} -v >>$LOG
-  check
   echo_log "($REQUEST_IDENTIFIER) CURL Request sent"
   echo_log "($REQUEST_IDENTIFIER) Sleeping..."
   sleep 60

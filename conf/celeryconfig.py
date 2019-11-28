@@ -6,10 +6,10 @@ from kombu import Queue
 import os
 import sys
 
-filepath = os.environ.get('NEWSML_ENV')
-sys.path.append(filepath)
+FILEPATH = os.environ.get('NEWSML_ENV', '')
+sys.path.append(FILEPATH)
 
-CELERYD_CHDIR = filepath
+CELERYD_CHDIR = FILEPATH
 CELERY_ENABLE_UTC = True
 CELERY_TIMEZONE = 'US/Pacific'
 CELERY_ACCEPT_CONTENT = ['json', 'pickle']
