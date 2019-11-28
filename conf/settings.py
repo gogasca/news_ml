@@ -3,7 +3,7 @@
 import os
 
 # Parameters
-FILEPATH = os.environ.get('NEWSML_ENV')
+FILEPATH = os.environ.get('NEWSML_ENV', '')
 
 DATE_LATEST = u'latest'
 DEFAULT_PROVIDER = u'GOOGLEBLOG.COM'

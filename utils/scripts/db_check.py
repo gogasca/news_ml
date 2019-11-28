@@ -2,10 +2,12 @@
 import os
 import sys
 
-path = os.environ.get('NEWSML_ENV')
-if not path:
+FILEPATH = os.environ.get('NEWSML_ENV')
+
+if not FILEPATH:
     raise Exception('Define NEWSML_ENV first')
-sys.path.append(path)
+
+sys.path.append(FILEPATH)
 from api.version1_0.database import DbHelper
 
 

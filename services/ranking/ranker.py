@@ -182,7 +182,7 @@ def sort_articles(articles):
     :param articles:
     :return:
     """
-    if articles < 1:
+    if len(articles) < 1:
         raise ValueError('No news')
     sorted_articles = sorted(articles, key=lambda x: x.score, reverse=True)
     return sorted_articles
