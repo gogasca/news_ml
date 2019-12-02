@@ -1,0 +1,4 @@
+google-cloud-pubsub
+tweepy
+urllib3
+
