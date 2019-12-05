@@ -111,7 +111,19 @@ True
 ## Database information
 
 You need to create a new Database based on PostgreSQL server:
-Check [conf/database/newsdb.sql] for Database schema.
+ - Check [conf/database/news_ml.sql] for Database creation.
+ - Check [conf/database/schema.sql] for Database schema.
+
+## Using Google Cloud SQL proxy
+
+```
+./cloud_sql_proxy -instances=<>Project>:<Zone>:<Instance name>=tcp:5432
+```
+
+Example:
+```
+./cloud_sql_proxy -instances=news-ml:us-central1:newsml-database-1=tcp:5432
+```
 
 ## RabbitMQ
 

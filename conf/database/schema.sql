@@ -5,30 +5,7 @@
 -- Dumped from database version 9.6.15
 -- Dumped by pg_dump version 12.0
 
--- Started on 2019-10-31 00:21:33 PDT
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
-
---
--- TOC entry 2778 (class 1262 OID 16410)
--- Name: newsml; Type: DATABASE; Schema: -; Owner: postgres
---
-
-CREATE DATABASE newsml WITH TEMPLATE = template0 ENCODING = 'UTF8' LC_COLLATE = 'en_US.UTF8' LC_CTYPE = 'en_US.UTF8';
-
-
-ALTER DATABASE newsml OWNER TO postgres;
-
-\connect newsml
+-- Started on 2019-12-04 21:53:58 PST
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -49,10 +26,10 @@ SET row_security = off;
 CREATE SCHEMA public;
 
 
-ALTER SCHEMA public OWNER TO newsml;
+ALTER SCHEMA public OWNER TO dev_news_ml;
 
 --
--- TOC entry 2780 (class 0 OID 0)
+-- TOC entry 2792 (class 0 OID 0)
 -- Dependencies: 3
 -- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: newsml
 --
@@ -75,7 +52,7 @@ CREATE TABLE public.api_users (
 );
 
 
-ALTER TABLE public.api_users OWNER TO newsml;
+ALTER TABLE public.api_users OWNER TO dev_news_ml;
 
 --
 -- TOC entry 192 (class 1259 OID 16471)
@@ -90,15 +67,13 @@ CREATE SEQUENCE public.api_users_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.api_users_id_seq OWNER TO newsml;
+ALTER TABLE public.api_users_id_seq OWNER TO dev_news_ml;
 
 --
--- TOC entry 2783 (class 0 OID 0)
+-- TOC entry 2795 (class 0 OID 0)
 -- Dependencies: 192
 -- Name: api_users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: newsml
 --
-
-ALTER SEQUENCE public.api_users_id_seq OWNED BY public.api_users.id;
 
 
 --
@@ -122,7 +97,7 @@ CREATE TABLE public.campaign (
 );
 
 
-ALTER TABLE public.campaign OWNER TO newsml;
+ALTER TABLE public.campaign OWNER TO dev_news_ml;
 
 --
 -- TOC entry 194 (class 1259 OID 16484)
@@ -137,15 +112,13 @@ CREATE SEQUENCE public.campaign_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.campaign_id_seq OWNER TO newsml;
+ALTER TABLE public.campaign_id_seq OWNER TO dev_news_ml;
 
 --
--- TOC entry 2785 (class 0 OID 0)
+-- TOC entry 2797 (class 0 OID 0)
 -- Dependencies: 194
 -- Name: campaign_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: newsml
 --
-
-ALTER SEQUENCE public.campaign_id_seq OWNED BY public.campaign.id;
 
 
 --
@@ -155,12 +128,12 @@ ALTER SEQUENCE public.campaign_id_seq OWNED BY public.campaign.id;
 
 CREATE TABLE public.companies (
     company_id integer NOT NULL,
-    name character varying(64) NOT NULL,
+    name character varying(1024) NOT NULL,
     mention_date time(6) with time zone
 );
 
 
-ALTER TABLE public.companies OWNER TO newsml;
+ALTER TABLE public.companies OWNER TO dev_news_ml;
 
 --
 -- TOC entry 187 (class 1259 OID 16452)
@@ -175,15 +148,13 @@ CREATE SEQUENCE public.companies_company_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.companies_company_id_seq OWNER TO newsml;
+ALTER TABLE public.companies_company_id_seq OWNER TO dev_news_ml;
 
 --
--- TOC entry 2787 (class 0 OID 0)
+-- TOC entry 2799 (class 0 OID 0)
 -- Dependencies: 187
 -- Name: companies_company_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: newsml
 --
-
-ALTER SEQUENCE public.companies_company_id_seq OWNED BY public.companies.company_id;
 
 
 --
@@ -200,7 +171,6 @@ CREATE TABLE public.news (
     description character varying(65536) NOT NULL,
     url character varying(512),
     url_to_image character varying(512),
-    published_at date,
     content character varying(65536),
     campaign character varying(16),
     score double precision,
@@ -210,11 +180,12 @@ CREATE TABLE public.news (
     rank_order integer,
     translated_content character varying(65536),
     detected_language character varying(128),
-    inserted_at time without time zone
+    published_at timestamp with time zone,
+    inserted_at timestamp with time zone
 );
 
 
-ALTER TABLE public.news OWNER TO newsml;
+ALTER TABLE public.news OWNER TO dev_news_ml;
 
 --
 -- TOC entry 185 (class 1259 OID 16441)
@@ -229,15 +200,13 @@ CREATE SEQUENCE public.news_news_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.news_news_id_seq OWNER TO newsml;
+ALTER TABLE public.news_news_id_seq OWNER TO dev_news_ml;
 
 --
--- TOC entry 2789 (class 0 OID 0)
+-- TOC entry 2801 (class 0 OID 0)
 -- Dependencies: 185
 -- Name: news_news_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: newsml
 --
-
-ALTER SEQUENCE public.news_news_id_seq OWNED BY public.news.news_id;
 
 
 --
@@ -253,7 +222,7 @@ CREATE TABLE public.persons (
 );
 
 
-ALTER TABLE public.persons OWNER TO newsml;
+ALTER TABLE public.persons OWNER TO dev_news_ml;
 
 --
 -- TOC entry 196 (class 1259 OID 16522)
@@ -268,15 +237,14 @@ CREATE SEQUENCE public.persons_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.persons_id_seq OWNER TO newsml;
+ALTER TABLE public.persons_id_seq OWNER TO dev_news_ml;
 
 --
--- TOC entry 2791 (class 0 OID 0)
+-- TOC entry 2803 (class 0 OID 0)
 -- Dependencies: 196
 -- Name: persons_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: newsml
 --
 
-ALTER SEQUENCE public.persons_id_seq OWNED BY public.persons.id;
 
 
 --
@@ -290,7 +258,7 @@ CREATE TABLE public.tags (
 );
 
 
-ALTER TABLE public.tags OWNER TO newsml;
+ALTER TABLE public.tags OWNER TO dev_news_ml;
 
 --
 -- TOC entry 191 (class 1259 OID 16468)
@@ -303,7 +271,7 @@ CREATE TABLE public.tags_news (
 );
 
 
-ALTER TABLE public.tags_news OWNER TO newsml;
+ALTER TABLE public.tags_news OWNER TO dev_news_ml;
 
 --
 -- TOC entry 189 (class 1259 OID 16460)
@@ -318,19 +286,18 @@ CREATE SEQUENCE public.tags_tag_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.tags_tag_id_seq OWNER TO newsml;
+ALTER TABLE public.tags_tag_id_seq OWNER TO dev_news_ml;
 
 --
--- TOC entry 2794 (class 0 OID 0)
+-- TOC entry 2806 (class 0 OID 0)
 -- Dependencies: 189
 -- Name: tags_tag_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: newsml
 --
 
-ALTER SEQUENCE public.tags_tag_id_seq OWNED BY public.tags.tag_id;
 
 
 --
--- TOC entry 2634 (class 2604 OID 16476)
+-- TOC entry 2635 (class 2604 OID 16476)
 -- Name: api_users id; Type: DEFAULT; Schema: public; Owner: newsml
 --
 
@@ -338,7 +305,7 @@ ALTER TABLE ONLY public.api_users ALTER COLUMN id SET DEFAULT nextval('public.ap
 
 
 --
--- TOC entry 2635 (class 2604 OID 16489)
+-- TOC entry 2636 (class 2604 OID 16489)
 -- Name: campaign id; Type: DEFAULT; Schema: public; Owner: newsml
 --
 
@@ -346,7 +313,7 @@ ALTER TABLE ONLY public.campaign ALTER COLUMN id SET DEFAULT nextval('public.cam
 
 
 --
--- TOC entry 2632 (class 2604 OID 16457)
+-- TOC entry 2633 (class 2604 OID 16457)
 -- Name: companies company_id; Type: DEFAULT; Schema: public; Owner: newsml
 --
 
@@ -354,7 +321,7 @@ ALTER TABLE ONLY public.companies ALTER COLUMN company_id SET DEFAULT nextval('p
 
 
 --
--- TOC entry 2631 (class 2604 OID 16446)
+-- TOC entry 2632 (class 2604 OID 16446)
 -- Name: news news_id; Type: DEFAULT; Schema: public; Owner: newsml
 --
 
@@ -362,7 +329,7 @@ ALTER TABLE ONLY public.news ALTER COLUMN news_id SET DEFAULT nextval('public.ne
 
 
 --
--- TOC entry 2640 (class 2604 OID 16527)
+-- TOC entry 2641 (class 2604 OID 16527)
 -- Name: persons id; Type: DEFAULT; Schema: public; Owner: newsml
 --
 
@@ -370,170 +337,8 @@ ALTER TABLE ONLY public.persons ALTER COLUMN id SET DEFAULT nextval('public.pers
 
 
 --
--- TOC entry 2633 (class 2604 OID 16465)
+-- TOC entry 2634 (class 2604 OID 16465)
 -- Name: tags tag_id; Type: DEFAULT; Schema: public; Owner: newsml
 --
 
 ALTER TABLE ONLY public.tags ALTER COLUMN tag_id SET DEFAULT nextval('public.tags_tag_id_seq'::regclass);
-
-
---
--- TOC entry 2649 (class 2606 OID 16481)
--- Name: api_users api_users_pkey; Type: CONSTRAINT; Schema: public; Owner: newsml
---
-
-ALTER TABLE ONLY public.api_users
-    ADD CONSTRAINT api_users_pkey PRIMARY KEY (id);
-
-
---
--- TOC entry 2651 (class 2606 OID 16483)
--- Name: api_users api_users_username_key; Type: CONSTRAINT; Schema: public; Owner: newsml
---
-
-ALTER TABLE ONLY public.api_users
-    ADD CONSTRAINT api_users_username_key UNIQUE (username);
-
-
---
--- TOC entry 2653 (class 2606 OID 16491)
--- Name: campaign campaign_pkey; Type: CONSTRAINT; Schema: public; Owner: newsml
---
-
-ALTER TABLE ONLY public.campaign
-    ADD CONSTRAINT campaign_pkey PRIMARY KEY (id);
-
-
---
--- TOC entry 2645 (class 2606 OID 16459)
--- Name: companies companies_pkey; Type: CONSTRAINT; Schema: public; Owner: newsml
---
-
-ALTER TABLE ONLY public.companies
-    ADD CONSTRAINT companies_pkey PRIMARY KEY (company_id);
-
-
---
--- TOC entry 2643 (class 2606 OID 16451)
--- Name: news news_pkey; Type: CONSTRAINT; Schema: public; Owner: newsml
---
-
-ALTER TABLE ONLY public.news
-    ADD CONSTRAINT news_pkey PRIMARY KEY (news_id);
-
-
---
--- TOC entry 2655 (class 2606 OID 16529)
--- Name: persons persons_pkey; Type: CONSTRAINT; Schema: public; Owner: newsml
---
-
-ALTER TABLE ONLY public.persons
-    ADD CONSTRAINT persons_pkey PRIMARY KEY (id);
-
-
---
--- TOC entry 2647 (class 2606 OID 16467)
--- Name: tags tags_pkey; Type: CONSTRAINT; Schema: public; Owner: newsml
---
-
-ALTER TABLE ONLY public.tags
-    ADD CONSTRAINT tags_pkey PRIMARY KEY (tag_id);
-
-
---
--- TOC entry 2779 (class 0 OID 0)
--- Dependencies: 2778
--- Name: DATABASE newsml; Type: ACL; Schema: -; Owner: postgres
---
-
-GRANT ALL ON DATABASE newsml TO newsml;
-
-
---
--- TOC entry 2781 (class 0 OID 0)
--- Dependencies: 3
--- Name: SCHEMA public; Type: ACL; Schema: -; Owner: newsml
---
-
-REVOKE ALL ON SCHEMA public FROM cloudsqladmin;
-REVOKE ALL ON SCHEMA public FROM PUBLIC;
-GRANT ALL ON SCHEMA public TO PUBLIC;
-GRANT ALL ON SCHEMA public TO newsml WITH GRANT OPTION;
-
-
---
--- TOC entry 2782 (class 0 OID 0)
--- Dependencies: 193
--- Name: TABLE api_users; Type: ACL; Schema: public; Owner: newsml
---
-
-REVOKE ALL ON TABLE public.api_users FROM newsml;
-GRANT ALL ON TABLE public.api_users TO newsml WITH GRANT OPTION;
-
-
---
--- TOC entry 2784 (class 0 OID 0)
--- Dependencies: 195
--- Name: TABLE campaign; Type: ACL; Schema: public; Owner: newsml
---
-
-REVOKE ALL ON TABLE public.campaign FROM newsml;
-GRANT ALL ON TABLE public.campaign TO newsml WITH GRANT OPTION;
-
-
---
--- TOC entry 2786 (class 0 OID 0)
--- Dependencies: 188
--- Name: TABLE companies; Type: ACL; Schema: public; Owner: newsml
---
-
-REVOKE ALL ON TABLE public.companies FROM newsml;
-GRANT ALL ON TABLE public.companies TO newsml WITH GRANT OPTION;
-
-
---
--- TOC entry 2788 (class 0 OID 0)
--- Dependencies: 186
--- Name: TABLE news; Type: ACL; Schema: public; Owner: newsml
---
-
-REVOKE ALL ON TABLE public.news FROM newsml;
-GRANT ALL ON TABLE public.news TO newsml WITH GRANT OPTION;
-
-
---
--- TOC entry 2790 (class 0 OID 0)
--- Dependencies: 197
--- Name: TABLE persons; Type: ACL; Schema: public; Owner: newsml
---
-
-REVOKE ALL ON TABLE public.persons FROM newsml;
-GRANT ALL ON TABLE public.persons TO newsml WITH GRANT OPTION;
-
-
---
--- TOC entry 2792 (class 0 OID 0)
--- Dependencies: 190
--- Name: TABLE tags; Type: ACL; Schema: public; Owner: newsml
---
-
-REVOKE ALL ON TABLE public.tags FROM newsml;
-GRANT ALL ON TABLE public.tags TO newsml WITH GRANT OPTION;
-
-
---
--- TOC entry 2793 (class 0 OID 0)
--- Dependencies: 191
--- Name: TABLE tags_news; Type: ACL; Schema: public; Owner: newsml
---
-
-REVOKE ALL ON TABLE public.tags_news FROM newsml;
-GRANT ALL ON TABLE public.tags_news TO newsml WITH GRANT OPTION;
-
-
--- Completed on 2019-10-31 00:21:40 PDT
-
---
--- PostgreSQL database dump complete
---
-
