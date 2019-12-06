@@ -5,7 +5,8 @@ from celery.task import task
 from conf import logger
 from conf import settings
 
-from main.lib.news_api import top_news as news_ml
+from main.lib.news_api import top_news as news_api
+from main.lib.techmeme import top_news as techmeme
 from services.nlp import utils as nlp_utils
 
 log = logger.LoggerManager().getLogger("__app__",
@@ -30,7 +31,10 @@ def process_campaign(self, campaign_instance):
     # Select campaign instance based on Provider
     if campaign_instance.provider == settings.NEWS_API:
         log.info('process_campaign() News API')
-        news_ml.launch(campaign_instance)
+        news_api.launch(campaign_instance)
+    elif campaign_instance.provider == settings.TECHMEME:
+        log.info('process_campaign() Techmeme')
+        techmeme.launch(campaign_instance)
     else:
         log.info(
             'process_campaign() Provider not found: %s' %

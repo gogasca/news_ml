@@ -46,9 +46,12 @@ def item_exists(url, table='news'):
 
 def insert_news(title=None, author='', description='', content='', url='',
                 url_to_image='', source_id='', source='', campaign='',
-                published_at='', score=0, magnitude=0, sentiment='',
+                published_at='NULL', score=0, magnitude=0, sentiment='',
                 **kwargs):
     """
+    Techmeme do not provide published at information
+    the best we can do is leave the field NULL or add the day which we read that
+    info. We already have inserted_at which provides this.
 
     :param title:
     :param author:
@@ -60,35 +63,40 @@ def insert_news(title=None, author='', description='', content='', url='',
     :param source:
     :param campaign:
     :param published_at:
+    :param score:
+    :param magnitude:
+    :param sentiment:
     :param kwargs:
     :return:
     """
     try:
         if not (title and url):
             raise ValueError('Title or url missing')
+        db = Db.Db()
+        db.initialize(dsn=settings.SQLALCHEMY_DSN)
         sql_query = \
             "INSERT INTO news (" \
             "title, author, description, content, url, url_to_image, " \
             "source_id, source, campaign, published_at, score, magnitude, " \
             "sentiment, inserted_at ) " \
-            "VALUES ('%s','%s','%s','%s', '%s','%s','%s','%s','%s','%s', " \
-            "%s, %s, '%s', '%s')" \
-            % (title.replace("'", "''"),
-               author.replace("'", "''"),
-               description.replace("'", "''"),
-               content[:settings.CONTENT_SIZE].replace("'", "''"),
-               url,
-               url_to_image,
-               source_id,
-               source,
-               campaign,
-               published_at,
-               score,
-               magnitude,
-               sentiment,
-               DB_NOW)
-        db = Db.Db()
-        db.initialize(dsn=settings.SQLALCHEMY_DSN)
+            "VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', " \
+            "{}, {}, {}, '{}', '{}')".format(
+                title.replace("'", "''"),
+                author.replace("'", "''"),
+                description.replace("'", "''"),
+                content[:settings.CONTENT_SIZE].replace("'", "''"),
+                url,
+                url_to_image,
+                source_id,
+                source,
+                campaign,
+                ''.join(('\'', published_at,
+                         '\'')) if published_at and published_at != 'NULL'
+                else published_at,
+                score,
+                magnitude,
+                sentiment,
+                DB_NOW)
         return db.insert_content(sql_query, 'news_id')
     except psycopg2.ProgrammingError as exception:
         log.exception(exception)

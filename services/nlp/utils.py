@@ -36,6 +36,22 @@ def extract_filter(dictionary=settings.ENTITY_FILTER):
         return f.read().splitlines()
 
 
+def text_cleaner(text):
+    """
+
+    :param text:
+    :return:
+    """
+    try:
+        if len(text) > 1:
+            for word in extract_filter(settings.ENTITY_FILTER):
+                text = text.replace(word, '').lstrip().rstrip()
+        return text
+    except FileNotFoundError as exception:
+        logging.exception('Will return original file', exception)
+        return text
+
+
 def extract_tags(text):
     """
 

@@ -255,7 +255,7 @@ class News(db.Model, AutoSerialize, Serializer):
         "nextval('news_news_id_seq'::regclass)"))
     source = Column(String(64))
     source_id = Column(String(64))
-    author = Column(String(128))
+    author = Column(String(256))
     title = Column(String(256), nullable=False)
     description = Column(String(65536))
     url = Column(String(512))
