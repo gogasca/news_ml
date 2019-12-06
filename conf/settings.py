@@ -73,6 +73,15 @@ TECHRADAR = 'TECHRADAR'
 THE_NEXT_WEB = 'THE_NEXT_WEB'
 
 # =========================================================
+# Techmeme
+# =========================================================
+
+TECHMEME = 'TECHMEME'
+TECHMEME_URL = 'https://www.techmeme.com/'
+TECHMEME_REPORT = 'Silicon Valley | Daily Automatic Summary Report | Techmeme'
+
+
+# =========================================================
 # Alexa Skill
 # =========================================================
 
@@ -237,4 +246,3 @@ SQLALCHEMY_POOL_RECYCLE = 60
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 DATABASE_CONNECT_OPTIONS = None
 SQLALCHEMY_COMMIT_ON_TEARDOWN = True
-

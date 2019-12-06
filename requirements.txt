@@ -63,5 +63,6 @@ tweepy==3.5.0
 twilio==5.7.0
 unidecode
 uritemplate==3.0.0
+urllib3
 validate-email==1.3
 Werkzeug==0.15.3

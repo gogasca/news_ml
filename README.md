@@ -124,6 +124,15 @@ Example:
 ```
 ./cloud_sql_proxy -instances=news-ml:us-central1:newsml-database-1=tcp:5432
 ```
+## Using Docker container
+
+```
+docker run -d \
+  -v <PATH_TO_KEY_FILE>:/config \
+  -p 127.0.0.1:5432:5432 \
+  gcr.io/cloudsql-docker/gce-proxy:1.16 /cloud_sql_proxy \
+  -instances=<INSTANCE_CONNECTION_NAME>=tcp:0.0.0.0:5432 -credential_file=/config
+```
 
 ## RabbitMQ
 
@@ -289,6 +298,12 @@ curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H
 ```
 curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" -X POST -d '{ "provider": "news_api", "query": "tensorflow, sagemaker, keras"}' http://0.0.0.0:8081/api/1.0/campaign
 ``` 
+
+- Request News from TechMeme:
+
+```
+curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" -X POST -d '{ "provider": "techmeme"}' http://0.0.0.0:8081/api/1.0/campaign
+```
 
 - Read for existing news:
 

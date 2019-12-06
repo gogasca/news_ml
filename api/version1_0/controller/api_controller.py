@@ -116,8 +116,8 @@ def get_clustering(json_request):
     clustering_instance = ClusterD.Clustering(settings.NUM_OF_CLUSTERS)
     clustering_instance.provider = settings.CLUSTERING_PROVIDER.upper()
 
-    if settings.API_NUM_OF_CLUSTERS in json_request:
-        num_of_clusters = json_request[settings.API_NUM_OF_CLUSTERS]
+    if settings.NUM_OF_CLUSTERS in json_request:
+        num_of_clusters = json_request[settings.NUM_OF_CLUSTERS]
         if isinstance(num_of_clusters, int) and (num_of_clusters > 1):
             clustering_instance.num_of_clusters = num_of_clusters
         else:
@@ -200,6 +200,6 @@ def get_person(json_request):
         raise ValueError(errors.INVALID_PERSON)
 
     person_instance = PersonD.PersonD()
-    if constants._NAME in json_request:
-        person_instance.name = json_request[constants._NAME]
+    if constants.NAME in json_request:
+        person_instance.name = json_request[constants.NAME]
     return person_instance

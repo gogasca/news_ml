@@ -56,6 +56,19 @@ Start Load Balancer
 docker run -d --name="loadbalancer" --hostname="loadbalancer" --network=newsml_network --publish="8443:8443"  news_ml/loadbalancer
 ```
 
+SQL proxy
+
+```
+docker run -d \
+  --name="cloud_sql_proxy" \
+  --network=newsml_network \
+  -v /usr/local/src/news_ml/conf/credentials/key.json:/config \
+  -p 127.0.0.1:5432:5432 \
+  gcr.io/cloudsql-docker/gce-proxy:1.16 /cloud_sql_proxy \
+  -instances=<INSTANCE_CONNECTION_NAME>=tcp:0.0.0.0:5432 -credential_file=/config
+```
+Reference [here](https://cloud.google.com/sql/docs/mysql/connect-docker)
+
 Validate connection:
 
 ```
