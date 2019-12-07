@@ -21,9 +21,9 @@ RANKER='{ "report": {"email": "'${EMAIL_NOTIFICATIONS}'"} }'
 CLUSTER='{ "clusters": 8, "report": {"email": "'${EMAIL_NOTIFICATIONS}'"} }'
 
 # API URL.
-CAMPAIGN_URL="http://0.0.0.0:8081/api/1.0/campaign"
-RANK_URL="http://0.0.0.0:8081/api/1.0/rank"
-CLUSTER_URL="http://0.0.0.0:8081/api/1.0/clustering"
+CAMPAIGN_URL="http://0.0.0.0:8443/api/1.0/campaign"
+RANK_URL="http://0.0.0.0:8443/api/1.0/rank"
+CLUSTER_URL="http://0.0.0.0:8443/api/1.0/clustering"
 
 function echo_log() {
   echo $DATE" $1" >>$LOG
@@ -34,10 +34,13 @@ function collect_news() {
   local REQUEST_IDENTIFIER=$(head -200 /dev/urandom | cksum | awk '{print $1}')
   local JSON_REQUEST=$1
   echo_log "($REQUEST_IDENTIFIER) Collecting information...${JSON_REQUEST}"
-  curl -k -u ${API_USERNAME}:${API_PASSWORD} -H "Content-Type: application/json" --data "${JSON_REQUEST}" ${CAMPAIGN_URL} -v >>$LOG
-  echo_log "($REQUEST_IDENTIFIER) Sleeping..."
-  sleep 60
-  echo_log "($REQUEST_IDENTIFIER) Request completed"
+  if curl -k -u ${API_USERNAME}:${API_PASSWORD} -H "Content-Type: application/json" --data "${JSON_REQUEST}" ${CAMPAIGN_URL} -v >>$LOG ; then
+    echo_log "($REQUEST_IDENTIFIER) Sleeping..."
+    sleep 60
+    echo_log "($REQUEST_IDENTIFIER) Request completed"
+  else
+    echo_log "Failed to run command"
+  fi
 }
 
 function rank_news() {
@@ -45,10 +48,13 @@ function rank_news() {
   local REQUEST_IDENTIFIER=$(head -200 /dev/urandom | cksum | awk '{print $1}')
   local JSON_REQUEST=$1
   echo_log "($REQUEST_IDENTIFIER) Ranking news information...${JSON_REQUEST}"
-  curl -k -u ${API_USERNAME}:${API_PASSWORD} -H "Content-Type: application/json" --data "${JSON_REQUEST}" ${RANK_URL} -v >>$LOG
-  echo_log "($REQUEST_IDENTIFIER) Sleeping..."
-  sleep 60
-  echo_log "($REQUEST_IDENTIFIER) Request completed"
+  if curl -k -u ${API_USERNAME}:${API_PASSWORD} -H "Content-Type: application/json" --data "${JSON_REQUEST}" ${RANK_URL} -v >>$LOG ; then
+    echo_log "($REQUEST_IDENTIFIER) Sleeping..."
+    sleep 60
+    echo_log "($REQUEST_IDENTIFIER) Request completed"
+  else
+    echo_log "Failed to run command"
+  fi
 }
 
 function cluster_news() {
@@ -56,10 +62,13 @@ function cluster_news() {
   local REQUEST_IDENTIFIER=$(head -200 /dev/urandom | cksum | awk '{print $1}')
   local JSON_REQUEST=$1
   echo_log "($REQUEST_IDENTIFIER) Clustering news information...${JSON_REQUEST}"
-  curl -k -u ${API_USERNAME}:${API_PASSWORD} -H "Content-Type: application/json" --data "${JSON_REQUEST}" ${CLUSTER_URL} -v >>$LOG
-  echo_log "($REQUEST_IDENTIFIER) CURL Request sent"
-  echo_log "($REQUEST_IDENTIFIER) Sleeping..."
-  sleep 60
+  if curl -k -u ${API_USERNAME}:${API_PASSWORD} -H "Content-Type: application/json" --data "${JSON_REQUEST}" ${CLUSTER_URL} -v >>$LOG ; then
+    echo_log "($REQUEST_IDENTIFIER) CURL Request sent"
+    echo_log "($REQUEST_IDENTIFIER) Sleeping..."
+    sleep 60
+  else
+    echo_log "Failed to run command"
+  fi
 }
 
 # Generate Daily report.
