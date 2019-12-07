@@ -16,14 +16,14 @@ EMAIL_NOTIFICATIONS='support@newsml.io'
 # API Requests.
 SOURCES='techcrunch'
 NEWS_API='{ "provider": "news_api", "report": {"email": "'${EMAIL_NOTIFICATIONS}'"}}'
-QUERY_NEWS='{ "provider": "news_api", "query": "tensorflow, sagemaker, keras, petastorm, kubeflow", "report": {"email": "'${EMAIL_NOTIFICATIONS}'"} }'
+QUERY_NEWS='{ "provider": "news_api", "query": "tensorflow, sagemaker, keras, kubeflow", "report": {"email": "'${EMAIL_NOTIFICATIONS}'"} }'
 RANKER='{ "report": {"email": "'${EMAIL_NOTIFICATIONS}'"} }'
 CLUSTER='{ "clusters": 8, "report": {"email": "'${EMAIL_NOTIFICATIONS}'"} }'
 
-# API URL.
-CAMPAIGN_URL="http://0.0.0.0:8443/api/1.0/campaign"
-RANK_URL="http://0.0.0.0:8443/api/1.0/rank"
-CLUSTER_URL="http://0.0.0.0:8443/api/1.0/clustering"
+# API URL using HTTPS and custom port.
+CAMPAIGN_URL="https://0.0.0.0:8443/api/1.0/campaign"
+RANK_URL="https://0.0.0.0:8443/api/1.0/rank"
+CLUSTER_URL="https://0.0.0.0:8443/api/1.0/clustering"
 
 function echo_log() {
   echo $DATE" $1" >>$LOG
@@ -63,9 +63,9 @@ function cluster_news() {
   local JSON_REQUEST=$1
   echo_log "($REQUEST_IDENTIFIER) Clustering news information...${JSON_REQUEST}"
   if curl -k -u ${API_USERNAME}:${API_PASSWORD} -H "Content-Type: application/json" --data "${JSON_REQUEST}" ${CLUSTER_URL} -v >>$LOG ; then
-    echo_log "($REQUEST_IDENTIFIER) CURL Request sent"
     echo_log "($REQUEST_IDENTIFIER) Sleeping..."
     sleep 60
+    echo_log "($REQUEST_IDENTIFIER) Request completed"
   else
     echo_log "Failed to run command"
   fi
