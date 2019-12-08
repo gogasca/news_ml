@@ -84,7 +84,8 @@ def analyze_sentiment(text, encoding='UTF32'):
     request = service.documents().analyzeSentiment(body=body)
     try:
         response = request.execute()
-    except HttpError:
+    except HttpError as exception:
+        logging.exception(exception)
         return
     return response
 

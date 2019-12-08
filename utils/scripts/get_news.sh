@@ -39,7 +39,7 @@ function collect_news() {
     sleep 60
     echo_log "($REQUEST_IDENTIFIER) Request completed"
   else
-    echo_log "Failed to run command"
+    echo_log "($REQUEST_IDENTIFIER) Failed to run command..."
   fi
 }
 
@@ -53,7 +53,7 @@ function rank_news() {
     sleep 60
     echo_log "($REQUEST_IDENTIFIER) Request completed"
   else
-    echo_log "Failed to run command"
+    echo_log "($REQUEST_IDENTIFIER) Failed to run command..."
   fi
 }
 
@@ -67,13 +67,17 @@ function cluster_news() {
     sleep 60
     echo_log "($REQUEST_IDENTIFIER) Request completed"
   else
-    echo_log "Failed to run command"
+    echo_log "($REQUEST_IDENTIFIER) Failed to run command..."
   fi
 }
 
-# Generate Daily report.
-collect_news "$QUERY_NEWS"
-# Rank news.
-rank_news "$RANKER"
-# Cluster news.
-cluster_news "$CLUSTER"
+function main() {
+  # Generate Daily report.
+  collect_news "$QUERY_NEWS"
+  # Rank news.
+  rank_news "$RANKER"
+  # Cluster news.
+  cluster_news "$CLUSTER"
+}
+
+main
