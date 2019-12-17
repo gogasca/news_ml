@@ -1,6 +1,6 @@
 import json
 import unittest
-import utils
+from .utils import extract_persons
 
 
 class TestUrl(unittest.TestCase):
@@ -169,7 +169,7 @@ class TestUrl(unittest.TestCase):
         Any method which starts with ``test_`` will considered as a test case.
         """
 
-        assert utils.extract_persons(json.loads(self.entities)) == [
+        assert extract_persons(json.loads(self.entities)) == [
             u'Chad Dickerson', u'Josh Silverman',
             u'Fred Wilson']
 
