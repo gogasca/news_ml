@@ -15,6 +15,17 @@ You can use [this](mini/app.py) sample Python script
 which collects News and stores them into a CSV file using News API Key 
 which can be obtained [here](https://www.newsapi.org).
 
+## Docker containers installation
+
+Take a look at [Docker configuration](conf/docker) for more information 
+about how to run this application using containers.
+You will need:
+
+- [Docker API server](conf/docker/apid/)
+- [Docker RabbitMQ](conf/docker/rabbitmq) or external [RabbitMQ server](https://www.rabbitmq.com/rabbitmq-server.8.html)
+- External PostgreSQL database (Example: Google Cloud SQL w/proxy)
+
+
 ## Full installation
 
 I created an [API](https://medium.com/ymedialabs-innovation/deploy-flask-app-with-nginx-using-gunicorn-and-supervisor-d7a93aa07c18) which is able to handle requests to collect News.
@@ -32,9 +43,9 @@ is composed of the following modules:
 
 ```
 
-REST API Server -> News collector -> PostgresSQL
-                           RabbitMQ
-                           Celery
+REST API Server -> News collector -> Postgres
+                      RabbitMQ
+                       Celery
 ```    
 
 ## Software requirements
@@ -48,18 +59,8 @@ Python based API:
  - PostgreSQL
  - Ngnix
  - Google Cloud NLP
- - Ngnix -> Gunicorn -> Flask -> RabbitMQ/Celery/PostgreSQL.
+ - Ngnix -> Gunicorn -> Flask -> RabbitMQ/Celery/Postgres.
  
-## Docker containers
-
-Take a look at [conf/docker] for more information about how to run
-this server with Docker.
-You need:
-
-- [Docker API](conf/docker/apid/)
-- [Docker RabbitMQ](conf/docker/rabbitmq) or external RabbitMQ server
-- External PostgreSQL database
-
 ### Requirements
 
 Install a Compute Engine instance using Ubuntu 16.
