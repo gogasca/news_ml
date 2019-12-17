@@ -82,6 +82,7 @@ def get_campaign(json_request):
     query = json_request.get('query')
     report = json_request.get('report')
     translate = json_request.get('translate')
+    limit = json_request.get('limit')
 
     if provider:
         campaign_instance.provider = json_request['provider'].upper()
@@ -97,6 +98,8 @@ def get_campaign(json_request):
         campaign_instance.translation_enable = True
         campaign_instance.translation_lang = json_request.get('translate').get(
             'language')
+    if limit:
+        campaign_instance.limit = limit
     else:
         campaign_instance.translation_enable = False
     return campaign_instance

@@ -175,7 +175,7 @@ class TornadoBacklog:
         if response.code != 200:
             gen_log.error('Response code: %d' % response.code)
             return
-        articles = news_handler.handle_http_response(response.body)
+        articles = news_handler.handle_http_response(response.body, self.campaign.limit)
         gen_log.info('Provider: %s Number of articles: %d ' % (
             news_provider, len(articles)))
         news_processor.process_articles(articles, news_provider, self.campaign)

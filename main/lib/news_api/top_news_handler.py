@@ -24,7 +24,7 @@ SOURCE_NAME = 'name'
 STATUS = 'status'
 
 
-def handle_http_response(response):
+def handle_http_response(response, limit=-1):
     """
     This function handles HTTP responde body in JSON format.
     It receives and JSON object with the following fields:
@@ -34,6 +34,8 @@ def handle_http_response(response):
     -articles: list
 
     :param response:
+    :param limit:
+
     :return: dict(). Articles response
     """
     try:
@@ -42,7 +44,7 @@ def handle_http_response(response):
         status = json_response.get('status')
         if status == 'ok':
             articles = json_response['articles']
-            for article in articles:
+            for article_index, article in enumerate(articles, start=1):
                 # Create a News Article instance.
                 source_name = article[SOURCE][SOURCE_NAME]
                 log.info('Article: [%s] %s' % (source_name, article[TITLE]))
@@ -59,6 +61,9 @@ def handle_http_response(response):
                 articles_processed[article_instance.url] = article_instance
                 log.info('%r %r', article_instance.author,
                          article_instance.url)
+                if article_index == limit:
+                    logging.warning('Limit is defined. Skipping other news')
+                    break
         else:
             log.error('Request failed. Status: %s' % status)
         return articles_processed

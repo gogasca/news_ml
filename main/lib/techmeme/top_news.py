@@ -3,6 +3,7 @@
 from bs4 import BeautifulSoup
 
 import logging
+import itertools
 import os
 import requests
 
@@ -114,9 +115,14 @@ def launch(campaign_instance=None):
     """
     articles = extract_articles(settings.TECHMEME_URL)
     num_of_articles = len(articles)
-    log.info('Analyzing %d articles...', len(articles))
+    log.info('Retrieved %d articles...', len(articles))
+    if campaign_instance.limit > 0:
+        logging.warning('Limit is defined. Skipping other news')
+        articles = dict(
+            itertools.islice(articles.items(), campaign_instance.limit))
+        num_of_articles = len(articles)
     if num_of_articles > 1:
-        log.info('Analyzing %d articles...', num_of_articles)
+        log.info('Processing %d articles...', num_of_articles)
         campaign_instance.set_articles(num_of_articles)
         # Create Report instance and attach recipients.
         log.info('Reporting enabled: %s', campaign_instance.send_report)

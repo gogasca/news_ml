@@ -40,14 +40,14 @@ TRANSLATION_DEFAULT_LANGUAGE = 'es'
 TRANSLATION_LANGUAGES = ('es', 'fr', 'zh-CN', 'pt', 'de')
 
 # Valid News providers.
-VALID_PROVIDERS = ('NEWS_API')
+VALID_PROVIDERS = ('NEWS_API', 'TECHMEME')
 
 # =========================================================
 # Google News API
 # =========================================================
 
 NEWS_API = 'NEWS_API'
-NEWS_API_KEY = os.environ['NEWS_API_KEY']
+NEWS_API_KEY = os.environ.get('NEWS_API_KEY', None)
 NEWS_API_URL = 'https://newsapi.org/v2/'
 NEWS_API_SOURCES = ['ars-technica',
                     'engadget',
@@ -144,7 +144,7 @@ CLUSTERING_QUERY_GET_NEWS_FILTERED = """SELECT news_id, title, content,
 # Authentication
 # =========================================================
 
-API_KEY = os.environ['SECRET_FERNET_KEY']
+API_KEY = os.environ.get('SECRET_FERNET_KEY', None)
 TOKEN_EXPIRATION_SECS = 600
 
 # =========================================================
@@ -152,8 +152,8 @@ TOKEN_EXPIRATION_SECS = 600
 # =========================================================
 
 API_VERSION = '0.4'
-API_ACCOUNT = os.environ['API_USERNAME']
-API_PASSWORD = os.environ['API_PASSWORD']
+API_ACCOUNT = os.environ.get('API_USERNAME', None)
+API_PASSWORD = os.environ.get('API_PASSWORD', None)
 API_LOGFILE = FILEPATH + '/log/apid.log'
 API_BASE_URL = '/api/1.0/'
 API_SCHEME = 'http'
@@ -222,11 +222,11 @@ REPORT_ALL_DATES_ARTICLES = False
 # =========================================================
 # psql -h 127.0.0.1 -d postgres -U newsml -W #dbhost = '127.0.0.1'
 
-DBHOST = os.environ.get('DBHOST')
-DBPORT = int(os.environ.get('DBPORT'))
-DBUSERNAME = os.environ.get('DBUSERNAME')
-DBPASSWORD = os.environ.get('DBPASSWORD')
-DBNAME = os.environ.get('DBNAME')
+DBHOST = os.environ.get('DBHOST', '127.0.0.1')
+DBPORT = int(os.environ.get('DBPORT', 5432))
+DBUSERNAME = os.environ.get('DBUSERNAME', 'postgres')
+DBPASSWORD = os.environ.get('DBPASSWORD', 'postgres')
+DBNAME = os.environ.get('DBNAME', 'postgres')
 DBPASSWORD_ALLOW_EMPTY_PASSWORD = False
 DBNOW = 'now()'
 

@@ -50,7 +50,7 @@ def send_email(email_recipients=None, subject='News Email sender',
     Send email via Gmail account via SMTP library. Use email settings which
     obtain information via ENV variables.
 
-    :param email_to:
+    :param email_recipients:
     :param subject:
     :param body:
     :return:
