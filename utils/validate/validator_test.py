@@ -1,7 +1,7 @@
 import unittest
 import json
 from .validator import check_campaign, check_person, check_email_addresses, \
-    check_report, check_translation
+    check_report, check_translation, check_limit
 
 
 class TestValidator(unittest.TestCase):
@@ -12,31 +12,57 @@ class TestValidator(unittest.TestCase):
 
         :return:
         """
+        # Valid request
         self.assertTrue(check_campaign(
             json_request=json.loads("""{
                 "provider": "techmeme",
                 "report": {
-                    "email": "gonzalo@techie8.com"
+                    "email": "gonzalo@newsml.io"
                 },
                 "translate": {
                     "language": "es"
                 }}""")))
+        # Valid campaign
         self.assertTrue(check_campaign(
             json_request=json.loads("""{
                 "provider": "techmeme",
                 "report": {
-                    "email": "gonzalo@techie8.com"
+                    "email": "gonzalo@newsml.io"
                 }}""")))
+        # Valid campaign with limit
+        self.assertTrue(check_campaign(
+            json_request=json.loads("""{
+                        "provider": "techmeme",
+                        "limit": 8,
+                        "report": {
+                            "email": "gonzalo@newsml.io"
+                        }}""")))
+        # Valid campaign with report
+        self.assertTrue(check_campaign(
+            json_request=json.loads("""{
+                                "provider": "techmeme",                                
+                                "report": {
+                                    "email": "gonzalo@newsml.io"
+                                }}""")))
         # Invalid language.
         self.assertFalse(check_campaign(
             json_request=json.loads("""{
                 "provider": "techmeme",
                 "report": {
-                    "email": "gonzalo@techie8.com"
+                    "email": "gonzalo@newsml.io"
                 },
                 "translate": {
                     "language": "en"
                 }}""")))
+
+        # Invalid campaign with invalid limit number
+        self.assertTrue(check_campaign(
+            json_request=json.loads("""{
+                                "provider": "techmeme",
+                                "limit": 0,
+                                "report": {
+                                    "email": "gonzalo@newsml.io"
+                                }}""")))
 
     def test_person(self):
         """
@@ -51,14 +77,14 @@ class TestValidator(unittest.TestCase):
         The actual test.
         Any method which starts with ``test_`` will considered as a test case.
         """
-        self.assertTrue(check_email_addresses('gonzalo@techie8.com'))
+        self.assertTrue(check_email_addresses('gonzalo@newsml.io'))
         self.assertTrue(check_email_addresses(
-            'gonzalo@techie8.com;carlos@techie8.com'))
-        self.assertTrue(check_email_addresses('gonzalo@techie8.com;'))
+            'gonzalo@newsml.io;carlos@newsml.io'))
+        self.assertTrue(check_email_addresses('gonzalo@newsml.io;'))
         self.assertTrue(
-            check_email_addresses(';gonzalo@techie8.com;'))
+            check_email_addresses(';gonzalo@newsml.io;'))
         self.assertFalse(
-            check_email_addresses('gonzalo@techie8', check_mx=True))
+            check_email_addresses('gonzalo@newsml', check_mx=True))
 
     def test_report(self):
         """
@@ -66,7 +92,7 @@ class TestValidator(unittest.TestCase):
         :return:
         """
         self.assertTrue(check_report(
-            json.loads("""{"report": { "email": "gonzalo@techie8.com"}}""")))
+            json.loads("""{"report": { "email": "gonzalo@newsml.io"}}""")))
         self.assertFalse(check_report(
             json.loads("""{"report": { "email": ""}}""")))
         self.assertFalse(
@@ -87,6 +113,20 @@ class TestValidator(unittest.TestCase):
             json.loads("""{"translate": {"language": "xx"}}""")))
         self.assertFalse(check_translation(
             json.loads("""{"translate": {"language": 1}}""")))
+
+    def test_limit(self):
+        self.assertTrue(check_limit(
+            json.loads("""{"limit": 5}""")))
+        self.assertTrue(check_limit(
+            json.loads("""{"limit": 1000000}""")))
+        self.assertTrue(check_limit(
+            json.loads("""{"limit": 1}""")))
+        self.assertFalse(check_limit(
+            json.loads("""{"limit": -1}""")))
+        self.assertFalse(check_limit(
+            json.loads("""{"limit": 0}""")))
+        self.assertFalse(check_limit(
+            json.loads("""{"limits": 1}""")))
 
 
 if __name__ == '__main__':

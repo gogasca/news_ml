@@ -23,9 +23,18 @@ class CampaignD(object):
         self._sms_recipients = []
         self._translation_enable = False
         self._translation_lang = None
+        self._limit = 0
         self._test = False
         self._status = 0
         self._num_of_articles = 0
+
+    @property
+    def limit(self):
+        return self._limit
+
+    @limit.setter
+    def limit(self, limit):
+        self._limit = limit
 
     @property
     def num_of_articles(self):

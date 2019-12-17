@@ -10,6 +10,7 @@ NAME = u'name'
 PROVIDER = 'provider'
 REPORT = 'report'
 TRANSLATE = 'translate'
+LIMIT = 'limit'
 
 
 def required(**mandatory):
@@ -48,6 +49,8 @@ def check_campaign(json_request=None):
             return check_report(json_request)
         if TRANSLATE in json_request:
             return check_translation(json_request)
+        if LIMIT in json_request:
+            return check_limit(json_request)
         return True
     return False
 
@@ -76,6 +79,7 @@ def check_provider(provider_request):
 def check_email_addresses(recipients, check_mx=settings.EMAIL_CHECK_MX,
                           verify=settings.EMAIL_VERIFY):
     """
+    Example: "report": {"email": "email@d.com"}}
 
     :param recipients:
     :param check_mx:
@@ -98,7 +102,7 @@ def check_email_addresses(recipients, check_mx=settings.EMAIL_CHECK_MX,
 
 def check_report(report_request):
     """
-
+    {"report": {"email": "jbernal@edujam.com.mx"}}
     :param report_request:
     :return: bool
     """
@@ -106,6 +110,20 @@ def check_report(report_request):
         if EMAIL in report_request[REPORT]:
             if check_email_addresses(report_request[REPORT][EMAIL]):
                 return True
+    return False
+
+
+def check_limit(limit_request):
+    """
+    {"limit": 10, "provider": "techmeme", "report": {"email": "email@d.com"}}
+
+    :param limit_request:
+    :return:
+    """
+    limit_number = limit_request.get(LIMIT)
+    if limit_number:
+        if isinstance(limit_number, int) and limit_number > 0:
+            return True
     return False
 
 
@@ -117,9 +135,9 @@ def check_translation(translation_request):
     :param translation_request:
     :return: bool
     """
-    if translation_request[TRANSLATE] and LANG in translation_request[
-        TRANSLATE]:
-        if translation_request[TRANSLATE][
-                LANG] in settings.TRANSLATION_LANGUAGES:
+    if translation_request.get(TRANSLATE) and LANG in translation_request.get(
+        TRANSLATE):
+        if translation_request.get(TRANSLATE).get(
+            LANG) in settings.TRANSLATION_LANGUAGES:
             return True
     return False
