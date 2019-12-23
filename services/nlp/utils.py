@@ -45,7 +45,7 @@ def text_cleaner(text):
     try:
         if len(text) > 1:
             for word in extract_filter(settings.ENTITY_FILTER):
-                text = text.replace(word, '').lstrip().rstrip()
+                text = text.replace(' {} '.format(word), '').lstrip().rstrip()
         return text
     except FileNotFoundError as exception:
         logging.exception('Will return original file', exception)

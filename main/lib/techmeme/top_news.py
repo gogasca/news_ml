@@ -15,7 +15,6 @@ from conf import constants
 from main.common.NewsArticle import Article
 from services.nlp import nlp
 from services.nlp import utils as nlp_utils
-from services.nlp.utils import text_cleaner
 from services.translate import utils as translate_utils
 from utils import url_extract
 from utils.reporting import Report
@@ -34,46 +33,44 @@ def process_entities(article, news_id):
     :param news_id:
     :return:
     """
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = settings.CREDENTIALS
     log.info('process_entities() Processing content for : %s using NLP',
              article.url)
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = settings.CREDENTIALS
     entities = nlp.analyze_entities(
         '%r %r' % (article.title, article.description))
+    num_of_entities = 0
     if entities:
         num_of_entities = len(entities)
-    else:
-        num_of_entities = 0
-    log.info('Processing %d entities: %s', num_of_entities, article.url)
-    if num_of_entities > 1:
-        # Extract tags and associate them with original article.
-        log.info('Processing article tags: %s', article.url)
-        tags = nlp_utils.extract_tags(entities)
-        for tag in tags:
-            if tag != '':
-                tag_id = DbHelper.insert_tag(tag_name=tag,
-                                             source=url_extract.get_domain(
-                                                 article.url))
-                if news_id and tag_id:
-                    DbHelper.associate_tag_news(news_id, tag_id)
-                    log.info('Processing persons in tags: %s', article.url)
-        # Extract entities.
-        persons = nlp_utils.extract_entity(entities, 'PERSON')
-        log.info('Found %d persons', len(persons))
-        for person in persons:
-            DbHelper.insert_person(person)
-        log.info('Processing organizations in tags: %s',
-                 article.url)
-        organizations = nlp_utils.extract_entity(entities, 'ORGANIZATION')
-        log.info('Found %d organizations', len(organizations))
-        for organization in organizations:
-            DbHelper.insert_company(organization)
-    else:
+    if num_of_entities < 1:
         log.error('No NLP entities found')
+        return
+    log.info('Processing %d entities: %s', num_of_entities, article.url)
+    # Extract tags and associate them with original article.
+    log.info('Processing article tags: %s', article.url)
+    tags = nlp_utils.extract_tags(entities)
+    for tag in tags:
+        if tag != '':
+            tag_id = DbHelper.insert_tag(tag_name=tag,
+                                         source=url_extract.get_domain(
+                                             article.url))
+            if news_id and tag_id:
+                DbHelper.associate_tag_news(news_id, tag_id)
+                log.info('Processing persons in tags: %s', article.url)
+    # Extract entities.
+    persons = nlp_utils.extract_entity(entities, 'PERSON')
+    log.info('Found %d persons', len(persons))
+    for person in persons:
+        DbHelper.insert_person(person)
+    log.info('Processing organizations in tags: %s', article.url)
+    organizations = nlp_utils.extract_entity(entities, 'ORGANIZATION')
+    log.info('Found %d organizations', len(organizations))
+    for organization in organizations:
+        DbHelper.insert_company(organization)
 
 
 def extract_articles(url=None):
     """
-    Extracts titles from Techcrunch Popular web page.
+    Extracts titles from Techememe Popular web page.
     Extract title, short url and article content.
     Based on URL creates a dictionary of objects. This URL serves as index
     Currently TechMeme does not have Content field, we extract summary.
@@ -90,8 +87,8 @@ def extract_articles(url=None):
         articles = {}
         for title in titles_html:
             article_instance = Article(settings.TECHMEME)
-            article_instance.title = text_cleaner(title.text)
-            article_instance.content = text_cleaner(title.text)
+            article_instance.title = title.text
+            article_instance.content = title.text
             article_instance.url = title[constants.HTML_HREF]
             articles[title[constants.HTML_HREF]] = article_instance
         log.info('Found %d articles', len(articles))
@@ -115,89 +112,84 @@ def launch(campaign_instance=None):
     """
     articles = extract_articles(settings.TECHMEME_URL)
     num_of_articles = len(articles)
-    log.info('Retrieved %d articles...', len(articles))
+    log.info('Retrieved %d articles...', num_of_articles)
     if campaign_instance.limit > 0:
         logging.warning('Limit is defined. Skipping other news')
         articles = dict(
             itertools.islice(articles.items(), campaign_instance.limit))
         num_of_articles = len(articles)
-    if num_of_articles > 1:
-        log.info('Processing %d articles...', num_of_articles)
-        campaign_instance.set_articles(num_of_articles)
-        # Create Report instance and attach recipients.
-        log.info('Reporting enabled: %s', campaign_instance.send_report)
-        if campaign_instance.send_report:
-            report = Report.Report(subject=settings.TECHMEME_REPORT)
-            report.email_recipients = campaign_instance.email_recipients
-        for _, _article in articles.items():
-            if _article.title:
-                log.info('Analyzing article %s, %s', _article.title,
-                         _article.url)
-                new_article = False
-                if not DbHelper.item_exists(_article.url):
-                    news_id = None
-                    log.info('New Article retrieved: %r, %r' % (
-                        _article.title, _article.url))
-                    try:
-                        log.info('Process sentiment analysis')
-                        score, magnitude = nlp_utils.get_sentiment_scores(
-                            _article.content)
-                        source = url_extract.get_domain(_article.url) or ''
-                        log.info('Insert article into Database')
-                        news_id = DbHelper.insert_news(title=_article.title,
-                                                       content=_article.content,
-                                                       url=_article.url,
-                                                       provider=settings.TECHMEME,
-                                                       source=source.upper(),
-                                                       source_id=source,
-                                                       campaign=campaign_instance.reference,
-                                                       score=score,
-                                                       magnitude=magnitude,
-                                                       sentiment=nlp_utils.get_sentiment(
-                                                           score)
-                                                       )
-                        if not news_id:
-                            log.error('Unable to insert record %s', _article.url)
-                            continue
-                    except (ValueError, UnicodeDecodeError) as exception:
-                        log.exception(exception)
-                    new_article = True
-                    if settings.PROCESS_ENTITIES:
-                        process_entities(_article, news_id)
-                else:
-                    log.warning('Article already exists.')
+    if num_of_articles < 1:
+        log.error('No articles found')
+        return
+    log.info('Processing %d articles...', num_of_articles)
+    campaign_instance.set_articles(num_of_articles)
+    # Create Report instance and attach recipients.
+    log.info('Send report: %s', campaign_instance.send_report)
+    if campaign_instance.send_report:
+        report = Report.Report(subject=settings.TECHMEME_REPORT)
+        report.email_recipients = campaign_instance.email_recipients
 
-                # Process translation
-                if campaign_instance.translation_enable:
-                    # Perform translation using Google Translate API
-                    log.info('Translating...%r', _article.url)
-                    if new_article:
-                        # Update database record
-                        translated_text = translate_utils.translate_content(
-                            _article.title, campaign_instance.translation_lang)
-                        sql_query = translate_utils.create_sql_query(
-                            translated_text, settings.DEFAULT_LANGUAGE, news_id)
-                        DbHelper.update_database(sql_query)
-                    else:
-                        log.warn('Article already exists, skipping DB update')
-                        translated_text = translate_utils.translate_content(
-                            _article.title,
-                            campaign_instance.translation_lang)
-                    if campaign_instance.send_report and len(
-                        translated_text) > 1:
-                        log.info('Adding translated information to report.')
-                        report.add_content(_article.url,
-                                           text_cleaner(translated_text))
-                elif campaign_instance.send_report:
-                    log.info('Adding information to report.')
-                    report.add_content(_article.url, _article.title)
+    for _, _article in articles.items():
+        if not _article.title:
+            log.warning('No title found. Article won\'t be inserted')
+            continue
+        log.info('Analyzing article %s, %s', _article.title, _article.url)
+        new_article = False
+
+        if not DbHelper.item_exists(_article.url):
+            news_id = None
+            log.info('New Article retrieved: %r, %r' % (
+                _article.title, _article.url))
+            try:
+                log.info('Process sentiment analysis')
+                score, magnitude = nlp_utils.get_sentiment_scores(
+                    _article.content)
+                source = url_extract.get_domain(_article.url) or ''
+                log.info('Insert article into Database')
+                news_id = DbHelper.insert_news(title=_article.title,
+                                               content=_article.content,
+                                               url=_article.url,
+                                               provider=settings.TECHMEME,
+                                               source=source.upper(),
+                                               source_id=source,
+                                               campaign=campaign_instance.reference,
+                                               score=score,
+                                               magnitude=magnitude,
+                                               sentiment=nlp_utils.get_sentiment(
+                                                   score)
+                                               )
+                if not news_id:
+                    log.error('Unable to insert record %s', _article.url)
+                    continue
+            except (ValueError, UnicodeDecodeError) as exception:
+                log.exception(exception)
+            new_article = True
+            if settings.PROCESS_ENTITIES:
+                process_entities(_article, news_id)
+        else:
+            log.warning('Article already exists.')
+
+        # Process translation
+        if campaign_instance.translation_enable:
+            # Perform translation using Google Translate API
+            log.info('Translating...%r', _article.url)
+            translated_text = translate_utils.translate_content(
+                _article.title, campaign_instance.translation_lang)
+            if new_article:
+                # Update database record
+                sql_query = translate_utils.create_sql_query(
+                    translated_text, settings.DEFAULT_LANGUAGE, news_id)
+                DbHelper.update_database(sql_query)
             else:
-                log.warning('No title found. Article won\'t be inserted')
-    else:
-        log.error('No titles found')
+                log.warn('Article already exists, skipping DB update')
+            if campaign_instance.send_report and len(translated_text) > 1:
+                log.info('Adding translated information to report.')
+                report.add_content(_article.url, translated_text)
+        elif campaign_instance.send_report:
+            log.info('Adding information to report.')
+            report.add_content(_article.url, _article.title)
 
     if campaign_instance.send_report:
         log.info('Sending email notification...')
         report.send()
-
     log.info('Extraction completed')
