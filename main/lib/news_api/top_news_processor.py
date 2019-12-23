@@ -151,9 +151,9 @@ def process_articles(articles, news_provider, campaign_instance):
             today = datetime.now().date()
             published_at = datetime.strptime(article.published_at[:10],
                                           '%Y-%m-%d').date()
+            if settings.REPORT_ALL_DATES_ARTICLES:
+                log.info('Publishing all dates articles')
             if today == published_at or settings.REPORT_ALL_DATES_ARTICLES:
-                if settings.REPORT_ALL_DATES_ARTICLES:
-                    log.info('Publishing all dates articles')
                 log.info(
                     'Adding article information to report: %s %s' % (
                         article.title, article.url))
@@ -163,7 +163,7 @@ def process_articles(articles, news_provider, campaign_instance):
                     'Article published date is not today (%s), '
                     'skipping article from report', published_at)
 
-        if campaign_instance.send_report:
-            log.info('Sending report via email...')
-            report.send()
+    if campaign_instance.send_report:
+        log.info('Sending report via email...')
+        report.send()
     log.info('Extraction completed')
