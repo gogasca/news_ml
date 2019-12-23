@@ -76,102 +76,94 @@ def process_articles(articles, news_provider, campaign_instance):
     :return:
     """
     num_of_articles = len(articles)
-    log.info('Analyzing %d articles...', len(articles))
-    if num_of_articles > 1:
-        campaign_instance.set_articles(num_of_articles)
-        # Create Report instance and attach recipients.
-        log.info('Reporting enabled: %s', campaign_instance.send_report)
+    campaign_instance.set_articles(num_of_articles)
+    log.info('Analyzing %d articles...', num_of_articles)
+    if num_of_articles < 1:
+        log.error('No titles found')
         if campaign_instance.send_report:
-            subject = 'News ML | %s' % news_provider
-            report = Report.Report(subject=subject)
-            report.email_recipients = campaign_instance.email_recipients
+            log.warning('Skipping report via email...')
+        return
+    # Create Report instance and attach recipients.
+    log.info('Reporting enabled: %s', campaign_instance.send_report)
+    if campaign_instance.send_report:
+        report = Report.Report(subject='News ML | %s' % news_provider)
+        report.email_recipients = campaign_instance.email_recipients
 
-        for _, article in articles.items():
-            if article.description:
-                log.info('Article %r, %r' % (article.title, article.url))
-                new_article = False
-                if not DbHelper.item_exists(article.url):
-                    news_id = None
-                    log.info('New Article retrieved: %r, %r' % (
-                        article.title, article.url))
-                    try:
-                        log.info('Process sentiment analysis')
-                        score, magnitude = nlp_utils.get_sentiment_scores(
-                            article.content or article.description)
-                        log.info('Insert article into Database')
-                        news_id = DbHelper.insert_news(title=article.title,
-                                                       author=article.author,
-                                                       description=article.description,
-                                                       content=article.content,
-                                                       url=article.url,
-                                                       url_to_image=article.url_to_image,
-                                                       source_id=article.source_id,
-                                                       source=article.source,
-                                                       campaign=campaign_instance.reference,
-                                                       published_at=article.published_at,
-                                                       score=score,
-                                                       magnitude=magnitude,
-                                                       sentiment=nlp_utils.get_sentiment(
-                                                           score))
-                        if not news_id:
-                            log.error('Unable to Insert record %s', article.url)
-                            continue
-                    except (ValueError, UnicodeDecodeError) as exception:
-                        log.exception(exception)
-                    new_article = True
-                    if settings.PROCESS_ENTITIES:
-                        process_entities(article, news_id)
-                else:
-                    log.warning('Article %r already exists ', article.url)
+    for _, article in articles.items():
+        if not article.description:
+            log.error('Not description found in article: %s', article.url)
+            continue
+        log.info('Article %r, %r' % (article.title, article.url))
+        new_article = False
+        if not DbHelper.item_exists(article.url):
+            news_id = None
+            log.info('New Article retrieved: %r, %r' % (
+                article.title, article.url))
+            try:
+                log.info('Process sentiment analysis')
+                score, magnitude = nlp_utils.get_sentiment_scores(
+                    article.content or article.description)
+                log.info('Insert article into Database')
+                news_id = DbHelper.insert_news(title=article.title,
+                                               author=article.author,
+                                               description=article.description,
+                                               content=article.content,
+                                               url=article.url,
+                                               url_to_image=article.url_to_image,
+                                               source_id=article.source_id,
+                                               source=article.source,
+                                               campaign=campaign_instance.reference,
+                                               published_at=article.published_at,
+                                               score=score,
+                                               magnitude=magnitude,
+                                               sentiment=nlp_utils.get_sentiment(
+                                                   score))
+                if not news_id:
+                    log.error('Unable to Insert record %s', article.url)
+                    continue
+            except (ValueError, UnicodeDecodeError) as exception:
+                log.exception(exception)
+            new_article = True
+            if settings.PROCESS_ENTITIES:
+                process_entities(article, news_id)
+        else:
+            log.warning('Article %r already exists ', article.url)
 
-                log.info('Translation enabled: %s',
-                         campaign_instance.translation_enable)
-                if campaign_instance.translation_enable:
-                    log.info('Translating: %s', article.url)
-                    if new_article:
-                        log.info('Translating...%r', article.url)
-                        translated_text = translate_utils.translate_content(
-                            article.title + ' ' + article.description,
-                            campaign_instance.translation_lang)
-                        sql_query = translate_utils.create_sql_query(
-                            translated_text, settings.DEFAULT_LANGUAGE, news_id)
-                        if sql_query:
-                            DbHelper.update_database(sql_query)
-                    else:
-                        log.warn('Article already exists, skipping DB update')
-                        translated_text = translate_utils.translate_content(
-                            article.title + ' ' + article.description,
-                            campaign_instance.translation_lang)
-                    if campaign_instance.send_report and len(
-                        translated_text) > 1:
-                        log.info('Adding translated information to report')
-                        report.add_content(article.url, translated_text)
-                elif campaign_instance.send_report:
-                    # Only send today articles in report.
-                    today = datetime.now().date()
-                    published_at = datetime.strptime(article.published_at[:10],
-                                                  '%Y-%m-%d').date()
-                    if today == published_at or \
-                        settings.REPORT_ALL_DATES_ARTICLES:
-                        if settings.REPORT_ALL_DATES_ARTICLES:
-                            log.info('Publishing all dates articles')
-                        log.info(
-                            'Adding article information to report: %s %s' % (
-                                article.title, article.url))
-                        report.add_content(article.url, article.title)
-                    else:
-                        log.warning(
-                            'Article published date is not today (%s), '
-                            'skipping article from report', published_at)
+        log.info('Translation enabled: %s',campaign_instance.translation_enable)
+        if campaign_instance.translation_enable:
+            log.info('Translating: %s', article.url)
+            translated_text = translate_utils.translate_content(
+                article.title + ' ' + article.description,
+                campaign_instance.translation_lang)
+            if new_article:
+                log.info('Translating...%r', article.url)
+                sql_query = translate_utils.create_sql_query(
+                    translated_text, settings.DEFAULT_LANGUAGE, news_id)
+                if sql_query:
+                    DbHelper.update_database(sql_query)
             else:
-                log.error('Not description found in article: %s', article.url)
+                log.warn('Article already exists, skipping DB update')
+            if campaign_instance.send_report and len(translated_text) > 1:
+                log.info('Adding translated information to report')
+                report.add_content(article.url, translated_text)
+        elif campaign_instance.send_report:
+            # Only send today articles in report.
+            today = datetime.now().date()
+            published_at = datetime.strptime(article.published_at[:10],
+                                          '%Y-%m-%d').date()
+            if today == published_at or settings.REPORT_ALL_DATES_ARTICLES:
+                if settings.REPORT_ALL_DATES_ARTICLES:
+                    log.info('Publishing all dates articles')
+                log.info(
+                    'Adding article information to report: %s %s' % (
+                        article.title, article.url))
+                report.add_content(article.url, article.title)
+            else:
+                log.warning(
+                    'Article published date is not today (%s), '
+                    'skipping article from report', published_at)
 
         if campaign_instance.send_report:
             log.info('Sending report via email...')
             report.send()
-    else:
-        log.error('No titles found')
-        if campaign_instance.send_report:
-            log.warning('Skipping report via email...')
-
     log.info('Extraction completed')

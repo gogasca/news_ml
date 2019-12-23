@@ -120,11 +120,13 @@ def launch(campaign_instance=None):
         num_of_articles = len(articles)
     if num_of_articles < 1:
         log.error('No articles found')
+        if campaign_instance.send_report:
+            log.warning('Skipping report via email...')
         return
     log.info('Processing %d articles...', num_of_articles)
     campaign_instance.set_articles(num_of_articles)
     # Create Report instance and attach recipients.
-    log.info('Send report: %s', campaign_instance.send_report)
+    log.info('Reporting enabled: %s', campaign_instance.send_report)
     if campaign_instance.send_report:
         report = Report.Report(subject=settings.TECHMEME_REPORT)
         report.email_recipients = campaign_instance.email_recipients
