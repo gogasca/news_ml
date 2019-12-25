@@ -203,7 +203,7 @@ class CampaignList(Resource):
             # Returns valid CampaignD object.
             if not campaign_instance:
                 log.error('api() | Unable to process Campaign request %r',
-                          request.get_data())
+                          request.data)
                 response = json.dumps(errors.INVALID_CAMPAIGN)
                 return Response(response, status=422,
                                 mimetype=settings.API_MIME_TYPE)
@@ -260,7 +260,7 @@ class ClusteringList(Resource):
             # Returns valid ClusterD object.
             if not clustering_instance:
                 log.error('api() | Unable to process Clustering request %r',
-                          request.get_data())
+                          request.data)
                 response = json.dumps(errors.INVALID_CAMPAIGN)
                 resp = Response(response, status=422,
                                 mimetype=settings.API_MIME_TYPE)
@@ -394,7 +394,7 @@ class PersonList(Resource):
             # Returns valid CampaignD object
             if not person_instance:
                 log.error('api() | Unable to process Person request %r',
-                          request.get_data())
+                          request.data)
                 response = json.dumps(errors.INVALID_PERSON)
                 resp = Response(response, status=422,
                                 mimetype=settings.API_MIME_TYPE)
@@ -466,7 +466,7 @@ class RankList(Resource):
             # Returns a RankerD object used to rank existing articles in DB.
             if not ranker_instance:
                 log.error('api() | Unable to process Ranker request %r',
-                          request.get_data())
+                          request.data)
                 response = json.dumps(errors.INVALID_RANKER)
                 resp = Response(response, status=422,
                                 mimetype=settings.API_MIME_TYPE)
