@@ -43,21 +43,21 @@ def handle_http_response(response, limit=-1):
         json_response = json.loads(response)
         status = json_response.get('status')
         if status == 'ok':
-            articles = json_response['articles']
+            articles = json_response.get('articles')
             for article_index, article in enumerate(articles, start=1):
                 # Create a News Article instance.
                 source_name = article[SOURCE][SOURCE_NAME]
                 log.info('Article: [%s] %s' % (source_name, article[TITLE]))
                 article_instance = NewsArticle.Article(settings.NEWS_API)
-                article_instance.source_id = article[SOURCE][ID]
+                article_instance.source_id = article.get(SOURCE).get(ID)
                 article_instance.source = source_name.upper()
-                article_instance.author = article[AUTHOR]
-                article_instance.title = article[TITLE]
-                article_instance.description = article[DESCRIPTION]
-                article_instance.content = article[CONTENT]
-                article_instance.url = article[URL]
-                article_instance.url_to_image = article[URL_TO_IMAGE]
-                article_instance.published_at = article[PUBLISHED_AT]
+                article_instance.author = article.get(AUTHOR)
+                article_instance.title = article.get(TITLE)
+                article_instance.description = article.get(DESCRIPTION)
+                article_instance.content = article.get(CONTENT)
+                article_instance.url = article.get(URL)
+                article_instance.url_to_image = article.get(URL_TO_IMAGE)
+                article_instance.published_at = article.get(PUBLISHED_AT)
                 articles_processed[article_instance.url] = article_instance
                 log.info('%r %r', article_instance.author,
                          article_instance.url)

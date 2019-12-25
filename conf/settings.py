@@ -78,7 +78,7 @@ THE_NEXT_WEB = 'THE_NEXT_WEB'
 
 TECHMEME = 'TECHMEME'
 TECHMEME_URL = 'https://www.techmeme.com/'
-TECHMEME_REPORT = 'Silicon Valley | Daily Automatic Summary Report | Techmeme'
+TECHMEME_REPORT = 'NewsML | Daily Automatic Summary Report | Techmeme'
 
 
 # =========================================================
@@ -151,7 +151,7 @@ TOKEN_EXPIRATION_SECS = 600
 # API configuration parameters
 # =========================================================
 
-API_VERSION = '0.4'
+API_VERSION = '0.5'
 API_ACCOUNT = os.environ.get('API_USERNAME', None)
 API_PASSWORD = os.environ.get('API_PASSWORD', None)
 API_LOGFILE = FILEPATH + '/log/apid.log'
@@ -188,8 +188,8 @@ EMAIL_SERVER = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_ADDRESS = os.environ.get('EMAIL_USERNAME')
 EMAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD')
-EMAIL_NAME = 'News ML Reporter'
-EMAIL_SUBJECT = 'News ML Daily summary'
+EMAIL_NAME = 'NewsML Reporter'
+EMAIL_SUBJECT = 'NewsML Daily summary'
 EMAIL_REPORT = True
 EMAIL_TO = ['admin@newsml.io']
 EMAIL_CHECK_MX = False

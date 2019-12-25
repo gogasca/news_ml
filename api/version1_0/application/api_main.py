@@ -30,6 +30,10 @@ log = logger.LoggerManager().getLogger('__app__',
                                        logging_file=settings.API_LOGFILE)
 log.setLevel(level=logging.DEBUG)
 
+# Singleton with Celery configuration
+celery = Celery()
+celery.config_from_object('conf.celeryconfig')
+
 
 class ApiBase(Resource):
     @authenticator.local_authentication
@@ -128,7 +132,6 @@ class ApiUserList(Resource):
                 response = json.dumps('Username already exists')
                 return Response(response, status=400,
                                 mimetype=settings.API_MIME_TYPE)
-            # Insert user into Postgres database.
             user_id = ModelOperations.insert_user(username, password, 'now()')
             response = jsonify({'id': user_id})
             response.headers['Location'] = api.url_for(api(current_app),
@@ -155,14 +158,14 @@ class Campaign(Resource):
         """
         try:
             log.info('%s %r' % (request.remote_addr, request))
-            log.info('api() | Finding Campaign: ' + ref)
+            log.info('api() | Finding Campaign: {}'.format(ref))
             campaign = Model.Campaign.query.filter(
                 Model.Campaign.reference == ref).first()
             if campaign:
-                log.info('api() | Campaign found: ' + ref)
+                log.info('api() | Campaign found: {}'.format(ref))
                 return jsonify(campaign.serialize())
 
-            log.warn('api() | Campaign not found: ' + ref)
+            log.warn('api() | Campaign not found: {}'.format(ref))
             return Response(status=404, mimetype=settings.API_MIME_TYPE)
         except Exception as exception:
             log.exception(exception)
@@ -177,9 +180,10 @@ class CampaignList(Resource):
 
         :return:
         """
+        # TODO(gogasca) List of campaigns.
         try:
             log.info('%s %r' % (request.remote_addr,
-                                request))  # TODO(gogasca) List of campaigns.
+                                request))
         except Exception as exception:
             log.exception(exception)
 
@@ -199,12 +203,10 @@ class CampaignList(Resource):
             # Returns valid CampaignD object.
             if not campaign_instance:
                 log.error('api() | Unable to process Campaign request %r',
-                          request.data)
+                          request.get_data())
                 response = json.dumps(errors.INVALID_CAMPAIGN)
                 return Response(response, status=422,
                                 mimetype=settings.API_MIME_TYPE)
-            celery = Celery()
-            celery.config_from_object("conf.celeryconfig")
             celery.send_task('process_campaign',
                              exchange='news_ml',
                              queue='gold',
@@ -232,7 +234,7 @@ class CampaignList(Resource):
                                                                        'Campaign %s' % campaign_instance.reference,
                                                                        campaign_instance.reference,
                                                                        settings.DBNOW,
-                                                                       request.data,
+                                                                       request.data.decode('utf-8'),
                                                                        campaign_instance.provider,
                                                                        campaign_instance.send_report,
                                                                        campaign_instance.num_of_articles,
@@ -258,13 +260,11 @@ class ClusteringList(Resource):
             # Returns valid ClusterD object.
             if not clustering_instance:
                 log.error('api() | Unable to process Clustering request %r',
-                          request.data)
+                          request.get_data())
                 response = json.dumps(errors.INVALID_CAMPAIGN)
                 resp = Response(response, status=422,
                                 mimetype=settings.API_MIME_TYPE)
                 return resp
-            celery = Celery()
-            celery.config_from_object("conf.celeryconfig")
             celery.send_task('process_clustering',
                              exchange='news_ml',
                              queue='gold',
@@ -296,7 +296,7 @@ class ClusteringList(Resource):
                                                                          'Cluster %s' % clustering_instance.campaign_reference,
                                                                          clustering_instance.campaign_reference,
                                                                          settings.DBNOW,
-                                                                         request.data,
+                                                                         request.data.decode('utf-8'),
                                                                          clustering_instance.provider,
                                                                          clustering_instance.send_report,
                                                                          clustering_instance.num_of_articles,
@@ -394,7 +394,7 @@ class PersonList(Resource):
             # Returns valid CampaignD object
             if not person_instance:
                 log.error('api() | Unable to process Person request %r',
-                          request.data)
+                          request.get_data())
                 response = json.dumps(errors.INVALID_PERSON)
                 resp = Response(response, status=422,
                                 mimetype=settings.API_MIME_TYPE)
@@ -466,13 +466,11 @@ class RankList(Resource):
             # Returns a RankerD object used to rank existing articles in DB.
             if not ranker_instance:
                 log.error('api() | Unable to process Ranker request %r',
-                          request.data)
+                          request.get_data())
                 response = json.dumps(errors.INVALID_RANKER)
                 resp = Response(response, status=422,
                                 mimetype=settings.API_MIME_TYPE)
                 return resp
-            celery = Celery()
-            celery.config_from_object("conf.celeryconfig")
             celery.send_task('rank_news',
                              exchange='news_ml',
                              queue='gold',
@@ -504,7 +502,7 @@ class RankList(Resource):
                                                                      ranker_instance.campaign_reference,
                                                                      ranker_instance.campaign_reference,
                                                                      settings.DBNOW,
-                                                                     request.data,
+                                                                     request.data.decode('utf-8'),
                                                                      'RANKER',
                                                                      ranker_instance.send_report,
                                                                      ranker_instance.num_of_articles,

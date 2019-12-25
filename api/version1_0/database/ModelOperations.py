@@ -88,7 +88,7 @@ def insert_user(username, password, created):
             db.session.commit()
             return user.id
     except Exception as exception:
-        log.error(exception)
+        log.exception(exception)
         db.session.rollback()
     finally:
         db.session.close()
@@ -117,7 +117,7 @@ def insert_campaign(status, description, reference, start, request_data,
         db.session.commit()
         return campaign.id
     except Exception as exception:
-        print(exception)
+        log.exception(exception)
         db.session.rollback()
     finally:
         db.session.close()
@@ -137,7 +137,7 @@ def insert_person(name, mention_date):
             db.session.commit()
             return person.id
     except Exception as exception:
-        print(exception)
+        log.exception(exception)
         db.session.rollback()
     finally:
         db.session.close()
