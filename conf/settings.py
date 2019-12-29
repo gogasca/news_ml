@@ -203,6 +203,17 @@ MAILGUN_DOMAIN = os.environ.get('MAILGUN_DOMAIN')
 MAILGUN_API_KEY = os.environ.get('MAILGUN_API_KEY')
 
 # =========================================================
+# Twitter
+# =========================================================
+TWITTER_ENABLED = True
+TWITTER_DELAY = 1
+TWITTER_ADD_HASHTAGS = True
+CONSUMER_KEY = os.environ.get('CONSUMER_KEY')
+CONSUMER_SECRET = os.environ.get('CONSUMER_SECRET')
+ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN')
+ACCESS_TOKEN_SECRET = os.environ.get('ACCESS_TOKEN_SECRET')
+
+# =========================================================
 # Twilio configuration parameters
 # =========================================================
 

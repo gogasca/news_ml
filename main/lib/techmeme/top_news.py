@@ -6,6 +6,8 @@ import logging
 import itertools
 import os
 import requests
+import time
+import tweepy
 
 
 from api.version1_0.database import DbHelper
@@ -16,6 +18,7 @@ from main.common.NewsArticle import Article
 from services.nlp import nlp
 from services.nlp import utils as nlp_utils
 from services.translate import utils as translate_utils
+from services.twitter import config
 from utils import url_extract
 from utils.reporting import Report
 
@@ -191,7 +194,21 @@ def launch(campaign_instance=None):
             log.info('Adding information to report.')
             report.add_content(_article.url, _article.title)
 
+        if campaign_instance.twitter:
+            log.info('Sending Twitter information')
+            twitter_api = config.create_api()
+            try:
+                if twitter_api.update_status(
+                    '{} {}'.format(_article.title, _article.url)):
+                    log.info('Tweet posted')
+            except tweepy.error.TweepError as e:
+                log.exception(e)
+
+            time.sleep(campaign_instance.twitter_delay)
+            log.info('Twitter information sent')
+
     if campaign_instance.send_report:
         log.info('Sending email notification...')
         report.send()
+
     log.info('Extraction completed')

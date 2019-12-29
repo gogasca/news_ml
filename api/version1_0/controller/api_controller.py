@@ -90,10 +90,22 @@ def get_campaign(json_request):
         campaign_instance.query = json_request['query']
     if report:
         email = json_request.get('report').get('email')
+        twitter = json_request.get('report').get('twitter')
+        # Process if we want to send email
         if email:
             campaign_instance.email_recipients = \
                 json_request['report']['email'].split(settings.EMAIL_SEPARATOR)
             campaign_instance.send_report = True
+        # Process if we want to send Tweets
+        if twitter:
+            campaign_instance.twitter = True
+            campaign_instance.twitter_delay = json_request.get(
+                'report').get(
+                'twitter').get('delay', settings.TWITTER_DELAY)
+            campaign_instance.twitter_add_hashtags = json_request.get(
+                'report').get(
+                'twitter').get('add_hashtags', settings.TWITTER_ADD_HASHTAGS)
+
     if translate:
         campaign_instance.translation_enable = True
         campaign_instance.translation_lang = json_request.get('translate').get(
