@@ -10,11 +10,9 @@ import logging
 import re
 
 from api.version1_0.database import DbHelper
-from conf import logger
 from conf import settings
 
-log = logger.LoggerManager().getLogger("__app__",
-                                       logging_file=settings.API_LOGFILE)
+log = logging.getLogger()
 log.setLevel(level=logging.DEBUG)
 
 DATE_FILTER_PATTERN = re.compile(

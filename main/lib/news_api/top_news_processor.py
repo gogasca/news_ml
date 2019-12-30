@@ -121,7 +121,7 @@ def process_articles(articles, news_provider, campaign_instance):
     log.info('Translation enabled: %s', campaign_instance.translation_enable)
     log.info('Reporting enabled: %s', campaign_instance.send_report)
     log.info('Twitter enabled: %s', campaign_instance.twitter)
-    
+
     if campaign_instance.send_report:
         report.email_recipients = campaign_instance.email_recipients
 
@@ -131,7 +131,7 @@ def process_articles(articles, news_provider, campaign_instance):
             continue
         log.info('Article %r, %r' % (article.title, article.url))
         new_article = False
-        if not DbHelper.item_exists(article.url):
+        if not DbHelper.record_exists(article.url):
             news_id = None
             log.info('New Article retrieved: %r, %r' % (
                 article.title, article.url))
