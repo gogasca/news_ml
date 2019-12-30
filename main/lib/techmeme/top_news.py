@@ -165,6 +165,7 @@ def launch(campaign_instance=None):
     log.info('Twitter enabled: %s', campaign_instance.twitter)
     if campaign_instance.send_report:
         report.email_recipients = campaign_instance.email_recipients
+
     for _, article in articles.items():
         if not article.title:
             log.warning('No title found. Article won\'t be inserted')

@@ -4,9 +4,6 @@ import logging
 import psycopg2
 import psycopg2.extensions
 
-psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
-psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
-
 from api.version1_0.database import Db
 from conf import logger
 from conf import settings
@@ -14,6 +11,9 @@ from conf import settings
 if settings.REMOVE_STOP_WORDS:
     from nltk.corpus import stopwords
     from nltk.tokenize import word_tokenize
+
+psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
+psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
 
 log = logger.LoggerManager().getLogger("__app__",
                                        logging_file=settings.APP_LOGFILE)
@@ -38,9 +38,9 @@ def item_exists(url, table='news'):
     """
     try:
         if url:
+            db = get_db()
             sql_query = """SELECT url FROM %s WHERE url='%s'""" % (
                 table, url.strip())
-            db = get_db()
             result = db.query(sql_query)
             if result:
                 return True
@@ -146,9 +146,9 @@ def insert_person(person_name=''):
     """
     try:
         if person_name:
+            db = get_db()
             sql_query = 'INSERT INTO persons (name, mention_date)'
             content = "'" + person_name.replace("'", "''") + "'," + DB_NOW
-            db = get_db()
             return db.insert(sql_query, content, None)
     except psycopg2.ProgrammingError as exception:
         log.exception(exception)
@@ -163,9 +163,9 @@ def insert_company(company_name=''):
 
     try:
         if company_name:
-            sql_query = 'INSERT INTO companies (name, mention_date)'
-            content = "'" + company_name.replace("'", "''") + "'," + DB_NOW
             db = get_db()
+            sql_query = 'INSERT INTO companies (name, mention_date)'
+            content = "'{}',{}".format(company_name.replace("'", "''"), DB_NOW)
             return db.insert(sql_query, content, None)
     except psycopg2.ProgrammingError as exception:
         log.exception(exception)
@@ -181,9 +181,9 @@ def associate_tag_news(news_id, tag_id):
 
     try:
         if news_id and tag_id:
-            sql_query = 'INSERT INTO tags_news (tag_id, news_id)'
-            content = str(tag_id) + "," + str(news_id)
             db = get_db()
+            sql_query = 'INSERT INTO tags_news (tag_id, news_id)'
+            content = '{},{}'.format(tag_id, news_id)
             return db.insert(sql_query, content, None)
     except psycopg2.ProgrammingError as exception:
         log.exception(exception)
@@ -286,8 +286,8 @@ def test_connection():
     :return:
     """
     try:
-        sql_query = 'SELECT COUNT(*) FROM news;'
         db = get_db()
+        sql_query = 'SELECT COUNT(*) FROM news;'
         return db.query(sql_query)
     except psycopg2.ProgrammingError as exception:
         log.exception(exception)

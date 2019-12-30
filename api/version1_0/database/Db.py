@@ -46,7 +46,7 @@ class Db(object):
             self.port,
             self.username,
             self.password)
-        # self.initialize(self.dsn)
+        self.initialize(self.dsn)
 
     def initialize(self, dsn=None, **kwargs):
         """
@@ -210,9 +210,9 @@ class Db(object):
         Clean up idle connections
         :return:
         """
-        query = "select pg_terminate_backend(pid) from pg_stat_activity where " \
+        query = "SELECT pg_terminate_backend(pid) FROM pg_stat_activity where " \
                 "usename = '" + settings.DBUSERNAME + \
-                "' and state = 'idle' and query_start < current_timestamp - " \
+                "' AND state = 'idle' AND query_start < current_timestamp - " \
                 "interval '5 minutes';"
         try:
             if self.conn:

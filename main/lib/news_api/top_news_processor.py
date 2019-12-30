@@ -121,7 +121,7 @@ def process_articles(articles, news_provider, campaign_instance):
     log.info('Translation enabled: %s', campaign_instance.translation_enable)
     log.info('Reporting enabled: %s', campaign_instance.send_report)
     log.info('Twitter enabled: %s', campaign_instance.twitter)
-    
+
     if campaign_instance.send_report:
         report.email_recipients = campaign_instance.email_recipients
 
