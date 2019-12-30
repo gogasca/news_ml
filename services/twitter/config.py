@@ -3,7 +3,7 @@ import logging
 
 from conf import settings
 
-logger = logging.getLogger()
+log = logging.getLogger()
 
 
 def create_api():
@@ -19,7 +19,7 @@ def create_api():
     try:
         api.verify_credentials()
     except Exception as e:
-        logger.error("Error creating API", exc_info=True)
+        log.error("Error creating API", exc_info=True)
         raise e
-    logger.info("Twitter API created")
+    log.info("Twitter API created")
     return api
