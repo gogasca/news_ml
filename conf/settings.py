@@ -205,7 +205,7 @@ MAILGUN_API_KEY = os.environ.get('MAILGUN_API_KEY')
 # =========================================================
 # Twitter
 # =========================================================
-TWITTER_ENABLED = True
+TWITTER_ENABLED = False
 TWITTER_DELAY = 1
 TWITTER_ADD_HASHTAGS = True
 CONSUMER_KEY = os.environ.get('CONSUMER_KEY')

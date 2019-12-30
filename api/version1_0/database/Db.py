@@ -46,6 +46,7 @@ class Db(object):
             self.port,
             self.username,
             self.password)
+        # self.initialize(self.dsn)
 
     def initialize(self, dsn=None, **kwargs):
         """
