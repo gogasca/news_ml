@@ -6,7 +6,6 @@ import logging
 import itertools
 import os
 import requests
-import time
 
 
 from api.version1_0.database import DbHelper
@@ -18,7 +17,6 @@ from services.nlp import nlp
 from services.nlp import utils as nlp_utils
 from services.translate import utils as translate_utils
 from services.twitter import utils as twitter_utils
-from services.twitter import config
 from utils import url_extract
 from utils.reporting import Report
 
@@ -54,8 +52,8 @@ def process_entities(article, news_id):
     for tag in tags:
         if tag != '':
             tag_id = DbHelper.insert_tag(tag_name=tag,
-                                         source=url_extract.get_domain(
-                                             article.url))
+                                          source=url_extract.get_domain(
+                                              article.url))
             if news_id and tag_id:
                 DbHelper.associate_tag_news(news_id, tag_id)
                 log.info('Processing persons in tags: %s', article.url)
@@ -165,7 +163,6 @@ def launch(campaign_instance=None):
     log.info('Twitter enabled: %s', campaign_instance.twitter)
     if campaign_instance.send_report:
         report.email_recipients = campaign_instance.email_recipients
-
     for _, article in articles.items():
         if not article.title:
             log.warning('No title found. Article won\'t be inserted')
@@ -173,7 +170,7 @@ def launch(campaign_instance=None):
         log.info('Analyzing article %s, %s', article.title, article.url)
         new_article = False
 
-        if not DbHelper.item_exists(article.url):
+        if not DbHelper.record_exists(article.url):
             news_id = None
             log.info('New Article retrieved: %r, %r' % (
                 article.title, article.url))

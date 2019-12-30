@@ -131,7 +131,7 @@ def process_articles(articles, news_provider, campaign_instance):
             continue
         log.info('Article %r, %r' % (article.title, article.url))
         new_article = False
-        if not DbHelper.item_exists(article.url):
+        if not DbHelper.record_exists(article.url):
             news_id = None
             log.info('New Article retrieved: %r, %r' % (
                 article.title, article.url))
