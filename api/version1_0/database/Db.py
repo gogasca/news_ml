@@ -115,8 +115,8 @@ class Db(object):
                 cur = self.conn.cursor()
                 content = bleach.clean(values)
                 # content = [bleach.clean(element) for element in content]
-                # final_query = query + " VALUES (" + content + ")" + return_id
-                final_query = '{} VALUES ({})'.format(query, content, return_id)
+                final_query = '{} VALUES ({}){}'.format(query, content,
+                                                        return_id)
                 log.info('DB insert() Executing SQL query: ' + final_query)
                 cur.execute(final_query)
                 self.conn.commit()
