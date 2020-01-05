@@ -136,7 +136,7 @@ def insert_tag(tag_name='', source='', language='english'):
     :return:
     """
     try:
-        if tag_name:
+        if tag_name and len(tag_name) > 1:
             if settings.REMOVE_STOP_WORDS:
                 tag_name = remove_stopwords(tag_name, language)
             # Insert into database.
@@ -154,7 +154,7 @@ def insert_person(person_name=''):
     :return:
     """
     try:
-        if person_name:
+        if person_name and len(person_name) > 1:
             db = _get_db()
             sql_query = 'INSERT INTO persons (name, mention_date)'
             content = "'" + person_name.replace("'", "''") + "'," + DB_NOW
@@ -171,7 +171,7 @@ def insert_company(company_name=''):
     """
 
     try:
-        if company_name:
+        if company_name and len(company_name) > 1:
             db = _get_db()
             sql_query = 'INSERT INTO companies (name, mention_date)'
             content = "'{}',{}".format(company_name.replace("'", "''"), DB_NOW)
