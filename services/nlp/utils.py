@@ -9,10 +9,8 @@ from nltk.stem.snowball import SnowballStemmer
 from services.nlp import nlp
 
 from conf import settings
-from conf import logger
 
-log = logger.LoggerManager().getLogger("__app__",
-                                       logging_file=settings.APP_LOGFILE)
+log = logging.getLogger()
 log.setLevel(level=logging.DEBUG)
 
 _ENTITIES = 'entities'
