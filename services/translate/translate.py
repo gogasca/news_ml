@@ -1,9 +1,11 @@
+import logging
 import os
 import six
 
 from conf import settings
 from google.cloud import translate
 
+log = logging.getLogger()
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = settings.CREDENTIALS
 
@@ -18,8 +20,8 @@ def detect_language(text):
     """
     translate_client = translate.Client()
     result = translate_client.detect_language(text)
-    print('Confidence: {}'.format(result['confidence']))
-    print('Language: {}'.format(result['language']))
+    log.info('Language: {}'.format(result['language']))
+    log.info('Confidence: {}'.format(result['confidence']))
     return result
 
 
@@ -28,7 +30,7 @@ def list_languages():
     translate_client = translate.Client()
     results = translate_client.get_languages()
     for language in results:
-        print(u'{name} ({language})'.format(**language))
+        log.info(u'{name} ({language})'.format(**language))
 
 
 def list_languages_with_target(target):
@@ -41,7 +43,7 @@ def list_languages_with_target(target):
     results = translate_client.get_languages(target_language=target)
 
     for language in results:
-        print(u'{name} ({language})'.format(**language))
+        log.info(u'{name} ({language})'.format(**language))
 
 
 def translate_text_with_model(target, text, model=translate.NMT):
@@ -65,9 +67,9 @@ def translate_text_with_model(target, text, model=translate.NMT):
     # will return a sequence of results for each text.
     result = translate_client.translate(
         text, target_language=target, model=model)
-    print(u'Text: {}'.format(result['input']))
-    print(u'Translation: {}'.format(result['translatedText']))
-    print(u'Detected source language: {}'.format(
+    log.info(u'Text: {}'.format(result['input']))
+    log.info(u'Translation: {}'.format(result['translatedText']))
+    log.info(u'Detected source language: {}'.format(
         result['detectedSourceLanguage']))
 
 
@@ -90,8 +92,8 @@ def translate_text(target, text):
     # will return a sequence of results for each text.
     result = translate_client.translate(
         text, target_language=target)
-    print(u'Text: {}'.format(result['input']))
-    print(u'Translation: {}'.format(result['translatedText']))
-    print(u'Detected source language: {}'.format(
+    log.info(u'Text: {}'.format(result['input']))
+    log.info(u'Translation: {}'.format(result['translatedText']))
+    log.info(u'Detected source language: {}'.format(
         result['detectedSourceLanguage']))
     return result

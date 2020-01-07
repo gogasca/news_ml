@@ -37,7 +37,8 @@ def translate_content(text, language=settings.TRANSLATION_DEFAULT_LANGUAGE):
     """
     translation = settings.EMPTY_TEXT
     if not settings.TRANSLATION_SERVICE:
-        print('Translation service is disabled in settings.translation_service')
+        log.info(
+            'Translation service is disabled in settings.translation_service')
         return settings.EMPTY_TEXT
     if not text:
         raise ValueError('Invalid text')
@@ -48,9 +49,9 @@ def translate_content(text, language=settings.TRANSLATION_DEFAULT_LANGUAGE):
     if detected_language != language:
         translated_text = translate.translate_text(language, limited_text)
     else:
-        print('No text to translate. Source language (%s) eq target language ' \
-              '(%s)' % (
-                  detected_language, language))
+        log.warning(
+            'No text to translate. Source language (%s) eq target language ('
+            '%s)' % (detected_language, language))
         return settings.EMPTY_TEXT
     # Verify language is detected and text is translated.
     if _LANGUAGE in detected_language and _TRANSLATED_TEXT in translated_text:
