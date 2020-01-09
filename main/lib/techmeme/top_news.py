@@ -4,10 +4,7 @@ from bs4 import BeautifulSoup
 
 import logging
 import itertools
-import os
 import requests
-import time
-import tweepy
 
 
 from api.version1_0.database import DbHelper
@@ -15,10 +12,10 @@ from conf import settings
 from conf import logger
 from conf import constants
 from main.common.NewsArticle import Article
-from services.nlp import nlp
+from main.common import utils as common_utils
 from services.nlp import utils as nlp_utils
 from services.translate import utils as translate_utils
-from services.twitter import config
+from services.twitter import utils as twitter_utils
 from utils import url_extract
 from utils.reporting import Report
 
@@ -27,48 +24,6 @@ log = logger.LoggerManager().getLogger("__app__",
 log.setLevel(level=logging.DEBUG)
 
 _HTML_TITLE_CLASS = 'ourh'
-
-
-def process_entities(article, news_id):
-    """
-
-    :param article:
-    :param news_id:
-    :return:
-    """
-    log.info('process_entities() Processing content for : %s using NLP',
-             article.url)
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = settings.CREDENTIALS
-    entities = nlp.analyze_entities(
-        '%r %r' % (article.title, article.description))
-    num_of_entities = 0
-    if entities:
-        num_of_entities = len(entities)
-    if num_of_entities < 1:
-        log.error('No NLP entities found')
-        return
-    log.info('Processing %d entities: %s', num_of_entities, article.url)
-    # Extract tags and associate them with original article.
-    log.info('Processing article tags: %s', article.url)
-    tags = nlp_utils.extract_tags(entities)
-    for tag in tags:
-        if tag != '':
-            tag_id = DbHelper.insert_tag(tag_name=tag,
-                                         source=url_extract.get_domain(
-                                             article.url))
-            if news_id and tag_id:
-                DbHelper.associate_tag_news(news_id, tag_id)
-                log.info('Processing persons in tags: %s', article.url)
-    # Extract entities.
-    persons = nlp_utils.extract_entity(entities, 'PERSON')
-    log.info('Found %d persons', len(persons))
-    for person in persons:
-        DbHelper.insert_person(person)
-    log.info('Processing organizations in tags: %s', article.url)
-    organizations = nlp_utils.extract_entity(entities, 'ORGANIZATION')
-    log.info('Found %d organizations', len(organizations))
-    for organization in organizations:
-        DbHelper.insert_company(organization)
 
 
 def extract_articles(url=None):
@@ -113,8 +68,13 @@ def launch(campaign_instance=None):
     :param campaign_instance:
     :return:
     """
+    news_id = None
+    translated_text = None
+    tweets = []
     articles = extract_articles(settings.TECHMEME_URL)
     num_of_articles = len(articles)
+    report = Report.Report(subject=settings.TECHMEME_REPORT)
+
     log.info('Retrieved %d articles...', num_of_articles)
     if campaign_instance.limit > 0:
         logging.warning('Limit is defined. Skipping other news')
@@ -129,31 +89,31 @@ def launch(campaign_instance=None):
     log.info('Processing %d articles...', num_of_articles)
     campaign_instance.set_articles(num_of_articles)
     # Create Report instance and attach recipients.
-    log.info('Reporting enabled: %s', campaign_instance.send_report)
+    log.info('Translation enabled: %s', campaign_instance.translation_enable)
+    log.info('Email reporting enabled: %s', campaign_instance.send_report)
+    log.info('Twitter enabled: %s', campaign_instance.twitter)
     if campaign_instance.send_report:
-        report = Report.Report(subject=settings.TECHMEME_REPORT)
         report.email_recipients = campaign_instance.email_recipients
-
-    for _, _article in articles.items():
-        if not _article.title:
+    for _, article in articles.items():
+        if not article.title:
             log.warning('No title found. Article won\'t be inserted')
             continue
-        log.info('Analyzing article %s, %s', _article.title, _article.url)
+        log.info('Analyzing article %s, %s', article.title, article.url)
         new_article = False
 
-        if not DbHelper.item_exists(_article.url):
+        if not DbHelper.record_exists(article.url):
             news_id = None
             log.info('New Article retrieved: %r, %r' % (
-                _article.title, _article.url))
+                article.title, article.url))
             try:
-                log.info('Process sentiment analysis')
+                log.info('Processing sentiment analysis')
                 score, magnitude = nlp_utils.get_sentiment_scores(
-                    _article.content)
-                source = url_extract.get_domain(_article.url) or ''
+                    article.content)
+                source = url_extract.get_domain(article.url) or ''
                 log.info('Insert article into Database')
-                news_id = DbHelper.insert_news(title=_article.title,
-                                               content=_article.content,
-                                               url=_article.url,
+                news_id = DbHelper.insert_news(title=article.title,
+                                               content=article.content,
+                                               url=article.url,
                                                provider=settings.TECHMEME,
                                                source=source.upper(),
                                                source_id=source,
@@ -164,51 +124,38 @@ def launch(campaign_instance=None):
                                                    score)
                                                )
                 if not news_id:
-                    log.error('Unable to insert record %s', _article.url)
+                    log.error('Unable to insert record %s', article.url)
                     continue
             except (ValueError, UnicodeDecodeError) as exception:
                 log.exception(exception)
             new_article = True
             if settings.PROCESS_ENTITIES:
-                process_entities(_article, news_id)
+                entities = common_utils.process_entities(article, news_id)
         else:
             log.warning('Article already exists.')
 
-        # Process translation
         if campaign_instance.translation_enable:
-            # Perform translation using Google Translate API
-            log.info('Translating...%r', _article.url)
-            translated_text = translate_utils.translate_content(
-                _article.title, campaign_instance.translation_lang)
-            if new_article:
-                # Update database record
-                sql_query = translate_utils.create_sql_query(
-                    translated_text, settings.DEFAULT_LANGUAGE, news_id)
-                DbHelper.update_database(sql_query)
-            else:
-                log.warn('Article already exists, skipping DB update')
-            if campaign_instance.send_report and len(translated_text) > 1:
-                log.info('Adding translated information to report.')
-                report.add_content(_article.url, translated_text)
+            translated_text = translate_utils.translate_article(
+                campaign_instance, article,
+                new_article, report, news_id)
         elif campaign_instance.send_report:
             log.info('Adding information to report.')
-            report.add_content(_article.url, _article.title)
+            report.add_content(article.url, article.title)
+        else:
+            pass
 
         if campaign_instance.twitter:
-            log.info('Sending Twitter information')
-            twitter_api = config.create_api()
-            try:
-                if twitter_api.update_status(
-                    '{} {}'.format(_article.title, _article.url)):
-                    log.info('Tweet posted')
-            except tweepy.error.TweepError as e:
-                log.exception(e)
-
-            time.sleep(campaign_instance.twitter_delay)
-            log.info('Twitter information sent')
+            tweet_text = article.title
+            if campaign_instance.translation_enable:
+                tweet_text = translated_text
+            tweets.append('{} {}'.format(tweet_text, article.url))
 
     if campaign_instance.send_report:
         log.info('Sending email notification...')
         report.send()
+
+    if campaign_instance.twitter:
+        log.info('Sending Tweets...')
+        twitter_utils.send_tweets(tweets, campaign_instance.twitter_delay)
 
     log.info('Extraction completed')

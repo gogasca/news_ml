@@ -89,8 +89,8 @@ def get_campaign(json_request):
     if query:
         campaign_instance.query = json_request['query']
     if report:
-        email = json_request.get('report').get('email')
-        twitter = json_request.get('report').get('twitter')
+        email = json_request.get('report').get('email', False)
+        twitter = json_request.get('report').get('twitter', False)
         # Process if we want to send email
         if email:
             campaign_instance.email_recipients = \
@@ -112,8 +112,7 @@ def get_campaign(json_request):
             'language')
     if limit:
         campaign_instance.limit = limit
-    else:
-        campaign_instance.translation_enable = False
+
     return campaign_instance
 
 

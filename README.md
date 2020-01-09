@@ -2,12 +2,13 @@
 
 ## Introduction
 
-This application collects news information from News 
-API. App collects information from fixed sources, if search feature is
-used API will look into all news in API for a specific time period that
-match search pattern.
-App extract entities from News content via Google Cloud NLP and 
-perform sentiment analysis.
+This application implements a REST API.
+This REST API implements different methods with the following functionality:
+ - Collects news information from News API and other News sources. 
+ - Search news by keyword, date.
+ - Extract entities from News content via Google Cloud NLP and perform sentiment analysis
+ - Send Email report
+ - Use Twitter to tweet News articles. 
 
 ## Quickstart
 

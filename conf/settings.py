@@ -151,7 +151,7 @@ TOKEN_EXPIRATION_SECS = 600
 # API configuration parameters
 # =========================================================
 
-API_VERSION = '0.5'
+API_VERSION = '0.6'
 API_ACCOUNT = os.environ.get('API_USERNAME', None)
 API_PASSWORD = os.environ.get('API_PASSWORD', None)
 API_LOGFILE = FILEPATH + '/log/apid.log'
@@ -205,7 +205,7 @@ MAILGUN_API_KEY = os.environ.get('MAILGUN_API_KEY')
 # =========================================================
 # Twitter
 # =========================================================
-TWITTER_ENABLED = True
+TWITTER_ENABLED = False
 TWITTER_DELAY = 1
 TWITTER_ADD_HASHTAGS = True
 CONSUMER_KEY = os.environ.get('CONSUMER_KEY')

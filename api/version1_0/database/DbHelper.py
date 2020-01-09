@@ -4,26 +4,53 @@ import logging
 import psycopg2
 import psycopg2.extensions
 
-psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
-psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
-
 from api.version1_0.database import Db
-from conf import logger
 from conf import settings
 
 if settings.REMOVE_STOP_WORDS:
     from nltk.corpus import stopwords
     from nltk.tokenize import word_tokenize
 
-log = logger.LoggerManager().getLogger("__app__",
-                                       logging_file=settings.APP_LOGFILE)
+psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
+psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
+log = logging.getLogger()
 log.setLevel(level=logging.DEBUG)
 
 DB_NOW = 'now()'
-SEPARATOR = "','"
 
 
-def item_exists(url, table='news'):
+def _get_db():
+    db = Db.Db()
+    db.initialize(dsn=settings.SQLALCHEMY_DSN)
+    return db
+
+
+def test_connection():
+    """
+
+    :return:
+    """
+    try:
+        db = _get_db()
+        sql_query = 'SELECT COUNT(*) FROM news;'
+        return db.query(sql_query)
+    except psycopg2.ProgrammingError as exception:
+        log.exception(exception)
+
+
+def remove_stopwords(text, language='english'):
+    """
+
+    :param text:
+    :param language:
+    :return:
+    """
+    stop_words = set(stopwords.words(language))
+    word_tokens = word_tokenize(text)
+    return ' '.join([w for w in word_tokens if not w in stop_words])
+
+
+def record_exists(url, table='news'):
     """
 
     :param url:
@@ -32,10 +59,9 @@ def item_exists(url, table='news'):
     """
     try:
         if url:
+            db = _get_db()
             sql_query = """SELECT url FROM %s WHERE url='%s'""" % (
                 table, url.strip())
-            db = Db.Db()
-            db.initialize(dsn=settings.SQLALCHEMY_DSN)
             result = db.query(sql_query)
             if result:
                 return True
@@ -72,8 +98,7 @@ def insert_news(title=None, author='', description='', content='', url='',
     try:
         if not (title and url):
             raise ValueError('Title or url missing')
-        db = Db.Db()
-        db.initialize(dsn=settings.SQLALCHEMY_DSN)
+        db = _get_db()
         sql_query = \
             "INSERT INTO news (" \
             "title, author, description, content, url, url_to_image, " \
@@ -102,18 +127,6 @@ def insert_news(title=None, author='', description='', content='', url='',
         log.exception(exception)
 
 
-def remove_stopwords(text, language='english'):
-    """
-
-    :param text:
-    :param language:
-    :return:
-    """
-    stop_words = set(stopwords.words(language))
-    word_tokens = word_tokenize(text)
-    return ' '.join([w for w in word_tokens if not w in stop_words])
-
-
 def insert_tag(tag_name='', source='', language='english'):
     """Inserts tag into database.
 
@@ -123,12 +136,11 @@ def insert_tag(tag_name='', source='', language='english'):
     :return:
     """
     try:
-        if tag_name:
+        if tag_name and len(tag_name) > 1:
             if settings.REMOVE_STOP_WORDS:
                 tag_name = remove_stopwords(tag_name, language)
             # Insert into database.
-            db = Db.Db()
-            db.initialize(dsn=settings.SQLALCHEMY_DSN)
+            db = _get_db()
             sql_query = "INSERT INTO tags (tag_name) VALUES ('%s')" % tag_name
             return db.insert_content(sql_query, 'tag_id')
     except (psycopg2.DataError, psycopg2.ProgrammingError) as exception:
@@ -142,11 +154,10 @@ def insert_person(person_name=''):
     :return:
     """
     try:
-        if person_name:
+        if person_name and len(person_name) > 1:
+            db = _get_db()
             sql_query = 'INSERT INTO persons (name, mention_date)'
             content = "'" + person_name.replace("'", "''") + "'," + DB_NOW
-            db = Db.Db()
-            db.initialize(dsn=settings.SQLALCHEMY_DSN)
             return db.insert(sql_query, content, None)
     except psycopg2.ProgrammingError as exception:
         log.exception(exception)
@@ -160,11 +171,10 @@ def insert_company(company_name=''):
     """
 
     try:
-        if company_name:
+        if company_name and len(company_name) > 1:
+            db = _get_db()
             sql_query = 'INSERT INTO companies (name, mention_date)'
-            content = "'" + company_name.replace("'", "''") + "'," + DB_NOW
-            db = Db.Db()
-            db.initialize(dsn=settings.SQLALCHEMY_DSN)
+            content = "'{}',{}".format(company_name.replace("'", "''"), DB_NOW)
             return db.insert(sql_query, content, None)
     except psycopg2.ProgrammingError as exception:
         log.exception(exception)
@@ -180,10 +190,9 @@ def associate_tag_news(news_id, tag_id):
 
     try:
         if news_id and tag_id:
+            db = _get_db()
             sql_query = 'INSERT INTO tags_news (tag_id, news_id)'
-            content = str(tag_id) + "," + str(news_id)
-            db = Db.Db()
-            db.initialize(dsn=settings.SQLALCHEMY_DSN)
+            content = '{},{}'.format(tag_id, news_id)
             return db.insert(sql_query, content, None)
     except psycopg2.ProgrammingError as exception:
         log.exception(exception)
@@ -201,8 +210,7 @@ def update_ranked_post(news_id, rank_score, rank_order):
     sql_query = 'UPDATE news SET rank_score = %s, rank_order = %s WHERE ' \
                 'news_id = %d' % (rank_score, rank_order, news_id)
     try:
-        db = Db.Db()
-        db.initialize(dsn=settings.SQLALCHEMY_DSN)
+        db = _get_db()
         return db.update(sql_query)
     except psycopg2.ProgrammingError as exception:
         log.exception(exception)
@@ -236,8 +244,7 @@ def insert_cluster_article(news_id=-1, title=None, content='', source='',
                            source,
                            cluster,
                            campaign_reference)
-            db = Db.Db()
-            db.initialize(dsn=settings.SQLALCHEMY_DSN)
+            db = _get_db()
             return db.insert_content(sql_query, 'id')
     except psycopg2.ProgrammingError as exception:
         log.exception(exception)
@@ -250,8 +257,7 @@ def get_multiple_records(sqlquery):
     :return:
     """
     try:
-        db = Db.Db()
-        db.initialize(dsn=settings.SQLALCHEMY_DSN)
+        db = _get_db()
         return db.query_multiple(sqlquery)
     except psycopg2.ProgrammingError as exception:
         log.exception(exception)
@@ -264,8 +270,7 @@ def get_record(sqlquery):
     :return:
     """
     try:
-        db = Db.Db()
-        db.initialize(dsn=settings.SQLALCHEMY_DSN)
+        db = _get_db()
         return db.query(sqlquery)
     except psycopg2.ProgrammingError as exception:
         log.exception(exception)
@@ -278,22 +283,7 @@ def update_database(sqlquery):
     :return:
     """
     try:
-        db = Db.Db()
-        db.initialize(dsn=settings.SQLALCHEMY_DSN)
+        db = _get_db()
         db.update(sqlquery)
-    except psycopg2.ProgrammingError as exception:
-        log.exception(exception)
-
-
-def test_connection():
-    """
-
-    :return:
-    """
-    try:
-        sql_query = 'SELECT COUNT(*) FROM news;'
-        db = Db.Db()
-        db.initialize(dsn=settings.SQLALCHEMY_DSN)
-        return db.query(sql_query)
     except psycopg2.ProgrammingError as exception:
         log.exception(exception)
