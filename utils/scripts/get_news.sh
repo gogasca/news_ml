@@ -11,11 +11,11 @@ source ~root/.profile
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 LOG='/var/log/news_ml_client.log'
 
-EMAIL_NOTIFICATIONS='support@newsml.io'
+EMAIL_NOTIFICATIONS='support@newsml.io;contact@newsml.io'
 
 # API Requests.
-SOURCES='techcrunch'
-NEWS_API='{ "provider": "news_api", "report": {"email": "'${EMAIL_NOTIFICATIONS}'"}}'
+SOURCES='techmeme, news_api'
+NEWS_API='{ "provider": "techmeme", "translate": {"language": "es"}, "report": {"email": "'${EMAIL_NOTIFICATIONS}'"}}'
 QUERY_NEWS='{ "provider": "news_api", "query": "tensorflow, sagemaker, keras, kubeflow", "report": {"email": "'${EMAIL_NOTIFICATIONS}'"} }'
 RANKER='{ "report": {"email": "'${EMAIL_NOTIFICATIONS}'"} }'
 CLUSTER='{ "clusters": 8, "report": {"email": "'${EMAIL_NOTIFICATIONS}'"} }'

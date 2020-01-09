@@ -48,8 +48,8 @@ apid1:
   ports:
     - "8081:8081"
   volumes:
-    - /usr/local/src/news_ml:/usr/local/src/news_ml
-    - /usr/local/src/containers/apid/volumes/log/apid1:/usr/local/src/news_ml/log
+    - /usr/local/src/newsml:/usr/local/src/newsml
+    - /usr/local/src/containers/apid/volumes/log/apid1:/usr/local/src/newsml/log
 
 # API server #2
 apid2:
@@ -62,5 +62,5 @@ apid2:
   ports:
     - "8081:8081"
   volumes:
-    - /usr/local/src/news_ml:/usr/local/src/news_ml
-    - /usr/local/src/containers/apid/volumes/log/apid2:/usr/local/src/news_ml/log
+    - /usr/local/src/newsml:/usr/local/src/newsml
+    - /usr/local/src/containers/apid/volumes/log/apid2:/usr/local/src/newsml/log
