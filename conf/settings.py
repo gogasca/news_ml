@@ -151,7 +151,7 @@ TOKEN_EXPIRATION_SECS = 600
 # API configuration parameters
 # =========================================================
 
-API_VERSION = '0.6'
+API_VERSION = '0.7'
 API_ACCOUNT = os.environ.get('API_USERNAME', None)
 API_PASSWORD = os.environ.get('API_PASSWORD', None)
 API_LOGFILE = FILEPATH + '/log/apid.log'
@@ -179,7 +179,9 @@ MAX_CRAWLER_PROCESSING = 3600  # Max time processing news task.
 MAX_TASK_PROCESSING = 3600  # Max time processing news task.
 MAX_RANK_PROCESSING = 1800  # Max time ranking posts.
 MAX_API_PROCESSING = 600
-
+USER_AGENT = 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) ' \
+             'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 ' \
+             'Mobile Safari/537.36'
 # =========================================================
 # Email SMTP
 # =========================================================
@@ -213,6 +215,7 @@ CONSUMER_SECRET = os.environ.get('CONSUMER_SECRET')
 ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN')
 ACCESS_TOKEN_SECRET = os.environ.get('ACCESS_TOKEN_SECRET')
 
+EXTRACT_TWITTER_IMAGE = True
 # =========================================================
 # Twilio configuration parameters
 # =========================================================
@@ -227,7 +230,7 @@ PHONE_NUMBERS = ['+1408XXXXXXX']
 # Report configuration parameters
 # =========================================================
 REPORT_ALL_DATES_ARTICLES = False
-
+REPORT_USE_BASE64_IMAGE = False
 # =========================================================
 # Database
 # =========================================================
@@ -257,3 +260,6 @@ SQLALCHEMY_POOL_RECYCLE = 60
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 DATABASE_CONNECT_OPTIONS = None
 SQLALCHEMY_COMMIT_ON_TEARDOWN = True
+
+
+

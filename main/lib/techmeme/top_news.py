@@ -1,11 +1,11 @@
 """Crawls TechMeme URL"""
 
 from bs4 import BeautifulSoup
+from datetime import datetime
 
 import logging
 import itertools
 import requests
-
 
 from api.version1_0.database import DbHelper
 from conf import settings
@@ -41,15 +41,24 @@ def extract_articles(url=None):
             raise ValueError('URL not found')
         response = requests.get(url)
         soup = BeautifulSoup(response.content, constants.LXML)
-        titles_html = soup.find_all("a", class_=_HTML_TITLE_CLASS)
+        titles_html = soup.find_all('a', class_=_HTML_TITLE_CLASS)
+        published_dates = soup.find_all('div', class_='itc2')
+        published_dates = [article.get('id') for article in published_dates if
+                           article.get('id')]
+        log.info('Found %d articles: [%d]', len(titles_html),
+                 len(published_dates))
         articles = {}
         for title in titles_html:
-            article_instance = Article(settings.TECHMEME)
-            article_instance.title = title.text
-            article_instance.content = title.text
-            article_instance.url = title[constants.HTML_HREF]
-            articles[title[constants.HTML_HREF]] = article_instance
-        log.info('Found %d articles', len(articles))
+            url = title.get('href')
+            if not articles.get(url):
+                article_instance = Article(settings.TECHMEME)
+                article_instance.url = url
+                article_instance.title = title.text
+                article_instance.content = title.text
+                if published_dates:
+                    article_instance.published_at = published_dates.pop(0)[:6]
+                articles[title['href']] = article_instance
+        log.info('Created %d article objects', len(articles))
         return articles
     except Exception as e:
         log.exception('We failed with error - %s.', e)
@@ -68,14 +77,19 @@ def launch(campaign_instance=None):
     :param campaign_instance:
     :return:
     """
+    entities = None
     news_id = None
+    num_of_articles = 0
     translated_text = None
     tweets = []
     articles = extract_articles(settings.TECHMEME_URL)
-    num_of_articles = len(articles)
+    if articles:
+        num_of_articles = len(articles)
+    else:
+        logging.error('No articles found.')
     report = Report.Report(subject=settings.TECHMEME_REPORT)
 
-    log.info('Retrieved %d articles...', num_of_articles)
+    log.info('Retrieving %d articles...', num_of_articles)
     if campaign_instance.limit > 0:
         logging.warning('Limit is defined. Skipping other news')
         articles = dict(
@@ -92,15 +106,19 @@ def launch(campaign_instance=None):
     log.info('Translation enabled: %s', campaign_instance.translation_enable)
     log.info('Email reporting enabled: %s', campaign_instance.send_report)
     log.info('Twitter enabled: %s', campaign_instance.twitter)
+    log.info('Twitter image extraction: %s', settings.EXTRACT_TWITTER_IMAGE)
     if campaign_instance.send_report:
         report.email_recipients = campaign_instance.email_recipients
     for _, article in articles.items():
+        new_article = False
         if not article.title:
             log.warning('No title found. Article won\'t be inserted')
             continue
-        log.info('Analyzing article %s, %s', article.title, article.url)
-        new_article = False
-
+        if settings.EXTRACT_TWITTER_IMAGE:  # meta:twitter:image
+            article.twitter_image = twitter_utils.get_twitter_element(
+                article.url, 'twitter:image')
+        log.info('Article: %s, [%s], [%s]', article.title, article.url,
+                 article.twitter_image)
         if not DbHelper.record_exists(article.url):
             news_id = None
             log.info('New Article retrieved: %r, %r' % (
@@ -136,13 +154,31 @@ def launch(campaign_instance=None):
 
         if campaign_instance.translation_enable:
             translated_text = translate_utils.translate_article(
-                campaign_instance, article,
-                new_article, report, news_id)
-        elif campaign_instance.send_report:
-            log.info('Adding information to report.')
-            report.add_content(article.url, article.title)
-        else:
-            pass
+                campaign_instance, article, new_article, news_id)
+            if translated_text:
+                log.info('Adding translated content to report.')
+                article.title = translated_text
+            else:
+                logging.warning('Translated text is empty.')
+
+        if campaign_instance.send_report:
+            # Only send today articles in Report.
+            today = datetime.now().date()
+            published_at = datetime.strptime(article.published_at,
+                                             '%y%m%d').date()
+            if settings.REPORT_ALL_DATES_ARTICLES:
+                log.info('Publishing all dates articles')
+            log.info('Today: %s Report date: %s. ', today, published_at)
+            if today == published_at or settings.REPORT_ALL_DATES_ARTICLES:
+                log.info(
+                    'Adding article information to Report: %s %s' % (
+                        article.title, article.url))
+                report.add_content(article.url, article.title,
+                                   article.twitter_image)
+            else:
+                log.warning(
+                    'Article published date is not today (%s), '
+                    'skipping article from Report', published_at)
 
         if campaign_instance.twitter:
             tweet_text = article.title

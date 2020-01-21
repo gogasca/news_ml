@@ -12,7 +12,7 @@ _TRANSLATED_TEXT = 'translatedText'
 _LANGUAGE = 'language'
 
 
-def create_sql_query(translation, detected_language, news_id):
+def update_db_query(translation, detected_language, news_id):
     """
 
     :param translation:
@@ -24,7 +24,7 @@ def create_sql_query(translation, detected_language, news_id):
         return u"UPDATE news SET translated_content='%s', detected_language='%s' " \
                u"WHERE news_id=%s;" % (
                    translation, detected_language, str(news_id))
-    return settings.EMPTY_TEXT
+    return
 
 
 def translate_content(text, language=settings.TRANSLATION_DEFAULT_LANGUAGE):
@@ -46,13 +46,15 @@ def translate_content(text, language=settings.TRANSLATION_DEFAULT_LANGUAGE):
     limited_text = text[:settings.TRANSLATION_LIMIT]
     detected_language = translate.detect_language(limited_text)
     # Submit translation request.
-    if detected_language != language:
+    if detected_language.get('language') != language:
+        logging.info(
+            'Translating from {} to {}'.format(detected_language, language))
         translated_text = translate.translate_text(language, limited_text)
     else:
         log.warning(
             'No text to translate. Source language (%s) eq target language ('
-            '%s)' % (detected_language, language))
-        return settings.EMPTY_TEXT
+            '%s)' % (detected_language.get('language'), language))
+        return None
     # Verify language is detected and text is translated.
     if _LANGUAGE in detected_language and _TRANSLATED_TEXT in translated_text:
         # Clean text for SQL insertion.
@@ -60,7 +62,7 @@ def translate_content(text, language=settings.TRANSLATION_DEFAULT_LANGUAGE):
     return translation
 
 
-def translate_article(campaign_instance, article, new_article, report, news_id):
+def translate_article(campaign_instance, article, new_article, news_id):
     """
 
     :param campaign_instance:
@@ -74,14 +76,11 @@ def translate_article(campaign_instance, article, new_article, report, news_id):
     log.info('Translating...%r', article.url)
     translated_text = translate_content(
         article.title, campaign_instance.translation_lang)
-    if new_article:
+    if new_article and translated_text:
         # Update database record
-        sql_query = create_sql_query(
+        sql_query = update_db_query(
             translated_text, settings.DEFAULT_LANGUAGE, news_id)
         DbHelper.update_database(sql_query)
     else:
         log.warning('Article already exists, skipping DB update')
-    if campaign_instance.send_report and len(translated_text) > 1:
-        log.info('Adding translated information to report.')
-        report.add_content(article.url, translated_text)
     return translated_text

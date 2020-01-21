@@ -11,14 +11,17 @@ source ~root/.profile
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 LOG='/var/log/news_ml_client.log'
 
+SUPPORT_EMAIL='support@newsml.io'
 EMAIL_NOTIFICATIONS='support@newsml.io;contact@newsml.io'
 
 # API Requests.
 SOURCES='techmeme, news_api'
-NEWS_API='{ "provider": "techmeme", "translate": {"language": "es"}, "report": {"email": "'${EMAIL_NOTIFICATIONS}'"}}'
-QUERY_NEWS='{ "provider": "news_api", "query": "tensorflow, sagemaker, keras, kubeflow", "report": {"email": "'${EMAIL_NOTIFICATIONS}'"} }'
-RANKER='{ "report": {"email": "'${EMAIL_NOTIFICATIONS}'"} }'
-CLUSTER='{ "clusters": 8, "report": {"email": "'${EMAIL_NOTIFICATIONS}'"} }'
+NEWS_API='{ "provider": "news_api", "report": {"email": "'${EMAIL_NOTIFICATIONS}'"}}'
+QUERY_NEWS='{ "provider": "news_api", "translate": {"language": "es"}, "query": "Microsoft Power Query, Microsoft Office 365, Microsoft Ignite, Microsoft Teams", "report": {"
+email": "'${EMAIL_NOTIFICATIONS}'"} }'
+QUERY_TECHMEME='{ "provider": "techmeme", "translate": {"language": "es"}, "report": {"email": "'${EMAIL_NOTIFICATIONS}'"} }'
+RANKER='{ "report": {"email": "'${SUPPORT_EMAIL}'"} }'
+CLUSTER='{ "clusters": 8, "report": {"email": "'${SUPPORT_EMAIL}'"} }'
 
 # API URL using HTTPS and custom port.
 CAMPAIGN_URL="https://0.0.0.0:8443/api/1.0/campaign"

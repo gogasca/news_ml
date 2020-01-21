@@ -49,16 +49,21 @@ def process_articles(articles, news_provider, campaign_instance):
     log.info('Translation enabled: %s', campaign_instance.translation_enable)
     log.info('Email reporting enabled: %s', campaign_instance.send_report)
     log.info('Twitter enabled: %s', campaign_instance.twitter)
+    log.info('Twitter image extraction: %s', settings.EXTRACT_TWITTER_IMAGE)
 
     if campaign_instance.send_report:
         report.email_recipients = campaign_instance.email_recipients
 
     for _, article in articles.items():
+        new_article = False
         if not article.description:
             log.error('Not description found in article: %s', article.url)
             continue
-        log.info('Article %r, %r' % (article.title, article.url))
-        new_article = False
+        if settings.EXTRACT_TWITTER_IMAGE:  # meta:twitter:image
+            article.twitter_image = twitter_utils.get_twitter_element(
+                article.url, 'twitter:image')
+        log.info('Article: %s, [%s], [%s]', article.title, article.url,
+                 article.twitter_image)
         if not DbHelper.record_exists(article.url):
             news_id = None
             log.info('New Article retrieved: %r, %r' % (
@@ -96,25 +101,31 @@ def process_articles(articles, news_provider, campaign_instance):
         if campaign_instance.translation_enable:
             translated_text = translate_utils.translate_article(
                 campaign_instance, article,
-                new_article, report, news_id)
-        elif campaign_instance.send_report:
-            # Only send today articles in report.
+                new_article, news_id)
+            if len(translated_text) > 1:
+                log.info('Adding translated content to report.')
+                article.title = translated_text
+            else:
+                logging.error('Translated text is empty.')
+
+        if campaign_instance.send_report:
+            # Only send today articles in Report.
             today = datetime.now().date()
             published_at = datetime.strptime(article.published_at[:10],
-                                          '%Y-%m-%d').date()
+                                             '%Y-%m-%d').date()
             if settings.REPORT_ALL_DATES_ARTICLES:
                 log.info('Publishing all dates articles')
+            log.info('Today: %s Report date: %s. ', today, published_at)
             if today == published_at or settings.REPORT_ALL_DATES_ARTICLES:
                 log.info(
-                    'Adding article information to report: %s %s' % (
+                    'Adding article information to Report: %s %s' % (
                         article.title, article.url))
-                report.add_content(article.url, article.title)
+                report.add_content(article.url, article.title,
+                                   article.twitter_image)
             else:
                 log.warning(
                     'Article published date is not today (%s), '
-                    'skipping article from report', published_at)
-        else:
-            pass
+                    'skipping article from Report', published_at)
 
         # Handle Twitter
         if campaign_instance.twitter:

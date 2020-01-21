@@ -111,12 +111,12 @@ class RankerD(object):
             logging.info('Updating database')
             update_articles(self.sorted_articles)
             for article in self.sorted_articles:
-                self.report.add_content(article._url,
+                self.report.add_content(article.url,
                                         '%s | <b>Score</b>: %d | '
                                         '<b>Provider</b>: %s' % (
-                                        article._title,
-                                        article.score,
-                                        article.source.upper()))
+                                            article.title,
+                                            article.score,
+                                            article.source.upper()))
         return self.sorted_articles
 
     def terminate(self, status=1):

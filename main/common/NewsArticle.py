@@ -25,6 +25,7 @@ class Article(object):
         self._title = ''
         self._url_to_image = ''
         self._url = ''
+        self._twitter_image = ''
 
     @property
     def author(self):
@@ -115,6 +116,14 @@ class Article(object):
             self._url_to_image = url_to_image
         else:
             log.warning('No image url defined')
+
+    @property
+    def twitter_image(self):
+        return self._twitter_image
+
+    @twitter_image.setter
+    def twitter_image(self, twitter_image):
+        self._twitter_image = twitter_image
 
     def __repr__(self):
         return 'Article: <{}> Title: <{}>'.format(self._url, self._title)

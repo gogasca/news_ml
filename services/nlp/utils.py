@@ -1,36 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import importlib
 import logging
 import re
 
 import nltk
-
-req_modules = {'nltk.punkt': 'punkt',
-               'nltk.corpus.stopwords': 'stopwords'}
-
-
-def try_load(module, name):
-    """
-
-    :param module:
-    :param name:
-    :return:
-    """
-    print("Trying to load: '%s'" % module)
-    globals()[name] = importlib.import_module(module)
-    print("Success.")
-
-
-for module, name in req_modules.items():
-    try:
-        try_load(module, name)
-    except (LookupError, ImportError):
-        # if data not found (not already installed), download it
-        print("Tried to load: '%s'. Resource '%s' was not available \
-               and is being downloaded.\n" % (module, name))
-        nltk.download(name)
-        try_load(module, name)
 
 from nltk.corpus import stopwords
 from nltk.stem.snowball import SnowballStemmer
