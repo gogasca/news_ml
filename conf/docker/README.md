@@ -53,7 +53,7 @@ docker run -d --name="rabbitmq" --hostname="rabbitmq" --network=newsml_network -
 Start Load Balancer
 
 ```
-docker run -d --name="loadbalancer" --hostname="loadbalancer" --network=newsml_network --publish="8443:8443"  news_ml/loadbalancer
+docker run -d --name="loadbalancer" --hostname="loadbalancer" --network=newsml_network --publish="8443:8443" -v /usr/local/src/newsml/conf/docker/loadbalancer/volumes/sites-available:/etc/nginx/sites-available news_ml/loadbalancer
 ```
 
 SQL proxy

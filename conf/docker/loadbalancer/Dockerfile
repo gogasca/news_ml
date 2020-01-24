@@ -25,6 +25,8 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 ENV LC_CTYPE en_US.UTF-8
 
+RUN echo "America/Los_Angeles" > /etc/timezone
+RUN dpkg-reconfigure -f noninteractive tzdata
 # Set hostname
 RUN echo $(grep $(hostname) /etc/hosts | cut -f1) loadbalancer >> /etc/hosts
 
