@@ -109,8 +109,10 @@ RANKING_SOURCES = ['amazon.com',
 
 UNKNOWN_SOURCE_SCORE = 5
 RANKING_LIMIT = 1000
-RANKING_QUERY_DATE = """SELECT to_char(published_at,'YYYY-MM-DD') AS date
-    FROM news WHERE inserted_at IS NOT NULL GROUP BY 1 ORDER BY date DESC LIMIT 1;"""
+RANKING_QUERY_DATE = """
+    SELECT to_char(published_at,'YYYY-MM-DD') AS date
+    FROM news WHERE inserted_at IS NOT NULL AND published_at IS NOT NULL GROUP 
+    BY 1 ORDER BY date DESC LIMIT 1;"""
 RANKING_QUERY_GET_NEWS = """SELECT news_id, title, content, LOWER(source) AS
     source, url FROM news WHERE campaign = '%s' GROUP BY 1,2,3,4,5;"""
 RANKING_QUERY_GET_NEWS_BY_DATE = """SELECT news_id, title, content,
