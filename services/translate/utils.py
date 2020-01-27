@@ -35,7 +35,6 @@ def translate_content(text, language=settings.TRANSLATION_DEFAULT_LANGUAGE):
     :param language:
     :return:
     """
-    translation = ''
     if not text:
         raise ValueError('Invalid text')
     if not settings.TRANSLATION_SERVICE:
@@ -49,8 +48,11 @@ def translate_content(text, language=settings.TRANSLATION_DEFAULT_LANGUAGE):
     # Submit translation request.
     if detected_language.get('language') != language:
         logging.info(
-            'Translating from {} to {}'.format(detected_language, language))
-        return translate.translate_text(language, limited_text)
+            'Translating from {} to {}'.format(
+                detected_language.get('language'), language))
+        translated_text = translate.translate_text(language, limited_text)
+        if translated_text.get('translatedText'):
+            return translated_text.get('translatedText')
     else:
         log.warning(
             'No text to translate. Source language (%s) eq target language ('
