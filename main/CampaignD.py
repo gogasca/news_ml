@@ -164,10 +164,10 @@ class CampaignD(object):
             self.num_of_articles = num_of_articles
 
         if self.reference and num_of_articles > -1:
-            sqlquery = 'UPDATE campaign SET articles=%s WHERE ' \
+            query = 'UPDATE campaign SET articles=%s WHERE ' \
                        'campaign.reference=\'%s\'' % (
                            num_of_articles, self.reference)
-            DbHelper.update_database(sqlquery)
+            DbHelper.update_database(query)
 
     def terminate(self, status='1'):
         """

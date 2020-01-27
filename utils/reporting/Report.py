@@ -10,6 +10,7 @@ log = logging.getLogger()
 _SEPARATOR = ' \n'
 
 
+
 class Report(object):
     """
     Class instance to generate Email reports
@@ -140,3 +141,12 @@ class Report(object):
     def __str__(self):
         return 'Report: <{}> Title: <{}>'.format(self._title)
 
+
+def get_report(id=None, subject=None):
+    """
+
+    :param id:
+    :param subject:
+    :return:
+    """
+    return Report(id, subject)

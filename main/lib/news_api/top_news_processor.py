@@ -6,7 +6,6 @@ from datetime import datetime
 from api.version1_0.database import DbHelper
 
 from conf import settings
-from conf import logger
 
 from main.common import utils as common_utils
 from services.nlp import utils as nlp_utils
@@ -15,9 +14,7 @@ from services.translate import utils as translate_utils
 
 from utils.reporting import Report
 
-log = logger.LoggerManager().getLogger("__app__",
-                                       logging_file=settings.APP_LOGFILE)
-log.setLevel(level=logging.DEBUG)
+log = logging.getLogger()
 
 
 def process_articles(articles, news_provider, campaign_instance):
@@ -37,7 +34,7 @@ def process_articles(articles, news_provider, campaign_instance):
     tweets = []
     num_of_articles = len(articles)
     campaign_instance.set_articles(num_of_articles)
-    report = Report.Report(subject='News ML | %s' % news_provider)
+    report = Report.get_report(subject='News ML | %s' % news_provider)
 
     log.info('Analyzing %d articles...', num_of_articles)
     if num_of_articles < 1:
@@ -50,6 +47,7 @@ def process_articles(articles, news_provider, campaign_instance):
     log.info('Email reporting enabled: %s', campaign_instance.send_report)
     log.info('Twitter enabled: %s', campaign_instance.twitter)
     log.info('Twitter image extraction: %s', settings.EXTRACT_TWITTER_IMAGE)
+    log.info('Twitter add hash tags: %s', settings.TWITTER_ADD_HASHTAGS)
 
     if campaign_instance.send_report:
         report.email_recipients = campaign_instance.email_recipients
@@ -94,9 +92,11 @@ def process_articles(articles, news_provider, campaign_instance):
                 log.exception(exception)
             new_article = True
             if settings.PROCESS_ENTITIES:
-                entities = common_utils.process_entities(article, news_id)
+                entities = common_utils.process_entities(article, news_id, True)
         else:
             log.warning('Article %r already exists ', article.url)
+            if settings.PROCESS_ENTITIES:
+                entities = common_utils.process_entities(article, news_id, False)
 
         if campaign_instance.translation_enable:
             translated_text = translate_utils.translate_article(
@@ -132,6 +132,9 @@ def process_articles(articles, news_provider, campaign_instance):
             tweet_text = article.title
             if campaign_instance.translation_enable:
                 tweet_text = translated_text
+            if settings.TWITTER_ADD_HASHTAGS:
+                # TODO (gogasca) Find Twitter handlers
+                tweet_text = twitter_utils.add_hash_tags(tweet_text, entities)
             tweets.append('{} {}'.format(tweet_text, article.url))
 
     if campaign_instance.send_report:

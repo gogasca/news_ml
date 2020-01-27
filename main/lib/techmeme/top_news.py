@@ -9,7 +9,6 @@ import requests
 
 from api.version1_0.database import DbHelper
 from conf import settings
-from conf import logger
 from conf import constants
 from main.common.NewsArticle import Article
 from main.common import utils as common_utils
@@ -19,9 +18,7 @@ from services.twitter import utils as twitter_utils
 from utils import url_extract
 from utils.reporting import Report
 
-log = logger.LoggerManager().getLogger("__app__",
-                                       logging_file=settings.APP_LOGFILE)
-log.setLevel(level=logging.DEBUG)
+log = logging.getLogger()
 
 _HTML_TITLE_CLASS = 'ourh'
 
@@ -82,12 +79,20 @@ def launch(campaign_instance=None):
     num_of_articles = 0
     translated_text = None
     tweets = []
+    report = Report.get_report(subject=settings.TECHMEME_REPORT)
+
+    """Create Report instance and attach recipients."""
+    log.info('Translation enabled: %s', campaign_instance.translation_enable)
+    log.info('Email reporting enabled: %s', campaign_instance.send_report)
+    log.info('Twitter enabled: %s', campaign_instance.twitter)
+    log.info('Twitter image extraction: %s', settings.EXTRACT_TWITTER_IMAGE)
+    log.info('Twitter add hash tags: %s', settings.TWITTER_ADD_HASHTAGS)
+
     articles = extract_articles(settings.TECHMEME_URL)
     if articles:
         num_of_articles = len(articles)
     else:
         logging.error('No articles found.')
-    report = Report.Report(subject=settings.TECHMEME_REPORT)
 
     log.info('Retrieving %d articles...', num_of_articles)
     if campaign_instance.limit > 0:
@@ -102,11 +107,7 @@ def launch(campaign_instance=None):
         return
     log.info('Processing %d articles...', num_of_articles)
     campaign_instance.set_articles(num_of_articles)
-    # Create Report instance and attach recipients.
-    log.info('Translation enabled: %s', campaign_instance.translation_enable)
-    log.info('Email reporting enabled: %s', campaign_instance.send_report)
-    log.info('Twitter enabled: %s', campaign_instance.twitter)
-    log.info('Twitter image extraction: %s', settings.EXTRACT_TWITTER_IMAGE)
+
     if campaign_instance.send_report:
         report.email_recipients = campaign_instance.email_recipients
     for _, article in articles.items():
@@ -144,13 +145,15 @@ def launch(campaign_instance=None):
                 if not news_id:
                     log.error('Unable to insert record %s', article.url)
                     continue
-            except (ValueError, UnicodeDecodeError) as exception:
-                log.exception(exception)
+            except (ValueError, UnicodeDecodeError) as e:
+                log.exception(e)
             new_article = True
             if settings.PROCESS_ENTITIES:
-                entities = common_utils.process_entities(article, news_id)
+                entities = common_utils.process_entities(article, news_id, True)
         else:
             log.warning('Article already exists.')
+            if settings.PROCESS_ENTITIES:
+                entities = common_utils.process_entities(article, news_id, False)
 
         if campaign_instance.translation_enable:
             translated_text = translate_utils.translate_article(
@@ -158,11 +161,9 @@ def launch(campaign_instance=None):
             if translated_text:
                 log.info('Adding translated content to report.')
                 article.title = translated_text
-            else:
-                logging.warning('Translated text is empty.')
 
         if campaign_instance.send_report:
-            # Only send today articles in Report.
+            # Only send articles created 'today' in Report.
             today = datetime.now().date()
             published_at = datetime.strptime(article.published_at,
                                              '%y%m%d').date()
@@ -184,6 +185,9 @@ def launch(campaign_instance=None):
             tweet_text = article.title
             if campaign_instance.translation_enable:
                 tweet_text = translated_text
+            if settings.TWITTER_ADD_HASHTAGS:
+                # TODO (gogasca) Find Twitter handlers
+                tweet_text = twitter_utils.add_hash_tags(tweet_text, entities)
             tweets.append('{} {}'.format(tweet_text, article.url))
 
     if campaign_instance.send_report:
