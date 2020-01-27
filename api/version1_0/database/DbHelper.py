@@ -127,7 +127,7 @@ def insert_news(title=None, author='', description='', content='', url='',
         log.exception(exception)
 
 
-def insert_tag(tag_name='', source='', language='english'):
+def insert_tag(tag_name='', language='english'):
     """Inserts tag into database.
 
     :param tag_name:
@@ -136,7 +136,7 @@ def insert_tag(tag_name='', source='', language='english'):
     :return:
     """
     try:
-        if tag_name and len(tag_name) > 1:
+        if tag_name != '' and len(tag_name) > 1:
             if settings.REMOVE_STOP_WORDS:
                 tag_name = remove_stopwords(tag_name, language)
             # Insert into database.

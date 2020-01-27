@@ -36,9 +36,8 @@ def get_twitter_element(url, element):
     """
     headers = requests.utils.default_headers()
     headers.update(
-        {
-            'User-Agent': settings.USER_AGENT,
-        }
+        { 'User-Agent': settings.USER_AGENT,
+          }
     )
     session = requests.Session()
     response = session.get(url, headers=headers)
@@ -51,3 +50,26 @@ def get_twitter_element(url, element):
     if not twitter_element:
         logging.warning('Element: {} not found'.format(element))
     return twitter_element
+
+
+def add_hash_tags(tweet, entities):
+    """For all entities add hashtags to words.
+    Example:
+        tweet: Thai startup Lightnet, which aims to provide remittance services in Southeast Asia through its Stellar based blockchain network, raises $31.2M Series A
+        entities: return {'persons': [], 'organizations': ['Lightnet', 'Stellar', 'blockchain']}
+        for _,
+    :param tweet:
+    :param entities:
+    :return:
+    """
+    if tweet is None:
+        raise ValueError('No tweet defined')
+    if entities is None:
+        raise ValueError('No entities defined')
+    persons = list(entities.values())[0] or []
+    organizations = list(entities.values())[1] or []
+    for person in persons:
+        tweet = tweet.replace(person, '#{}'.format(person))
+    for organization in organizations:
+        tweet = tweet.replace(organization, '#{}'.format(organization))
+    return tweet
