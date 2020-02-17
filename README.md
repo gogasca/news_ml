@@ -2,19 +2,19 @@
 
 ## Introduction
 
-This application implements a REST API.
-This REST API implements different methods with the following functionality:
+This application implements a REST API for News management.
+This REST API provides different functionality:
  - Collects news information from News API and other News sources. 
  - Search news by keyword, date.
  - Extract entities from News content via Google Cloud NLP and perform sentiment analysis
  - Send Email report
- - Use Twitter to tweet News articles. 
+ - Use Twitter to tweet News articles
+ - Generate News content based on News headlines.
 
 ## Quickstart
 
-You can use [this](mini/app.py) sample Python script  
-which collects News and stores them into a CSV file using News API Key 
-which can be obtained [here](https://www.newsapi.org).
+You can use [this](mini/app.py) sample Python script. 
+Collect News and stores them into a CSV file using [News API Key](https://www.newsapi.org).
 
 ## Architecture
 
