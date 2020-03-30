@@ -81,7 +81,7 @@ Clone GitHub repo
 
 ```
 cd /usr/local/src
-git clone https://github.com/gogasca/news_ml.git
+git clone https://github.com/newsml/newsml.git
 ```
 
 Install dependencies
