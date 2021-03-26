@@ -117,8 +117,8 @@ True
 ## Database information
 
 You need to create a new Database based on PostgreSQL server:
- - Check [conf/database/news_ml.sql] for Database creation.
- - Check [conf/database/schema.sql] for Database schema.
+ - Database creation [script](conf/database/news_ml.sql).
+ - Database schema [script](conf/database/schema.sql).
 
 ## Using Google Cloud SQL proxy
 
