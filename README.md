@@ -27,11 +27,7 @@ is composed of the following modules:
  - [Flask](http://flask.pocoo.org/) (Python Web App)
  - [RabbitMQ](https://www.rabbitmq.com/) (Message Queue)
  - [PostgreSQL](https://www.postgresql.org/) (Relational Database)
- 
-```
-Client -> Ngnix --> Gunicorn --> Flask --> News app -> PostgreSQL
-                                                       RabbitMQ
-```
+
 
 ![image](https://user-images.githubusercontent.com/30065079/112689168-24ff7900-8e37-11eb-8de3-ee3626e7e935.png)
 
@@ -64,14 +60,13 @@ Python based API:
  - PostgreSQL
  - Ngnix
  - Google Cloud NLP
- - Ngnix -> Gunicorn -> Flask -> RabbitMQ/Celery/Postgres.
  
 ### Requirements
 
-Install a Compute Engine instance using Ubuntu 16+.
+Deploy a new Compute Engine instance using Ubuntu 16+.
 
-Python version: 3.7+
- 
+Install the following software:
+
 ```
 sudo apt-get install python build-essential  -y
 sudo apt-get install libpq-dev python-dev -y   # Required for psycopg2
@@ -85,6 +80,7 @@ Clone GitHub repo
 ```
 cd /usr/local/src
 git clone https://github.com/newsml/newsml.git
+cd newsml
 ```
 
 Install dependencies
@@ -138,6 +134,7 @@ docker run -d \
 
 ## RabbitMQ
 
+[RabbitMQ](https://www.rabbitmq.com/) is an open-source message-broker. Is used to handle Asyncronous requests.
 Start RabbitMQ server:
 
 ```
@@ -152,7 +149,7 @@ rabbitmqctl set_permissions -p / news_ml ".*" ".*" ".*"
 
 ## Celery
 
-Start Celery and verify RabbitMQ tasks are successful.
+Start [Celery](https://docs.celeryproject.org/en/stable/getting-started/index.html) and verify RabbitMQ tasks are successful.
 
 ```
 export RABBITMQ_USER=news_ml
