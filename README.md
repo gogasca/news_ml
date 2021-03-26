@@ -2,51 +2,52 @@
 
 ## Introduction
 
-This application collects news information from News 
-API. App collects information from fixed sources, if search feature is
-used API will look into all news in API for a specific time period that
-match search pattern.
-App extract entities from News content via Google Cloud NLP and 
-perform sentiment analysis.
+This application implements a REST API for News management.
+This REST API provides different functionality:
+ - Collects news information from News API and other News sources. 
+ - Search news by keyword, date.
+ - Extract entities from News content via Google Cloud NLP and perform sentiment analysis
+ - Send Email report
+ - Use Twitter to tweet News articles
+ - Generate News content based on News headlines.
 
 ## Quickstart
 
-You can use [this](mini/app.py) sample Python script  
-which collects News and stores them into a CSV file using News API Key 
-which can be obtained [here](https://www.newsapi.org).
+You can use [this](mini/app.py) sample Python script. 
+Collect News and stores them into a CSV file using [News API Key](https://www.newsapi.org).
 
-## Docker containers installation
-
-Take a look at [Docker configuration](conf/docker) for more information 
-about how to run this application using containers.
-You will need:
-
-- [Docker API server](conf/docker/apid/)
-- [Docker RabbitMQ](conf/docker/rabbitmq) or external [RabbitMQ server](https://www.rabbitmq.com/rabbitmq-server.8.html)
-- External PostgreSQL database (Example: Google Cloud SQL w/proxy)
-
-
-## Full installation
+## Architecture
 
 I created an [API](https://medium.com/ymedialabs-innovation/deploy-flask-app-with-nginx-using-gunicorn-and-supervisor-d7a93aa07c18) which is able to handle requests to collect News.
 The API [stack](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-14-04)
 is composed of the following modules:
   
- - [Ngnix](https://www.nginx.com/) (Web server and main load balancer, terminates HTTPS) (Optional)
+ - [Ngnix](https://www.nginx.com/) (Main load balancer, terminates HTTPS) (Optional)
  - [Gunicorn](http://flask.pocoo.org/docs/1.0/deploying/wsgi-standalone/) (WSGI)
  - [Flask](http://flask.pocoo.org/) (Python Web App)
  - [RabbitMQ](https://www.rabbitmq.com/) (Message Queue)
  - [PostgreSQL](https://www.postgresql.org/) (Relational Database)
 
 
-## Architecture
+![image](https://user-images.githubusercontent.com/30065079/112689168-24ff7900-8e37-11eb-8de3-ee3626e7e935.png)
 
-```
 
-REST API Server -> News collector -> Postgres
-                      RabbitMQ
-                       Celery
-```    
+## Docker containers installation
+
+A group of containers are available to help you deploy the application faster.
+If you are interested in setting up the application manually please go to the Full Installation section.
+
+Take a look at [Docker configuration](conf/docker) for more information about how to run this application using containers.
+You will need:
+
+- [Docker API server](conf/docker/apid/)
+- [Docker RabbitMQ](conf/docker/rabbitmq)
+- [Docker Load Balancer](conf/docker/loadbalancer)
+- External PostgreSQL database (Example: Google Cloud SQL w/proxy)
+
+## Full installation
+
+To perform a manual installation follow the next steps:
 
 ## Software requirements
 
@@ -59,14 +60,13 @@ Python based API:
  - PostgreSQL
  - Ngnix
  - Google Cloud NLP
- - Ngnix -> Gunicorn -> Flask -> RabbitMQ/Celery/Postgres.
  
 ### Requirements
 
-Install a Compute Engine instance using Ubuntu 16.
+Deploy a new Compute Engine instance using Ubuntu 16+.
 
-Python version: 3.6
- 
+Install the following software:
+
 ```
 sudo apt-get install python build-essential  -y
 sudo apt-get install libpq-dev python-dev -y   # Required for psycopg2
@@ -79,7 +79,8 @@ Clone GitHub repo
 
 ```
 cd /usr/local/src
-git clone https://github.com/gogasca/news_ml.git
+git clone https://github.com/newsml/newsml.git
+cd newsml
 ```
 
 Install dependencies
@@ -112,8 +113,8 @@ True
 ## Database information
 
 You need to create a new Database based on PostgreSQL server:
- - Check [conf/database/news_ml.sql] for Database creation.
- - Check [conf/database/schema.sql] for Database schema.
+ - Database creation [script](conf/database/news_ml.sql).
+ - Database schema [script](conf/database/schema.sql).
 
 ## Using Google Cloud SQL proxy
 
@@ -121,11 +122,7 @@ You need to create a new Database based on PostgreSQL server:
 ./cloud_sql_proxy -instances=<>Project>:<Zone>:<Instance name>=tcp:5432
 ```
 
-Example:
-```
-./cloud_sql_proxy -instances=news-ml:us-central1:newsml-database-1=tcp:5432
-```
-## Using Docker container
+## Using Using Google Cloud SQL proxy Docker container
 
 ```
 docker run -d \
@@ -137,6 +134,7 @@ docker run -d \
 
 ## RabbitMQ
 
+[RabbitMQ](https://www.rabbitmq.com/) is an open-source message-broker. Is used to handle Asyncronous requests.
 Start RabbitMQ server:
 
 ```
@@ -151,7 +149,7 @@ rabbitmqctl set_permissions -p / news_ml ".*" ".*" ".*"
 
 ## Celery
 
-Start Celery and verify RabbitMQ tasks are successful.
+Start [Celery](https://docs.celeryproject.org/en/stable/getting-started/index.html) and verify RabbitMQ tasks are successful.
 
 ```
 export RABBITMQ_USER=news_ml
@@ -293,6 +291,12 @@ curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H
 ```
 curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" -X POST -d '{ "provider": "news_api", "report": {"email": "no-reply@newsml.io"}}' http://0.0.0.0:8081/api/1.0/campaign
 ``` 
+
+- Request News from NEWS API and Tweet:
+
+```
+curl -u AC64861838b417b555d1c8868705e4453f:YYPKpbIAYqz90oMN8A11YYPKpbIAYqz90o -H "Content-Type: application/json" -X POST -d '{ "provider": "news_api", "report": {"twitter": {"delay": 1, "add_hashtags": True}}}' http://0.0.0.0:8081/api/1.0/campaign
+```
 
 - Search for news including 'tensorflow, keras and sagemaker' from NEWS API:
 
