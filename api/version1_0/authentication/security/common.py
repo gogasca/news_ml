@@ -17,7 +17,7 @@ def encrypt(plain_text):
         raise Exception('decrypt() No Key defined in ENV')
     if isinstance(plain_text, str):
         string_text = str(plain_text)
-        return crypto.encrypt(bytes(string_text))
+        return crypto.encrypt(bytes(string_text, encoding='utf8'))
     else:
         raise Exception('encrypt() Only strings are allowed.')
 
