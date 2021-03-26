@@ -22,29 +22,32 @@ I created an [API](https://medium.com/ymedialabs-innovation/deploy-flask-app-wit
 The API [stack](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-14-04)
 is composed of the following modules:
   
- - [Ngnix](https://www.nginx.com/) (Web server and main load balancer, terminates HTTPS) (Optional)
+ - [Ngnix](https://www.nginx.com/) (Main load balancer, terminates HTTPS) (Optional)
  - [Gunicorn](http://flask.pocoo.org/docs/1.0/deploying/wsgi-standalone/) (WSGI)
  - [Flask](http://flask.pocoo.org/) (Python Web App)
  - [RabbitMQ](https://www.rabbitmq.com/) (Message Queue)
  - [PostgreSQL](https://www.postgresql.org/) (Relational Database)
  
 ```
-REST API Server -> Ngnix --> Gunicorn --> Flask --> News app -> PostgreSQL
-                                                    RabbitMQ
-```    
+Client -> Ngnix --> Gunicorn --> Flask --> News app -> PostgreSQL
+                                                       RabbitMQ
+```
+
+![image](https://user-images.githubusercontent.com/30065079/112689168-24ff7900-8e37-11eb-8de3-ee3626e7e935.png)
+
 
 ## Docker containers installation
 
-We created a group of containers to help you deploy the application faster.
+A group of containers are available to help you deploy the application faster.
 If you are interested in setting up the application manually please go to the Full Installation section.
 
 Take a look at [Docker configuration](conf/docker) for more information about how to run this application using containers.
 You will need:
 
 - [Docker API server](conf/docker/apid/)
-- [Docker RabbitMQ](conf/docker/rabbitmq) or external [RabbitMQ server](https://www.rabbitmq.com/rabbitmq-server.8.html)
+- [Docker RabbitMQ](conf/docker/rabbitmq)
+- [Docker Load Balancer](conf/docker/loadbalancer)
 - External PostgreSQL database (Example: Google Cloud SQL w/proxy)
-
 
 ## Full installation
 
@@ -65,9 +68,9 @@ Python based API:
  
 ### Requirements
 
-Install a Compute Engine instance using Ubuntu 16.
+Install a Compute Engine instance using Ubuntu 16+.
 
-Python version: 3.6
+Python version: 3.7+
  
 ```
 sudo apt-get install python build-essential  -y
@@ -123,10 +126,6 @@ You need to create a new Database based on PostgreSQL server:
 ./cloud_sql_proxy -instances=<>Project>:<Zone>:<Instance name>=tcp:5432
 ```
 
-Example:
-```
-./cloud_sql_proxy -instances=news-ml:us-central1:newsml-database-1=tcp:5432
-```
 ## Using Using Google Cloud SQL proxy Docker container
 
 ```
