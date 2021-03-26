@@ -37,4 +37,4 @@ def decrypt(cipher_text):
     if not crypto:
         raise Exception('decrypt() No Crypto defined')
     else:
-        return crypto.decrypt(bytes(cipher_text))
+        return crypto.decrypt(bytes(cipher_text, encoding='utf8'))
