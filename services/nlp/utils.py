@@ -1,18 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import logging
-import nltk
 import re
+
+import nltk
 
 from nltk.corpus import stopwords
 from nltk.stem.snowball import SnowballStemmer
 from services.nlp import nlp
 
 from conf import settings
-from conf import logger
 
-log = logger.LoggerManager().getLogger("__app__",
-                                       logging_file=settings.APP_LOGFILE)
+log = logging.getLogger()
 log.setLevel(level=logging.DEBUG)
 
 _ENTITIES = 'entities'
@@ -64,7 +63,7 @@ def extract_tags(text):
             for entity in text[_ENTITIES]:
                 if entity[_SALIENCE] > settings.SALIENCE_SCORE and text[
                     'language'] == 'en' \
-                        or text['language'] == 'es':
+                    or text['language'] == 'es':
                     if _MENTIONS in entity:
                         if len(entity[_MENTIONS]) > 0:
                             # Fix NLP defect getting: ['season', "u'SNL",
@@ -74,7 +73,7 @@ def extract_tags(text):
                             relevant_words.append(word)
                 elif entity[
                     _SALIENCE] < settings.SALIENCE_SCORE and \
-                        settings.LOG_SALIENCE:
+                    settings.LOG_SALIENCE:
                     log.warning('extract_tags() Salience score is too low [%r]',
                                 entity[_SALIENCE])
         log.info('extract_tags() Found relevant keywords: %r',
@@ -122,7 +121,7 @@ def extract_entity(entities, entity_type=_PERSON):
                             # Filter entity name by discarding dictionary of
                             # words.
                             if not set(extract_filter()) & set(
-                                    entity_name.lower().split()):
+                                entity_name.lower().split()):
                                 log.info('extract_entity() | Insert %s %s ',
                                          entity_type, entity_name)
                                 extracted_entities.append(entity[_NAME])
@@ -158,7 +157,7 @@ def extract_persons(entities):
                             # Filter person name by discarding dictionary of
                             # words.
                             if not set(extract_filter()) & set(
-                                    entity_name.lower().split()):
+                                entity_name.lower().split()):
                                 log.info('extract_person() | Insert Person %s ',
                                          entity_name)
                                 persons.append(entity[_NAME])
@@ -238,7 +237,8 @@ def get_sentiment_scores(text):
 
 
 def get_sentiment(score):
-    """Returns sentiment analysis value based in score. # TODO(gonzalo) use magnitude.
+    """Returns sentiment analysis value based in score. # TODO(gonzalo) use
+    magnitude.
     :param score:
     :return:
     """

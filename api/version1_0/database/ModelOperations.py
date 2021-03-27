@@ -10,11 +10,9 @@ import logging
 import re
 
 from api.version1_0.database import DbHelper
-from conf import logger
 from conf import settings
 
-log = logger.LoggerManager().getLogger("__app__",
-                                       logging_file=settings.API_LOGFILE)
+log = logging.getLogger()
 log.setLevel(level=logging.DEBUG)
 
 DATE_FILTER_PATTERN = re.compile(
@@ -88,7 +86,7 @@ def insert_user(username, password, created):
             db.session.commit()
             return user.id
     except Exception as exception:
-        log.error(exception)
+        log.exception(exception)
         db.session.rollback()
     finally:
         db.session.close()
@@ -117,7 +115,7 @@ def insert_campaign(status, description, reference, start, request_data,
         db.session.commit()
         return campaign.id
     except Exception as exception:
-        print(exception)
+        log.exception(exception)
         db.session.rollback()
     finally:
         db.session.close()
@@ -137,7 +135,7 @@ def insert_person(name, mention_date):
             db.session.commit()
             return person.id
     except Exception as exception:
-        print(exception)
+        log.exception(exception)
         db.session.rollback()
     finally:
         db.session.close()

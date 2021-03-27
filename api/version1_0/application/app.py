@@ -25,7 +25,8 @@ from api.version1_0.application.api_main import RankList
 from api.version1_0.application.api_main import Status
 
 from flask import Flask
-from werkzeug.contrib.fixers import ProxyFix
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 
 from utils import banner
 
@@ -60,6 +61,6 @@ news_api.add_resource(Status, '/api/1.0/status')
 api_app.wsgi_app = ProxyFix(api_app.wsgi_app)
 
 # API Logs.
-log.info('Initializing News API >>>')
-banner.horizontal('News ML v{}'.format(settings.API_VERSION))
-log.info('News API Started... >>>')
+log.info('Initializing NewsML API version {}>>>'.format(settings.API_VERSION))
+banner.horizontal('NewsML v{}'.format(settings.API_VERSION))
+log.info('NewsML API Started... >>>')

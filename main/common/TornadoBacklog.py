@@ -149,9 +149,8 @@ class TornadoBacklog:
                                                      settings.NEWS_API_KEY),
                                                  connect_timeout=CONNECTION_TIMEOUT,
                                                  request_timeout=REQUEST_TIMEOUT)
-                self.backlog.fetch(request,
-                                   callback=partial(self.handle_request,
-                                                    source))
+                self.backlog.fetch(request, callback=partial(self.handle_request,
+                                                             source))
 
             except httpclient.HTTPError as exception:
                 gen_log.exception('crawl() %r' % exception)
@@ -175,7 +174,8 @@ class TornadoBacklog:
         if response.code != 200:
             gen_log.error('Response code: %d' % response.code)
             return
-        articles = news_handler.handle_http_response(response.body, self.campaign.limit)
+        articles = news_handler.handle_http_response(response.body,
+                                                     self.campaign.limit)
         gen_log.info('Provider: %s Number of articles: %d ' % (
             news_provider, len(articles)))
         news_processor.process_articles(articles, news_provider, self.campaign)

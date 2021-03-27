@@ -25,14 +25,7 @@ ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
 ACCESS_TOKEN_SECRET = os.getenv('ACCESS_TOKEN_SECRET')
 
 # Define the list of terms to listen to
-_HASHTAGS = ["#Microsoft365", "#MicrosoftTeamsRooms", "#OneNote",
-             "#ProjectOnline", "#MicrosoftTeams", "#ProductiveAnywhere",
-             "#SharePoint", "#OneDrive", "#Yammer", "#MicrosoftStream",
-             "#PowerApps", "#Flows", "#Office365", "#Outlook", "#PowerBI",
-             "#PowerPlatform", "#Kaizala", "#FormulaFriday", "#powerpoint",
-             "#Windows10", "#Azure", "#TipsAndTricks", "#AzureFriday",
-             "#DevOps", "#cybersecurity", "#levelup", "#MicrosoftSecurity",
-             "#technology", "#HybridCloud", "#AI", "#IoT", "#O365"]
+_HASHTAGS = ["#GCP, #AI, #AIPlatform"]
 
 # Authenticate to the API
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)

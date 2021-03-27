@@ -93,8 +93,8 @@ def sort_articles(articles):
     :param articles:
     :return:
     """
-    if articles < 1:
-        raise ValueError('No news')
+    if not articles:
+        raise ValueError('No articles')
 
     sorted_articles = sorted(articles, key=lambda x: x.cluster)
     return sorted_articles

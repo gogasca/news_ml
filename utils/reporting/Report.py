@@ -1,9 +1,14 @@
 """Generate HTML Report."""
 
+import logging
+from conf import settings
 from utils.reporting import Generator
 from services.email_client import email_client
+from utils import url_extract
+log = logging.getLogger()
 
 _SEPARATOR = ' \n'
+
 
 
 class Report(object):
@@ -57,18 +62,27 @@ class Report(object):
         self.content += '<h4><span style="color: #339966;">%s%s &nbsp;</h4>' % (
         body, _SEPARATOR)
 
-    def add_content(self, location, content):
+    def add_content(self, location, content, image=''):
         """Adds HTML text to email body.
 
         :param location:
         :param content:
+        :param image:
         :return:
         """
         self.content_added = True
         if not self.content:
             self.content = ''
-        self.content += '<li> %s%s &nbsp;<a href=%s>Link</a></li><br/>' % (
-        content, _SEPARATOR, location)
+        if not image:
+            logging.warning('No image found in Report')
+        else:
+            logging.info('Adding image {} to Report'.format(image))
+            if settings.REPORT_USE_BASE64_IMAGE:
+                image = url_extract.convert_image(image)
+            else:
+                image = '&nbsp;<a href=%s>Image</a>' % image
+        self.content += '<li> %s%s &nbsp;<a href=%s>Link</a>%s</li><br/>' % (
+            content, _SEPARATOR, location, '' if not image else image)
 
     def send(self):
         """Sends report via email. Using mail library.
@@ -126,3 +140,13 @@ class Report(object):
     @property
     def __str__(self):
         return 'Report: <{}> Title: <{}>'.format(self._title)
+
+
+def get_report(id=None, subject=None):
+    """
+
+    :param id:
+    :param subject:
+    :return:
+    """
+    return Report(id, subject)

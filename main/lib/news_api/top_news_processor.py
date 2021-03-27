@@ -6,61 +6,15 @@ from datetime import datetime
 from api.version1_0.database import DbHelper
 
 from conf import settings
-from conf import logger
 
-from services.nlp import nlp
+from main.common import utils as common_utils
 from services.nlp import utils as nlp_utils
+from services.twitter import utils as twitter_utils
 from services.translate import utils as translate_utils
 
-from utils import url_extract
 from utils.reporting import Report
 
-log = logger.LoggerManager().getLogger("__app__",
-                                       logging_file=settings.APP_LOGFILE)
-log.setLevel(level=logging.DEBUG)
-
-
-def process_entities(article, news_id):
-    """
-
-    :param article:
-    :param news_id:
-    :return:
-    """
-    log.info('process_entities() Processing content for : %s using NLP',
-             article.url)
-    entities = nlp.analyze_entities(
-        '%r %r' % (article.title, article.description))
-    if entities:
-        num_of_entities = len(entities)
-    else:
-        num_of_entities = 0
-    log.info('Processing %d entities: %s', num_of_entities, article.url)
-    if num_of_entities > 1:
-        # Extract tags and associate them with original article.
-        log.info('Processing article tags: %s', article.url)
-        tags = nlp_utils.extract_tags(entities)
-        for tag in tags:
-            if tag != '':
-                tag_id = DbHelper.insert_tag(tag_name=tag,
-                                             source=url_extract.get_domain(
-                                                 article.url))
-                if news_id and tag_id:
-                    DbHelper.associate_tag_news(news_id, tag_id)
-                    log.info('Processing persons in tags: %s', article.url)
-        # Extract entities.
-        persons = nlp_utils.extract_entity(entities, 'PERSON')
-        log.info('Found %d persons', len(persons))
-        for person in persons:
-            DbHelper.insert_person(person)
-        log.info('Processing organizations in tags: %s',
-                 article.url)
-        organizations = nlp_utils.extract_entity(entities, 'ORGANIZATION')
-        log.info('Found %d organizations', len(organizations))
-        for organization in organizations:
-            DbHelper.insert_company(organization)
-    else:
-        log.error('No NLP entities found')
+log = logging.getLogger()
 
 
 def process_articles(articles, news_provider, campaign_instance):
@@ -75,32 +29,45 @@ def process_articles(articles, news_provider, campaign_instance):
     :param campaign_instance:
     :return:
     """
+    news_id = None
+    translated_text = None
+    tweets = []
     num_of_articles = len(articles)
     campaign_instance.set_articles(num_of_articles)
+    report = Report.get_report(subject='News ML | %s' % news_provider)
+
     log.info('Analyzing %d articles...', num_of_articles)
     if num_of_articles < 1:
-        log.error('No titles found')
         if campaign_instance.send_report:
             log.warning('Skipping report via email...')
+        log.error('No titles found')
         return
     # Create Report instance and attach recipients.
-    log.info('Reporting enabled: %s', campaign_instance.send_report)
+    log.info('Translation enabled: %s', campaign_instance.translation_enable)
+    log.info('Email reporting enabled: %s', campaign_instance.send_report)
+    log.info('Twitter enabled: %s', campaign_instance.twitter)
+    log.info('Twitter image extraction: %s', settings.EXTRACT_TWITTER_IMAGE)
+    log.info('Twitter add hash tags: %s', settings.TWITTER_ADD_HASHTAGS)
+
     if campaign_instance.send_report:
-        report = Report.Report(subject='News ML | %s' % news_provider)
         report.email_recipients = campaign_instance.email_recipients
 
     for _, article in articles.items():
+        new_article = False
         if not article.description:
             log.error('Not description found in article: %s', article.url)
             continue
-        log.info('Article %r, %r' % (article.title, article.url))
-        new_article = False
-        if not DbHelper.item_exists(article.url):
+        if settings.EXTRACT_TWITTER_IMAGE:  # meta:twitter:image
+            article.twitter_image = twitter_utils.get_twitter_element(
+                article.url, 'twitter:image')
+        log.info('Article: %s, [%s], [%s]', article.title, article.url,
+                 article.twitter_image)
+        if not DbHelper.record_exists(article.url):
             news_id = None
             log.info('New Article retrieved: %r, %r' % (
                 article.title, article.url))
             try:
-                log.info('Process sentiment analysis')
+                log.info('Processing sentiment analysis')
                 score, magnitude = nlp_utils.get_sentiment_scores(
                     article.content or article.description)
                 log.info('Insert article into Database')
@@ -119,51 +86,63 @@ def process_articles(articles, news_provider, campaign_instance):
                                                sentiment=nlp_utils.get_sentiment(
                                                    score))
                 if not news_id:
-                    log.error('Unable to Insert record %s', article.url)
+                    log.error('Unable to insert record %s', article.url)
                     continue
             except (ValueError, UnicodeDecodeError) as exception:
                 log.exception(exception)
             new_article = True
             if settings.PROCESS_ENTITIES:
-                process_entities(article, news_id)
+                entities = common_utils.process_entities(article, news_id, True)
         else:
             log.warning('Article %r already exists ', article.url)
+            if settings.PROCESS_ENTITIES:
+                entities = common_utils.process_entities(article, news_id, False)
 
-        log.info('Translation enabled: %s',campaign_instance.translation_enable)
         if campaign_instance.translation_enable:
-            log.info('Translating: %s', article.url)
-            translated_text = translate_utils.translate_content(
-                article.title + ' ' + article.description,
-                campaign_instance.translation_lang)
-            if new_article:
-                log.info('Translating...%r', article.url)
-                sql_query = translate_utils.create_sql_query(
-                    translated_text, settings.DEFAULT_LANGUAGE, news_id)
-                if sql_query:
-                    DbHelper.update_database(sql_query)
+            translated_text = translate_utils.translate_article(
+                campaign_instance, article,
+                new_article, news_id)
+            if len(translated_text) > 1:
+                log.info('Adding translated content to report.')
+                article.title = translated_text
             else:
-                log.warn('Article already exists, skipping DB update')
-            if campaign_instance.send_report and len(translated_text) > 1:
-                log.info('Adding translated information to report')
-                report.add_content(article.url, translated_text)
-        elif campaign_instance.send_report:
-            # Only send today articles in report.
+                logging.error('Translated text is empty.')
+
+        if campaign_instance.send_report:
+            # Only send today articles in Report.
             today = datetime.now().date()
             published_at = datetime.strptime(article.published_at[:10],
-                                          '%Y-%m-%d').date()
+                                             '%Y-%m-%d').date()
             if settings.REPORT_ALL_DATES_ARTICLES:
                 log.info('Publishing all dates articles')
+            log.info('Today: %s Report date: %s. ', today, published_at)
             if today == published_at or settings.REPORT_ALL_DATES_ARTICLES:
                 log.info(
-                    'Adding article information to report: %s %s' % (
+                    'Adding article information to Report: %s %s' % (
                         article.title, article.url))
-                report.add_content(article.url, article.title)
+                report.add_content(article.url, article.title,
+                                   article.twitter_image)
             else:
                 log.warning(
                     'Article published date is not today (%s), '
-                    'skipping article from report', published_at)
+                    'skipping article from Report', published_at)
+
+        # Handle Twitter
+        if campaign_instance.twitter:
+            tweet_text = article.title
+            if campaign_instance.translation_enable:
+                tweet_text = translated_text
+            if settings.TWITTER_ADD_HASHTAGS:
+                # TODO (gogasca) Find Twitter handlers
+                tweet_text = twitter_utils.add_hash_tags(tweet_text, entities)
+            tweets.append('{} {}'.format(tweet_text, article.url))
 
     if campaign_instance.send_report:
         log.info('Sending report via email...')
         report.send()
+
+    if campaign_instance.twitter:
+        log.info('Sending Tweets')
+        twitter_utils.send_tweets(tweets, campaign_instance.twitter_delay)
+
     log.info('Extraction completed')

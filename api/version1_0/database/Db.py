@@ -5,14 +5,12 @@ import bleach
 import psycopg2
 import psycopg2.extensions
 
-from conf import logger
 from conf import settings
 
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
 
-log = logger.LoggerManager().getLogger("__app__",
-                                       logging_file=settings.APP_LOGFILE)
+log = logging.getLogger()
 log.setLevel(level=logging.DEBUG)
 
 
@@ -70,6 +68,7 @@ class Db(object):
         :param id:
         :return:
         """
+        cur = None
         try:
             if self.conn:
                 if id:
@@ -106,6 +105,7 @@ class Db(object):
         ( 'Hola','TSLA','http://w.com','','TECHMEME', now()')
 
         """
+        cur = None
         try:
             if self.conn:
                 if id:
@@ -115,7 +115,8 @@ class Db(object):
                 cur = self.conn.cursor()
                 content = bleach.clean(values)
                 # content = [bleach.clean(element) for element in content]
-                final_query = query + " VALUES (" + content + ")" + return_id
+                final_query = '{} VALUES ({}){}'.format(query, content,
+                                                        return_id)
                 log.info('DB insert() Executing SQL query: ' + final_query)
                 cur.execute(final_query)
                 self.conn.commit()
@@ -138,6 +139,7 @@ class Db(object):
         :param query:
         :return:
         """
+        cur = None
         try:
             if self.conn:
                 cur = self.conn.cursor()
@@ -162,6 +164,7 @@ class Db(object):
         :param query:
         :return:
         """
+        cur = None
         try:
             if self.conn:
                 cur = self.conn.cursor()
@@ -187,6 +190,7 @@ class Db(object):
         :param query:
         :return:
         """
+        cur = None
         try:
             if self.conn:
                 cur = self.conn.cursor()
@@ -209,10 +213,12 @@ class Db(object):
         Clean up idle connections
         :return:
         """
-        query = "select pg_terminate_backend(pid) from pg_stat_activity where " \
+        query = "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE " \
+                "" \
                 "usename = '" + settings.DBUSERNAME + \
-                "' and state = 'idle' and query_start < current_timestamp - " \
+                "' AND state = 'idle' AND query_start < current_timestamp - " \
                 "interval '5 minutes';"
+        cur = None
         try:
             if self.conn:
                 cur = self.conn.cursor()

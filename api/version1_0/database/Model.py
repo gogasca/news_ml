@@ -114,7 +114,7 @@ class ApiUsers(db.Model, AutoSerialize, Serializer):
         :param password:
         :return:
         """
-        return common.encrypt(password)
+        return common.encrypt(password).decode()
 
     def verify_password(self, password):
         """Verifies password (clear text) is the same as the one stored in
@@ -124,7 +124,7 @@ class ApiUsers(db.Model, AutoSerialize, Serializer):
         :return:
         """
         if password:
-            if common.decrypt(self.password_hash) == password:
+            if common.decrypt(self.password_hash).decode() == password:
                 return True
             else:
                 return False

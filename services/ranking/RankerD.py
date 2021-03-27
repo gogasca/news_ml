@@ -108,15 +108,18 @@ class RankerD(object):
         logging.info('Completed Ranking of %d articles(s).',
                      len(self.sorted_articles))
         if settings.UPDATE_RANK_ARTICLES_DB:
-            logging.info('Updating database')
+            logging.info('Updating database with Rank information.')
             update_articles(self.sorted_articles)
             for article in self.sorted_articles:
-                self.report.add_content(article._url,
-                                        '%s | <b>Score</b>: %d | '
-                                        '<b>Provider</b>: %s' % (
-                                        article._title,
-                                        article.score,
-                                        article.source.upper()))
+                try:
+                    self.report.add_content(article.url,
+                                            '%s | <b>Score</b>: %d | '
+                                            '<b>Provider</b>: %s' % (
+                                                article.title,
+                                                article.score,
+                                                article.source.upper()))
+                except AttributeError as e:
+                    logging.exception(e)
         return self.sorted_articles
 
     def terminate(self, status=1):

@@ -27,6 +27,9 @@ class CampaignD(object):
         self._test = False
         self._status = 0
         self._num_of_articles = 0
+        self._twitter = settings.TWITTER_ENABLED
+        self._twitter_add_hashtags = settings.TWITTER_ADD_HASHTAGS
+        self._twitter_delay = settings.TWITTER_DELAY
 
     @property
     def limit(self):
@@ -108,6 +111,30 @@ class CampaignD(object):
     def test(self, test):
         self._test = test
 
+    @property
+    def twitter(self):
+        return self._twitter
+
+    @twitter.setter
+    def twitter(self, twitter):
+        self._twitter = twitter
+
+    @property
+    def twitter_delay(self):
+        return self._twitter_delay
+
+    @twitter_delay.setter
+    def twitter_delay(self, delay):
+        self._twitter_delay = delay
+
+    @property
+    def twitter_add_hashtags(self):
+        return self._twitter_add_hashtags
+
+    @twitter_add_hashtags.setter
+    def twitter_add_hashtags(self, add_hashtags):
+        self._twitter_add_hashtags = add_hashtags
+
     def add_email_recipient(self, recipient):
         """
 
@@ -137,10 +164,10 @@ class CampaignD(object):
             self.num_of_articles = num_of_articles
 
         if self.reference and num_of_articles > -1:
-            sqlquery = 'UPDATE campaign SET articles=%s WHERE ' \
+            query = 'UPDATE campaign SET articles=%s WHERE ' \
                        'campaign.reference=\'%s\'' % (
                            num_of_articles, self.reference)
-            DbHelper.update_database(sqlquery)
+            DbHelper.update_database(query)
 
     def terminate(self, status='1'):
         """

@@ -12,7 +12,7 @@ apt-get update
 apt-get install docker.io -y
 
 mkdir -p /usr/local/src/containers/apid/volumes/log/apid1 (Optional)
-git clone https://github.com/gogasca/news_ml.git /usr/local/src/
+git clone https://github.com/newsml/newsml.git /usr/local/src/
 ```
 
 ## Docker build commands
@@ -20,14 +20,14 @@ git clone https://github.com/gogasca/news_ml.git /usr/local/src/
 Build API container
 
 ```
-cd /usr/local/src/news_ml/conf/docker/apid
+cd /usr/local/src/newsml/conf/docker/apid
 docker build -t news_ml/apid .
 ```
 
 Build Load balancer container
 
 ```
-cd /usr/local/src/news_ml/conf/docker/loadbalancer
+cd /usr/local/src/newsml/conf/docker/loadbalancer
 docker build -t news_ml/loadbalancer .
 ```
 
@@ -42,7 +42,7 @@ docker network create newsml_network # For intra-Docker communication
 
 Start API
 ```
-docker run -d --name "apid1" --hostname="apid1" --network=newsml_network -itd --env-file=/usr/local/src/containers/secrets.env -v /usr/local/src/news_ml/:/usr/local/src/news_ml/ -v /usr/local/src/news_ml/log/:/usr/local/src/news_ml/log/ news_ml/apid
+docker run -d --name "apid1" --hostname="apid1" --network=newsml_network -itd --env-file=/usr/local/src/containers/secrets.env -v /usr/local/src/newsml/:/usr/local/src/newsml/ -v /usr/local/src/newsml/log/:/usr/local/src/newsml/log/ news_ml/apid
 ```
 Start RabbitMQ
 
@@ -53,7 +53,7 @@ docker run -d --name="rabbitmq" --hostname="rabbitmq" --network=newsml_network -
 Start Load Balancer
 
 ```
-docker run -d --name="loadbalancer" --hostname="loadbalancer" --network=newsml_network --publish="8443:8443"  news_ml/loadbalancer
+docker run -d --name="loadbalancer" --hostname="loadbalancer" --network=newsml_network --publish="8443:8443" -v /usr/local/src/newsml/conf/docker/loadbalancer/volumes/sites-available:/etc/nginx/sites-available news_ml/loadbalancer
 ```
 
 SQL proxy
@@ -62,7 +62,7 @@ SQL proxy
 docker run -d \
   --name="cloud_sql_proxy" \
   --network=newsml_network \
-  -v /usr/local/src/news_ml/conf/credentials/key.json:/config \
+  -v /usr/local/src/newsml/conf/credentials/key.json:/config \
   -p 127.0.0.1:5432:5432 \
   gcr.io/cloudsql-docker/gce-proxy:1.16 /cloud_sql_proxy \
   -instances=<INSTANCE_CONNECTION_NAME>=tcp:0.0.0.0:5432 -credential_file=/config

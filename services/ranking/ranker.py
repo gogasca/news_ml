@@ -20,6 +20,38 @@ class RankedArticle(object):
         self._ranking_source = -1
 
     @property
+    def url(self):
+        return self._url
+
+    @url.setter
+    def url(self, url):
+        self._url = url
+
+    @property
+    def title(self):
+        return self._title
+
+    @title.setter
+    def title(self, title):
+        self._title = title
+
+    @property
+    def score(self):
+        return self._score
+
+    @score.setter
+    def score(self, score):
+        self._score = score
+
+    @property
+    def source(self):
+        return self._source
+
+    @source.setter
+    def source(self, source):
+        self._source = source
+
+    @property
     def news_id(self):
         return self._news_id
 
@@ -113,7 +145,7 @@ def get_and_rank_news_articles(date='latest'):
     """Get Articles in DB and assigns them a score.
 
     Args:
-        campaign: (str)
+        date: (str)
 
     Returns:
         News information from Database.
@@ -122,8 +154,10 @@ def get_and_rank_news_articles(date='latest'):
         raise ValueError('Invalid date')
 
     if date == 'latest':
-        date = DbHelper.get_record(settings.RANKING_QUERY_DATE)
+        date = str(DbHelper.get_record(settings.RANKING_QUERY_DATE))
         logging.info('Using latest date. The latest date found was: %s', date)
+        if not date:
+            raise ValueError('Unable to extract date')
 
     logging.info('Using date: %s', date)
     if re.match('\d{4}-\d{1,2}-\d{2}', date):
@@ -201,7 +235,7 @@ def update_articles(articles):
         DbHelper.update_ranked_post(news_id=article.news_id,
                                     rank_score=article.score,
                                     rank_order=order)
-    logging.info('Process %d articles', len(articles))
+    logging.info('Update %d articles', len(articles))
 
 
 def process_articles(campaign, limit=100):

@@ -58,6 +58,7 @@ sklearn
 SQLAlchemy>=1.3.0
 sqlacodegen
 subprocess32
+tenacity
 tornado==4.5.1
 tweepy==3.5.0
 twilio==5.7.0

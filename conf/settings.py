@@ -78,7 +78,7 @@ THE_NEXT_WEB = 'THE_NEXT_WEB'
 
 TECHMEME = 'TECHMEME'
 TECHMEME_URL = 'https://www.techmeme.com/'
-TECHMEME_REPORT = 'Silicon Valley | Daily Automatic Summary Report | Techmeme'
+TECHMEME_REPORT = 'NewsML | Daily Automatic Summary Report | Techmeme'
 
 
 # =========================================================
@@ -109,8 +109,10 @@ RANKING_SOURCES = ['amazon.com',
 
 UNKNOWN_SOURCE_SCORE = 5
 RANKING_LIMIT = 1000
-RANKING_QUERY_DATE = """SELECT to_char(published_at,'YYYY-MM-DD') AS date
-    FROM news WHERE inserted_at IS NOT NULL GROUP BY 1 ORDER BY date DESC LIMIT 1;"""
+RANKING_QUERY_DATE = """
+    SELECT to_char(published_at,'YYYY-MM-DD') AS date
+    FROM news WHERE inserted_at IS NOT NULL AND published_at IS NOT NULL GROUP 
+    BY 1 ORDER BY date DESC LIMIT 1;"""
 RANKING_QUERY_GET_NEWS = """SELECT news_id, title, content, LOWER(source) AS
     source, url FROM news WHERE campaign = '%s' GROUP BY 1,2,3,4,5;"""
 RANKING_QUERY_GET_NEWS_BY_DATE = """SELECT news_id, title, content,
@@ -151,7 +153,7 @@ TOKEN_EXPIRATION_SECS = 600
 # API configuration parameters
 # =========================================================
 
-API_VERSION = '0.4'
+API_VERSION = '0.7'
 API_ACCOUNT = os.environ.get('API_USERNAME', None)
 API_PASSWORD = os.environ.get('API_PASSWORD', None)
 API_LOGFILE = FILEPATH + '/log/apid.log'
@@ -179,7 +181,9 @@ MAX_CRAWLER_PROCESSING = 3600  # Max time processing news task.
 MAX_TASK_PROCESSING = 3600  # Max time processing news task.
 MAX_RANK_PROCESSING = 1800  # Max time ranking posts.
 MAX_API_PROCESSING = 600
-
+USER_AGENT = 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) ' \
+             'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 ' \
+             'Mobile Safari/537.36'
 # =========================================================
 # Email SMTP
 # =========================================================
@@ -188,8 +192,8 @@ EMAIL_SERVER = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_ADDRESS = os.environ.get('EMAIL_USERNAME')
 EMAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD')
-EMAIL_NAME = 'News ML Reporter'
-EMAIL_SUBJECT = 'News ML Daily summary'
+EMAIL_NAME = 'NewsML Reporter'
+EMAIL_SUBJECT = 'NewsML Daily summary'
 EMAIL_REPORT = True
 EMAIL_TO = ['admin@newsml.io']
 EMAIL_CHECK_MX = False
@@ -202,6 +206,18 @@ MAILGUN_SENDER = 'news-ml@newsml.io'
 MAILGUN_DOMAIN = os.environ.get('MAILGUN_DOMAIN')
 MAILGUN_API_KEY = os.environ.get('MAILGUN_API_KEY')
 
+# =========================================================
+# Twitter
+# =========================================================
+TWITTER_ENABLED = False
+TWITTER_DELAY = 1
+TWITTER_ADD_HASHTAGS = True
+CONSUMER_KEY = os.environ.get('CONSUMER_KEY')
+CONSUMER_SECRET = os.environ.get('CONSUMER_SECRET')
+ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN')
+ACCESS_TOKEN_SECRET = os.environ.get('ACCESS_TOKEN_SECRET')
+
+EXTRACT_TWITTER_IMAGE = True
 # =========================================================
 # Twilio configuration parameters
 # =========================================================
@@ -216,7 +232,7 @@ PHONE_NUMBERS = ['+1408XXXXXXX']
 # Report configuration parameters
 # =========================================================
 REPORT_ALL_DATES_ARTICLES = False
-
+REPORT_USE_BASE64_IMAGE = False
 # =========================================================
 # Database
 # =========================================================
@@ -246,3 +262,6 @@ SQLALCHEMY_POOL_RECYCLE = 60
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 DATABASE_CONNECT_OPTIONS = None
 SQLALCHEMY_COMMIT_ON_TEARDOWN = True
+
+
+
