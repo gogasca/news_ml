@@ -61,6 +61,10 @@ Python based API:
  - Ngnix
  - Google Cloud NLP
  
+### System Design
+
+![image](https://user-images.githubusercontent.com/30065079/114759168-abaac600-9d12-11eb-8871-b2b7f90d6061.png)
+
 ### Requirements
 
 Deploy a new Compute Engine instance using Ubuntu 16+.
