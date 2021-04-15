@@ -27,7 +27,7 @@ google-cloud-translate==0.24.0
 googleapis-common-protos==1.5.2
 gunicorn==19.6.0
 html5lib==0.9999999
-httplib2==0.10.3
+httplib2==0.19.0
 inflect
 itsdangerous==0.24
 Jinja2>=2.10.1
