@@ -51,7 +51,7 @@ python-dateutil>=2.6.0
 #pytz==2016.10
 requests==2.20.0
 requests-oauthlib==0.8.0
-rsa==4.1
+rsa==4.7
 singledispatch==3.4.0.3
 six==1.10.0
 sklearn
