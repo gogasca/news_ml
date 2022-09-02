@@ -35,7 +35,7 @@ kombu==3.0.35
 lxml>=3.7.3
 MarkupSafe==0.23
 mechanize==0.2.5
-nltk==3.4.5
+nltk==3.6.6
 numpy>=1.13.3
 oauth2client==4.0.0
 oauthlib==2.0.2
