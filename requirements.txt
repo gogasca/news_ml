@@ -9,7 +9,7 @@ bleach==3.3.0
 bs4==0.0.1
 cachetools==2.0.0
 celery==3.1.23
-certifi==2017.4.17
+certifi==2022.12.7
 click==6.7
 cryptography
 cycler==0.10.0
